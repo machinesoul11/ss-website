@@ -19,7 +19,13 @@ export interface Database {
           documentation_platform: string[]
           pain_points: string
           use_case_description: string
-          team_size: 'individual' | 'small_team' | 'medium_team' | 'large_team' | 'enterprise' | null
+          team_size:
+            | 'individual'
+            | 'small_team'
+            | 'medium_team'
+            | 'large_team'
+            | 'enterprise'
+            | null
           signup_source: string | null
           referrer_code: string | null
           created_at: string
@@ -39,7 +45,13 @@ export interface Database {
           documentation_platform: string[]
           pain_points: string
           use_case_description: string
-          team_size?: 'individual' | 'small_team' | 'medium_team' | 'large_team' | 'enterprise' | null
+          team_size?:
+            | 'individual'
+            | 'small_team'
+            | 'medium_team'
+            | 'large_team'
+            | 'enterprise'
+            | null
           signup_source?: string | null
           referrer_code?: string | null
           created_at?: string
@@ -59,7 +71,13 @@ export interface Database {
           documentation_platform?: string[]
           pain_points?: string
           use_case_description?: string
-          team_size?: 'individual' | 'small_team' | 'medium_team' | 'large_team' | 'enterprise' | null
+          team_size?:
+            | 'individual'
+            | 'small_team'
+            | 'medium_team'
+            | 'large_team'
+            | 'enterprise'
+            | null
           signup_source?: string | null
           referrer_code?: string | null
           created_at?: string
@@ -110,8 +128,22 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          email_type: 'welcome' | 'update' | 'early_access' | 'feedback_request' | 're_engagement' | 'monthly_newsletter'
-          event_type: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'spam_report' | 'unsubscribe' | 'group_unsubscribe'
+          email_type:
+            | 'welcome'
+            | 'update'
+            | 'early_access'
+            | 'feedback_request'
+            | 're_engagement'
+            | 'monthly_newsletter'
+          event_type:
+            | 'sent'
+            | 'delivered'
+            | 'opened'
+            | 'clicked'
+            | 'bounced'
+            | 'spam_report'
+            | 'unsubscribe'
+            | 'group_unsubscribe'
           timestamp: string
           email_subject: string | null
           campaign_id: string | null
@@ -120,8 +152,22 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          email_type: 'welcome' | 'update' | 'early_access' | 'feedback_request' | 're_engagement' | 'monthly_newsletter'
-          event_type: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'spam_report' | 'unsubscribe' | 'group_unsubscribe'
+          email_type:
+            | 'welcome'
+            | 'update'
+            | 'early_access'
+            | 'feedback_request'
+            | 're_engagement'
+            | 'monthly_newsletter'
+          event_type:
+            | 'sent'
+            | 'delivered'
+            | 'opened'
+            | 'clicked'
+            | 'bounced'
+            | 'spam_report'
+            | 'unsubscribe'
+            | 'group_unsubscribe'
           timestamp?: string
           email_subject?: string | null
           campaign_id?: string | null
@@ -130,8 +176,22 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          email_type?: 'welcome' | 'update' | 'early_access' | 'feedback_request' | 're_engagement' | 'monthly_newsletter'
-          event_type?: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'spam_report' | 'unsubscribe' | 'group_unsubscribe'
+          email_type?:
+            | 'welcome'
+            | 'update'
+            | 'early_access'
+            | 'feedback_request'
+            | 're_engagement'
+            | 'monthly_newsletter'
+          event_type?:
+            | 'sent'
+            | 'delivered'
+            | 'opened'
+            | 'clicked'
+            | 'bounced'
+            | 'spam_report'
+            | 'unsubscribe'
+            | 'group_unsubscribe'
           timestamp?: string
           email_subject?: string | null
           campaign_id?: string | null

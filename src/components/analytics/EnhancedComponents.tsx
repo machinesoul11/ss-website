@@ -508,14 +508,16 @@ export function EnhancedMultiStepForm({
               className={`step ${i + 1 <= currentStep ? 'completed' : 'pending'}`}
               onClick={() => handleStepChange(i + 1)}
             >
-              <div className={`step-number ${i + 1 === currentStep ? 'active' : ''}`}>
+              <div
+                className={`step-number ${i + 1 === currentStep ? 'active' : ''}`}
+              >
                 {i + 1}
               </div>
             </div>
           ))}
         </div>
         <div className="progress-bar mt-2">
-          <div 
+          <div
             className="progress-fill"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />

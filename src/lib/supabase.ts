@@ -15,7 +15,9 @@ if (typeof window === 'undefined') {
   if (supabaseServiceKey) {
     _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
   } else {
-    console.warn('SUPABASE_SERVICE_ROLE_KEY is not set - admin operations will fail')
+    console.warn(
+      'SUPABASE_SERVICE_ROLE_KEY is not set - admin operations will fail'
+    )
   }
 }
 

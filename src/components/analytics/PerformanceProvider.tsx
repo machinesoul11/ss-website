@@ -235,7 +235,7 @@ export function PerformanceProvider({
         severity,
         message,
         page: window.location.pathname,
-        metrics: getCurrentMetrics() as Record<string, number> || {},
+        metrics: (getCurrentMetrics() as Record<string, number>) || {},
         timestamp: Date.now(),
         userAgent: navigator.userAgent,
       })

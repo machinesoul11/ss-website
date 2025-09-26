@@ -418,27 +418,25 @@ async function storeHealthMetric(
       return
     }
 
-    const { error } = await supabaseAdmin
-      .from('page_analytics')
-      .insert([
-        {
-          page_path: '/system/health',
-          event_type: 'health_metric',
-          timestamp: new Date().toISOString(),
-          visitor_id: null,
-          session_id: null,
-          referrer: null,
-          user_agent_hash: null,
-          metadata: {
-            health: {
-              component,
-              status,
-              metrics,
-              recordedAt: new Date().toISOString()
-            }
-          }
-        }
-      ])
+    const { error } = await supabaseAdmin.from('page_analytics').insert([
+      {
+        page_path: '/system/health',
+        event_type: 'health_metric',
+        timestamp: new Date().toISOString(),
+        visitor_id: null,
+        session_id: null,
+        referrer: null,
+        user_agent_hash: null,
+        metadata: {
+          health: {
+            component,
+            status,
+            metrics,
+            recordedAt: new Date().toISOString(),
+          },
+        },
+      },
+    ])
 
     if (error) {
       console.error('Failed to store health metric:', error)

@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  
+
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: [
