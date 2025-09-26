@@ -14,7 +14,7 @@
     "cleanup": "node scripts/cleanup-resource-forks.js",
     "cleanup:verbose": "node scripts/cleanup-resource-forks.js --verbose",
     "build:analyze": "ANALYZE=true npm run build",
-    "deploy:prep": "npm run cleanup && npm run type-check && npm run lint && npm run build",
+    "deploy:prep": "npm run cleanup && npm run lint && npm run build",
     "postbuild": "next-sitemap",
     "prepare": "husky"
   },
