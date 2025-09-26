@@ -85,12 +85,10 @@ export async function POST(request: NextRequest) {
 
     const mockRes = {
       status: (code: number) => ({
-         
         json: (data: any) => ({ status: code, data }),
       }),
     }
 
-     
     await SendGridWebhookService.processWebhookEvents(
       mockReq as any,
       mockRes as any
