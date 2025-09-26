@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from '@/lib/utils'
 import { forwardRef, SelectHTMLAttributes, useId } from 'react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'

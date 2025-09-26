@@ -6,10 +6,12 @@ import type { Database } from '@/types/database'
  * Throws error if not available (client-side or not configured)
  */
 export function ensureAdminClient() {
-    if (!supabaseAdmin) {
-        throw new Error('supabaseAdmin not available - ensure you are on server-side with proper configuration')
-    }
-    return supabaseAdmin
+  if (!supabaseAdmin) {
+    throw new Error(
+      'supabaseAdmin not available - ensure you are on server-side with proper configuration'
+    )
+  }
+  return supabaseAdmin
 }
 
 /**
@@ -24,22 +26,28 @@ export type TableUpdate<T extends TableName> = Tables[T]['Update']
 /**
  * Helper to get typed data from Supabase response
  */
-export function getTypedData<T>(response: { data: T[] | null; error: any }): T[] {
-    if (response.error) {
-        throw new Error(`Database error: ${response.error.message}`)
-    }
-    return response.data || []
+export function getTypedData<T>(response: {
+  data: T[] | null
+  error: any
+}): T[] {
+  if (response.error) {
+    throw new Error(`Database error: ${response.error.message}`)
+  }
+  return response.data || []
 }
 
 /**
  * Helper to get single typed row from Supabase response
  */
-export function getTypedSingleRow<T>(response: { data: T | null; error: any }): T {
-    if (response.error) {
-        throw new Error(`Database error: ${response.error.message}`)
-    }
-    if (!response.data) {
-        throw new Error('No data returned from query')
-    }
-    return response.data
+export function getTypedSingleRow<T>(response: {
+  data: T | null
+  error: any
+}): T {
+  if (response.error) {
+    throw new Error(`Database error: ${response.error.message}`)
+  }
+  if (!response.data) {
+    throw new Error('No data returned from query')
+  }
+  return response.data
 }

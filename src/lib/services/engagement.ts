@@ -28,11 +28,11 @@ export class EngagementService {
       }
 
       // Get user data with type assertion for deployment
-      const { data: user, error: userError } = await admin
+      const { data: user, error: userError } = (await admin
         .from('beta_signups')
         .select('*')
         .eq('id', userId)
-        .single() as any
+        .single()) as any
 
       if (userError) {
         return {
@@ -48,10 +48,10 @@ export class EngagementService {
       }
 
       // Get email interactions with type assertion for deployment
-      const { data: emailEvents, error: emailError } = await admin
+      const { data: emailEvents, error: emailError } = (await admin
         .from('email_events')
         .select('event_type, timestamp')
-        .eq('user_id', userId) as any
+        .eq('user_id', userId)) as any
 
       if (emailError) {
         return {
