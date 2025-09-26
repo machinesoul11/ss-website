@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '../supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import type { BetaSignup } from '../../types'
 
 /**
@@ -21,12 +21,18 @@ export class EngagementService {
     error: string | null
   }> {
     try {
-      // Get user data
-      const { data: user, error: userError } = await supabaseAdmin
+      // Ensure admin client is available
+      const admin = supabaseAdmin
+      if (!admin) {
+        throw new Error('supabaseAdmin not available')
+      }
+
+      // Get user data with type assertion for deployment
+      const { data: user, error: userError } = await admin
         .from('beta_signups')
         .select('*')
         .eq('id', userId)
-        .single()
+        .single() as any
 
       if (userError) {
         return {
@@ -41,11 +47,11 @@ export class EngagementService {
         }
       }
 
-      // Get email interactions
-      const { data: emailEvents, error: emailError } = await supabaseAdmin
+      // Get email interactions with type assertion for deployment
+      const { data: emailEvents, error: emailError } = await admin
         .from('email_events')
         .select('event_type, timestamp')
-        .eq('user_id', userId)
+        .eq('user_id', userId) as any
 
       if (emailError) {
         return {
