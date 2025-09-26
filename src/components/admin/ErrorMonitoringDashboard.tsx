@@ -157,7 +157,7 @@ export function ErrorMonitoringDashboard() {
 
   return (
     <AutoRetryWrapper
-      fallbackComponent={({ error, retry }) => (
+      fallbackComponent={({ retry }) => (
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h3 className="text-lg font-medium text-red-800 mb-2">Error Dashboard Unavailable</h3>
           <p className="text-red-700 mb-4">Unable to load error monitoring dashboard.</p>

@@ -7,7 +7,7 @@
 
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { errorTracker, PerformanceMonitor } from '@/lib/services/error-tracking'
 
 interface ErrorMonitoringProviderProps {
@@ -101,11 +101,6 @@ export function useErrorMonitoringStats() {
 export function ErrorTestingWidget() {
   const [isVisible, setIsVisible] = React.useState(false)
 
-  // Only available in development mode
-  if (process.env.NODE_ENV !== 'development') {
-    return null
-  }
-
   // Keyboard shortcut to toggle visibility (Ctrl+Shift+E)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -117,6 +112,11 @@ export function ErrorTestingWidget() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
+
+  // Only available in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return null
+  }
 
   const triggerJavaScriptError = () => {
     throw new Error('Test JavaScript error from ErrorTestingWidget')

@@ -193,6 +193,7 @@ async function generateAggregatedMetrics(
         .filter((r: any) => r.visitor_id)
         .map((r: any) => `${r.visitor_id}-${new Date(r.timestamp).toDateString()}`)
     )
+    const uniqueSessions = sessionKeys.size
     
     // All records in page_analytics are page views
     const pageViews = records

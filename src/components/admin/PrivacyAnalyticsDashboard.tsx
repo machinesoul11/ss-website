@@ -48,10 +48,10 @@ export default function PrivacyAnalyticsDashboard() {
       setRefreshing(!!data)
       setError(null)
 
-      const params = new URLSearchParams({
-        range,
-        live: live.toString()
-      })
+      // const params = new URLSearchParams({
+      //   range,
+      //   live: live.toString()
+      // })
 
       // Try admin API first, fall back to public API
       let response
@@ -73,7 +73,7 @@ export default function PrivacyAnalyticsDashboard() {
           response = await fetch(`/api/analytics/public?days=7`)
           result = await response.json()
         }
-      } catch (error) {
+      } catch {
         // Fall back to public API
         response = await fetch(`/api/analytics/public?days=7`)
         result = await response.json()

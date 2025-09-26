@@ -171,7 +171,7 @@ export function usePerformanceMonitoring() {
           jsHeapSizeLimit: memory.jsHeapSizeLimit
         }
       }
-    } catch (error) {
+    } catch {
       // Memory API not available
     }
     return undefined
@@ -241,9 +241,7 @@ export function usePerformanceMonitoring() {
 /**
  * Higher-order function to wrap fetch with performance tracking
  */
-export function createPerformanceTrackedFetch() {
-  const { trackAPIPerformance } = usePerformanceMonitoring()
-  
+export function createPerformanceTrackedFetch(trackAPIPerformance: (url: string, duration: number, success: boolean, status?: number) => void) {  
   return async (url: string, options?: RequestInit): Promise<Response> => {
     const startTime = performance.now()
     
@@ -253,15 +251,7 @@ export function createPerformanceTrackedFetch() {
       const duration = Math.round(endTime - startTime)
       
       // Track the API call performance
-      trackAPIPerformance({
-        endpoint: url,
-        method: options?.method || 'GET',
-        duration,
-        status: response.status,
-        success: response.ok,
-        timestamp: Date.now(),
-        size: parseInt(response.headers.get('content-length') || '0', 10) || undefined
-      })
+      trackAPIPerformance(url, duration, response.ok, response.status)
       
       return response
       
@@ -270,14 +260,7 @@ export function createPerformanceTrackedFetch() {
       const duration = Math.round(endTime - startTime)
       
       // Track failed API call
-      trackAPIPerformance({
-        endpoint: url,
-        method: options?.method || 'GET',
-        duration,
-        status: 0,
-        success: false,
-        timestamp: Date.now()
-      })
+      trackAPIPerformance(url, duration, false, 0)
       
       throw error
     }

@@ -38,7 +38,7 @@ interface SystemHealthStatus {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const healthStatus = await getSystemHealth()
     
@@ -126,7 +126,7 @@ async function checkDatabaseHealth() {
     }
 
     // Simple connectivity test
-    const { data, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from('page_analytics')
       .select('id')
       .limit(1)
@@ -154,7 +154,7 @@ async function checkDatabaseHealth() {
       connections: count || 0
     }
 
-  } catch (error) {
+  } catch {
     return {
       status: 'error' as const,
       latency: Math.round(performance.now() - startTime),
@@ -220,7 +220,7 @@ async function checkApiHealth() {
       throughput
     }
 
-  } catch (error) {
+  } catch {
     return {
       status: 'down' as const,
       averageResponseTime: 0,
@@ -299,7 +299,7 @@ async function checkPerformanceHealth() {
       }
     }
 
-  } catch (error) {
+  } catch {
     return {
       status: 'poor' as const,
       averageScore: 0,
@@ -367,7 +367,7 @@ async function checkErrorHealth() {
       recentTrend
     }
 
-  } catch (error) {
+  } catch {
     return {
       critical: 0,
       high: 0,
@@ -377,37 +377,36 @@ async function checkErrorHealth() {
   }
 }
 
-/**
+/*
  * Store health metric
  */
-async function storeHealthMetric(
-  component: string,
-  status: string,
-  metrics: Record<string, any>,
-  request: NextRequest
-) {
-  if (!supabaseAdmin) return
+// async function logHealthMetrics(
+//   status: string,
+//   metrics: Record<string, any>,
+//   _request: NextRequest
+// ) {
+//   if (!supabaseAdmin) return
 
-  const { error } = await (supabaseAdmin as any)
-    .from('page_analytics')
-    .insert([
-      {
-        page_path: '/health',
-        event_type: 'health_metric',
-        timestamp: new Date().toISOString(),
-        metadata: {
-          health: {
-            component,
-            status,
-            metrics,
-            recordedAt: new Date().toISOString()
-          }
-        }
-      }
-    ])
+//   const { error } = await (supabaseAdmin as any)
+//     .from('page_analytics')
+//     .insert([
+//       {
+//         page_path: '/health',
+//         event_type: 'health_metric',
+//         timestamp: new Date().toISOString(),
+//         metadata: {
+//           health: {
+//             component,
+//             status,
+//             metrics,
+//             recordedAt: new Date().toISOString()
+//           }
+//         }
+//       }
+//     ])
 
-  if (error) {
-    console.error('Failed to store health metric:', error)
-    throw new Error(`Database error: ${error.message}`)
-  }
-}
+//   if (error) {
+//     console.error('Failed to store health metric:', error)
+//     throw new Error(`Database error: ${error.message}`)
+//   }
+// }

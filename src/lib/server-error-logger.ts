@@ -6,6 +6,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server'
 
 export enum ErrorSeverity {
   LOW = 'low',
@@ -479,10 +480,10 @@ export { serverErrorLogger }
 /**
  * Next.js API route error handler middleware
  */
-export function withErrorHandler(handler: Function) {
-  return async (req: any, res: any) => {
+export function withErrorHandler(handler: (req: NextRequest) => Promise<NextResponse>) {
+  return async (req: NextRequest) => {
     try {
-      return await handler(req, res)
+      return await handler(req)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       
@@ -491,17 +492,17 @@ export function withErrorHandler(handler: Function) {
         req.url || 'unknown',
         req.method || 'unknown',
         500,
-        req.headers['user-id'] || undefined
+        req.headers.get('user-id') || undefined
       )
       
       // Don't expose internal errors in production
       const isProduction = process.env.NODE_ENV === 'production'
       
-      return res.status(500).json({
+      return NextResponse.json({
         success: false,
         error: isProduction ? 'Internal server error' : errorMessage,
         ...(isProduction ? {} : { stack: error instanceof Error ? error.stack : undefined })
-      })
+      }, { status: 500 })
     }
   }
 }

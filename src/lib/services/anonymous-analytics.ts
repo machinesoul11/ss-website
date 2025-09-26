@@ -7,7 +7,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
-import { AnonymousVisitor, AnalyticsSession, AnalyticsEventRecord } from '@/types'
+import { AnonymousVisitor, AnalyticsSession } from '@/types'
 import crypto from 'crypto'
 
 // Type alias for session data to match our interface
@@ -124,7 +124,7 @@ export class AnonymousAnalyticsService {
     deviceData?: Record<string, any>
   ): Promise<SessionData> {
     
-    const sessionId = this.generateSessionId()
+    // const sessionId = this.generateSessionId()
     
     const sessionData: Partial<SessionData> = {
       visitor_id: visitorId,

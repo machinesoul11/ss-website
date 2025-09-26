@@ -7,7 +7,7 @@
 
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useErrorHandler } from './error-boundary'
 
 interface RetryConfig {
@@ -213,17 +213,17 @@ interface AutoRetryWrapperProps {
 
 export function AutoRetryWrapper({ 
   children, 
-  onError,
-  retryConfig,
+  onError: _onError,
+  // retryConfig,
   fallbackComponent: FallbackComponent
 }: AutoRetryWrapperProps) {
   const [error, setError] = useState<Error | null>(null)
   const [retryKey, setRetryKey] = useState(0)
   
-  const handleError = useCallback((error: Error) => {
-    setError(error)
-    onError?.(error)
-  }, [onError])
+  // const handleError = useCallback((error: Error) => {
+  //   setError(error)
+  //   onError?.(error)
+  // }, [onError])
   
   const retry = useCallback(() => {
     setError(null)

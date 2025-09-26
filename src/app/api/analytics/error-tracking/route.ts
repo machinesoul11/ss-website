@@ -39,12 +39,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       errors,
-      performanceIssues,
-      timestamp
+      performanceIssues
     }: {
       errors: ErrorDetails[]
       performanceIssues: PerformanceIssue[]
-      timestamp: number
+      timestamp?: number
     } = body
 
     if (!errors?.length && !performanceIssues?.length) {

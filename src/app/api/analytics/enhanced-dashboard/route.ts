@@ -539,12 +539,12 @@ function calculateFunnelPerformance(events: any[]) {
   }))
 }
 
-function calculateDropOffAnalysis(events: any[]) {
+function calculateDropOffAnalysis(_events: any[]) {
   // Implementation for drop-off analysis
   return {}
 }
 
-function calculateConversionTimes(events: any[]) {
+function calculateConversionTimes(_events: any[]) {
   // Implementation for conversion time analysis
   return {}
 }
@@ -577,7 +577,7 @@ function calculateConversionsBySource(conversions: any[]) {
   }, {})
 }
 
-function calculateTimeToConversion(conversions: any[]) {
+function calculateTimeToConversion(_conversions: any[]) {
   // Implementation for time to conversion analysis
   return {}
 }

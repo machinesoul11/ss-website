@@ -33,8 +33,8 @@ export const EnhancedButton = forwardRef<HTMLButtonElement, EnhancedButtonProps>
     section,
     destination,
     userFlow,
-    trackAsGoal,
-    goalName,
+    // trackAsGoal,
+    // goalName,
     onClick, 
     children, 
     ...props 
@@ -99,7 +99,7 @@ export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
     enableFormTracking = true,
     enableFunnelTracking = false,
     onStepComplete,
-    onAbandon,
+    // onAbandon,
     onComplete,
     onSubmit, 
     children, 
@@ -111,7 +111,7 @@ export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
       enableFunnelTracking && funnelName ? startFunnelTracking(funnelName, totalSteps) : null
     )
     const [currentStep, setCurrentStep] = useState(1)
-    const startTimeRef = useRef(Date.now())
+    // const startTimeRef = useRef(Date.now())
 
     // Track form abandonment on unmount or page leave
     useEffect(() => {

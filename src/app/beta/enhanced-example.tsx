@@ -12,8 +12,8 @@ import {
   TrackedFormField,
   EnhancedButton,
   ScrollDepthTracker,
-  ConversionFunnelStep,
-  useEnhancedAnalyticsContext
+  ConversionFunnelStep
+  // useEnhancedAnalyticsContext
 } from '@/components/analytics'
 import { Container } from '@/components/layout/containers'
 import { CheckboxGroup } from '@/components/forms/checkbox-group'
@@ -66,7 +66,7 @@ export default function EnhancedBetaPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const { startFunnelTracking } = useEnhancedAnalyticsContext()
+  // const { startFunnelTracking } = useEnhancedAnalyticsContext()
 
   const handleFieldChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({

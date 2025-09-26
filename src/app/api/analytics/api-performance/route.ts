@@ -153,7 +153,7 @@ async function getAPIPerformanceData(
   const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
   try {
-    let query = supabaseAdmin
+    const query = supabaseAdmin
       .from('page_analytics')
       .select('*')
       .eq('event_type', 'api_performance')

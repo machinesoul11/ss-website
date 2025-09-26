@@ -293,11 +293,10 @@ export function EnhancedAnalyticsProvider({
   // Funnel tracker factory
   const startFunnelTracking = (funnelName: string, totalSteps: number): FunnelTracker => {
     const startTime = Date.now()
-    let currentStep = 1
+    // let currentStep = 1
 
     return {
       trackStep: (step: string, stepNumber: number) => {
-        currentStep = stepNumber
         tracking.trackConversionFunnel({
           funnelName,
           step,

@@ -40,14 +40,14 @@ export function PerformanceProvider({
   enableMemoryMonitoring = true,
   enableBundleMonitoring = true
 }: PerformanceProviderProps) {
-  const { getCurrentMetrics, trackAPIPerformance } = usePerformanceMonitoring()
+  const { getCurrentMetrics } = usePerformanceMonitoring()
   const [isMonitoring, setIsMonitoring] = React.useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     // Initialize monitoring based on props
-    let cleanup: (() => void)[] = []
+    const cleanup: (() => void)[] = []
 
     try {
       if (enableWebVitalsMonitoring) {
@@ -344,14 +344,14 @@ export function useComponentPerformance(componentName: string) {
 export function useAsyncPerformance() {
   const { trackEvent, reportPerformanceIssue } = usePerformanceContext()
 
-  const measureAsync = React.useCallback(async <T>(
+  const measureAsync = React.useCallback(async function<T>(
     operation: () => Promise<T>,
     operationName: string,
     options?: {
       warningThreshold?: number
       errorThreshold?: number
     }
-  ): Promise<T> => {
+  ): Promise<T> {
     const startTime = performance.now()
     
     try {

@@ -8,8 +8,8 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useEnhancedTracking } from '@/lib/enhanced-tracking'
-import { usePerformanceMonitoring } from '@/lib/services/performance-monitoring'
+// import { useEnhancedTracking } from '@/lib/enhanced-tracking'
+// import { usePerformanceMonitoring } from '@/lib/services/performance-monitoring'
 
 interface AnalyticsConfig {
   enableTracking: boolean
@@ -53,13 +53,13 @@ export function PrivacyAnalyticsProvider({
   const [visitorId, setVisitorId] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
-  const [isHydrated, setIsHydrated] = useState(false)
+  // const [isHydrated, setIsHydrated] = useState(false)
 
-  const enhancedTracking = useEnhancedTracking()
-  const { getCurrentMetrics } = usePerformanceMonitoring()
+  // const enhancedTracking = useEnhancedTracking()
+  // const { getCurrentMetrics } = usePerformanceMonitoring()
 
   useEffect(() => {
-    setIsHydrated(true)
+    // setIsHydrated(true)
     
     if (typeof window === 'undefined') return
 

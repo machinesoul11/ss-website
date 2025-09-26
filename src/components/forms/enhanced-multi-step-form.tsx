@@ -52,7 +52,7 @@ export function EnhancedMultiStepForm({
   // Track step changes
   useEffect(() => {
     if (enableTracking && activeStep > 0) {
-      const stepTime = Date.now() - stepStartTime.current
+      // const stepTime = Date.now() - stepStartTime.current
       
       // Track the current step
       funnelTracker.current?.trackStep(steps[activeStep - 1]?.id || `step_${activeStep}`, activeStep)
@@ -72,7 +72,7 @@ export function EnhancedMultiStepForm({
   useEffect(() => {
     return () => {
       if (enableTracking && activeStep < steps.length) {
-        const stepTime = Date.now() - stepStartTime.current
+        // const stepTime = Date.now() - stepStartTime.current
         formTracker.current?.trackAbandonment(activeStep)
         funnelTracker.current?.trackAbandonment(activeStep)
       }
@@ -264,7 +264,7 @@ export function TrackedFormField({
   className
 }: TrackedFormFieldProps) {
   const [fieldValue, setFieldValue] = useState(value || '')
-  const [hasInteracted, setHasInteracted] = useState(false)
+  // const [hasInteracted, setHasInteracted] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const { trackFormInteraction } = useEnhancedAnalyticsContext()
   const focusTimeRef = useRef<number>(0)
@@ -294,7 +294,7 @@ export function TrackedFormField({
 
   const handleFocus = async () => {
     focusTimeRef.current = Date.now()
-    setHasInteracted(true)
+    // setHasInteracted(true)
 
     await trackFormInteraction({
       formId: formName,
