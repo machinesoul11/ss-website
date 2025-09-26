@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# Host
+Host: https://silentscribe.dev
+
+# Sitemaps
+Sitemap: https://silentscribe.dev/sitemap.xml

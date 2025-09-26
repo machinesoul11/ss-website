@@ -1,0 +1,304 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+import crypto from 'crypto'
+
+/**
+ * Conversion tracking endpoint for beta signups and other conversion events
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const {
+      conversionType = 'beta_signup',
+      visitorId,
+      sessionId,
+      email,
+      signupSource,
+      referrerCode,
+      teamSize,
+      conversionValue = 1,
+      metadata = {}
+    } = body
+
+    if (!visitorId) {
+      return NextResponse.json(
+        { success: false, error: 'visitorId is required for conversion tracking' },
+        { status: 400 }
+      )
+    }
+
+    // Track the conversion event
+    const conversionData = {
+      page_path: `/conversion/${conversionType}`,
+      visitor_id: visitorId,
+      session_id: sessionId,
+      event_type: 'conversion',
+      user_agent_hash: crypto.createHash('sha256')
+        .update(request.headers.get('user-agent') || '')
+        .digest('hex')
+        .substring(0, 16),
+      metadata: {
+        conversion_type: conversionType,
+        conversion_value: conversionValue,
+        email_hash: email ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 16) : null,
+        signup_source: signupSource,
+        referrer_code: referrerCode,
+        team_size: teamSize,
+        funnel_step: 'completed',
+        timestamp: new Date().toISOString(),
+        ...metadata
+      }
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
+    }
+    
+    const { error: conversionError } = await (supabaseAdmin
+      .from('page_analytics') as any)
+      .insert(conversionData)
+
+    if (conversionError) {
+      throw conversionError
+    }
+
+    // Calculate conversion funnel data
+    await updateConversionFunnel(visitorId, sessionId, conversionType)
+
+    // Update engagement score
+    await updateVisitorEngagementScore(visitorId, conversionValue * 10)
+
+    return NextResponse.json({
+      success: true,
+      conversionId: crypto.randomUUID(),
+      message: 'Conversion tracked successfully'
+    })
+
+  } catch (error) {
+    console.error('Conversion tracking error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Conversion tracking failed' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Get conversion analytics for admin dashboard
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_API_KEY}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const days = parseInt(searchParams.get('days') || '30')
+    const conversionType = searchParams.get('type') || 'beta_signup'
+    
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+
+        // Get conversion data
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
+    }
+    
+    const { data: conversions, error: conversionsError } = await supabaseAdmin
+      .from('page_analytics')
+      .select('*')
+      .eq('event_type', 'conversion')
+      .gte('timestamp', startDate)
+
+    if (conversionsError) throw conversionsError
+
+    // Get total page views for conversion rate calculation
+    const { data: pageViews, error: pageViewsError } = await supabaseAdmin
+      .from('page_analytics')
+      .select('visitor_id, session_id')
+      .eq('event_type', 'page_view')
+      .gte('timestamp', startDate)
+
+    if (pageViewsError) throw pageViewsError
+
+    // Get beta signups for correlation
+    const { error: signupsError } = await supabaseAdmin
+      .from('beta_signups')
+      .select('created_at, signup_source, team_size, engagement_score')
+      .gte('created_at', startDate)
+
+    if (signupsError) throw signupsError
+
+    // Calculate conversion metrics
+    const filteredConversions = (conversions as any[])?.filter((c: any) =>
+      !conversionType || c.metadata?.conversion_type === conversionType
+    ) || []
+    
+    const conversionStats = {
+      totalConversions: filteredConversions.length,
+      uniqueConverters: new Set(filteredConversions.map(c => c.visitor_id)).size,
+      conversionRate: calculateConversionRate(filteredConversions, pageViews || []),
+      conversionsByDay: getConversionsByDay(filteredConversions),
+      conversionsBySource: getConversionsBySource(filteredConversions),
+      conversionsByTeamSize: getConversionsByTeamSize(filteredConversions),
+      conversionFunnel: await getConversionFunnel(startDate),
+      averageTimeToConvert: calculateAverageTimeToConvert(filteredConversions),
+      conversionValue: filteredConversions.reduce((sum, c) => 
+        sum + (c.metadata?.conversion_value || 1), 0
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: conversionStats
+    })
+
+  } catch (error) {
+    console.error('Conversion analytics error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch conversion analytics' },
+      { status: 500 }
+    )
+  }
+}
+
+// Helper functions
+async function updateConversionFunnel(visitorId: string, sessionId: string | null, conversionType: string) {
+  try {
+    // Track funnel progression
+    const funnelSteps = [
+      'landing_page_view',
+      'cta_click',
+      'form_start',
+      'form_completion',
+      'conversion'
+    ]
+
+    // Get visitor's journey
+    const { data: journey } = await supabaseAdmin
+      .from('page_analytics')
+      .select('event_type, metadata, timestamp')
+      .eq('visitor_id', visitorId)
+      .order('timestamp', { ascending: true })
+
+    if (journey) {
+      const funnelData = {
+        page_path: '/funnel/analysis',
+        visitor_id: visitorId,
+        session_id: sessionId,
+        event_type: 'funnel_completion',
+        metadata: {
+          conversion_type: conversionType,
+          funnel_steps_completed: journey.length,
+          journey_duration: journey.length > 1 ? 
+            new Date(journey[journey.length - 1].timestamp).getTime() - 
+            new Date(journey[0].timestamp).getTime() : 0,
+          funnel_drop_offs: funnelSteps.length - journey.length,
+          timestamp: new Date().toISOString()
+        }
+      }
+
+      await supabaseAdmin.from('page_analytics').insert(funnelData)
+    }
+  } catch (error) {
+    console.error('Funnel tracking error:', error)
+  }
+}
+
+async function updateVisitorEngagementScore(visitorId: string, points: number) {
+  try {
+    await supabaseAdmin
+      .from('page_analytics')
+      .insert({
+        page_path: '/engagement/score',
+        visitor_id: visitorId,
+        event_type: 'engagement_score',
+        metadata: {
+          points_awarded: points,
+          reason: 'conversion_completed',
+          timestamp: new Date().toISOString()
+        }
+      })
+  } catch (error) {
+    console.error('Engagement score update error:', error)
+  }
+}
+
+function calculateConversionRate(conversions: Array<{visitor_id: string}>, pageViews: Array<{visitor_id: string}>): number {
+  const uniqueVisitors = new Set(pageViews.map(pv => pv.visitor_id)).size
+  const uniqueConverters = new Set(conversions.map(c => c.visitor_id)).size
+  
+  if (uniqueVisitors === 0) return 0
+  return Math.round((uniqueConverters / uniqueVisitors) * 10000) / 100 // 2 decimal places
+}
+
+function getConversionsByDay(conversions: Array<{timestamp: string}>): Record<string, number> {
+  const conversionsByDay: Record<string, number> = {}
+  
+  conversions.forEach(c => {
+    const date = new Date(c.timestamp).toISOString().split('T')[0]
+    conversionsByDay[date] = (conversionsByDay[date] || 0) + 1
+  })
+
+  return conversionsByDay
+}
+
+function getConversionsBySource(conversions: Array<{metadata?: {signup_source?: string}}>): Record<string, number> {
+  const conversionsBySource: Record<string, number> = {}
+  
+  conversions.forEach(c => {
+    const source = c.metadata?.signup_source || 'direct'
+    conversionsBySource[source] = (conversionsBySource[source] || 0) + 1
+  })
+
+  return conversionsBySource
+}
+
+function getConversionsByTeamSize(conversions: Array<{metadata?: {team_size?: string}}>): Record<string, number> {
+  const conversionsByTeamSize: Record<string, number> = {}
+  
+  conversions.forEach(c => {
+    const teamSize = c.metadata?.team_size || 'unknown'
+    conversionsByTeamSize[teamSize] = (conversionsByTeamSize[teamSize] || 0) + 1
+  })
+
+  return conversionsByTeamSize
+}
+
+async function getConversionFunnel(startDate: string): Promise<Record<string, number>> {
+  try {
+    const funnelSteps = [
+      'page_view',
+      'cta_click',
+      'form_interaction',
+      'conversion'
+    ]
+
+    const funnelData: Record<string, number> = {}
+
+    for (const step of funnelSteps) {
+      const { data, error } = await supabaseAdmin
+        .from('page_analytics')
+        .select('visitor_id')
+        .eq('event_type', step)
+        .gte('timestamp', startDate)
+
+      if (!error && data) {
+        funnelData[step] = new Set(data.map(d => d.visitor_id)).size
+      } else {
+        funnelData[step] = 0
+      }
+    }
+
+    return funnelData
+  } catch (error) {
+    console.error('Funnel data error:', error)
+    return {}
+  }
+}
+
+function calculateAverageTimeToConvert(_conversions: Array<Record<string, unknown>>): number {
+  // This would require tracking visitor's first visit timestamp
+  // For now, return 0 as placeholder
+  return 0
+}

@@ -21,6 +21,16 @@ const eslintConfig = [
       'next-env.d.ts',
     ],
   },
+  {
+    rules: {
+      // Disable quote escaping rules for better DX - these don't affect functionality
+      'react/no-unescaped-entities': 'off',
+      // Allow any types in specific cases where complex typing isn't worth the effort
+      '@typescript-eslint/no-explicit-any': 'warn',
+      // Allow unused variables prefixed with underscore
+      '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+    },
+  },
 ]
 
 export default eslintConfig

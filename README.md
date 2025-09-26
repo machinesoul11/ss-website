@@ -110,26 +110,79 @@ npm run format && npm run lint:fix
 - **Forms**: React Hook Form + Zod
 - **UI Components**: Headless UI + Heroicons
 - **Animations**: Framer Motion
-- **Analytics**: Plausible (privacy-first)
+- **Analytics**: Dual system (Plausible + Custom)
 - **Deployment**: Vercel
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
 
+This project is optimized for Vercel deployment with automatic CI/CD pipeline.
+
+**Quick Deploy:**
 1. Connect your GitHub repository to Vercel
 2. Configure environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
 
+**Detailed Instructions:** See [DEPLOYMENT.md](./DEPLOYMENT.md) for comprehensive deployment guide.
+
+### Pre-Deployment Check
+
+```bash
+npm run deploy:prep
+```
+
 ### Environment Variables for Production
 
-Make sure to set all required environment variables in your deployment platform:
+Configure these in your Vercel dashboard:
 
-- Supabase configuration
-- SendGrid API key
-- Any other service keys
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SENDGRID_API_KEY`
+- `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`
 
-## 📝 Contributing
+## � Analytics Setup
+
+This project uses a dual analytics approach for comprehensive yet privacy-compliant tracking:
+
+### Plausible Analytics (External)
+- **Privacy-first**: No cookies, GDPR compliant, respects DNT
+- **Lightweight**: <1KB script, minimal performance impact
+- **Automatic tracking**: Page views, outbound links, file downloads
+- **Custom goals**: Conversion tracking, engagement metrics
+
+### Custom Analytics (Internal)
+- **Detailed tracking**: User journeys, form interactions, engagement
+- **Database storage**: All data stored in Supabase
+- **Real-time updates**: Live dashboard for admin users
+- **Privacy compliant**: Anonymous visitor tracking, no personal data
+
+### Setup Instructions
+
+1. **Configure Plausible**:
+   ```bash
+   NEXT_PUBLIC_PLAUSIBLE_DOMAIN=silentscribe.dev
+   ```
+
+2. **Set up goals** in Plausible dashboard:
+   - `Beta Signup`
+   - `Form Submit`
+   - `CTA Click`
+   - `Scroll Depth`
+
+3. **Use analytics components**:
+   ```tsx
+   import { AnalyticsButton, AnalyticsForm } from '@/components/analytics'
+   
+   <AnalyticsButton ctaText="Join Beta" ctaPosition="hero">
+     Sign Up
+   </AnalyticsButton>
+   ```
+
+For detailed setup instructions, see [`docs/PLAUSIBLE_SETUP.md`](./docs/PLAUSIBLE_SETUP.md).
+
+## �📝 Contributing
 
 1. Fork the repository
 2. Create a feature branch

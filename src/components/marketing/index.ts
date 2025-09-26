@@ -1,0 +1,8 @@
+export { HeroSection } from './hero-section'
+export { PrivacyFirstSection } from './privacy-section'
+export { ComparisonSection } from './comparison-section'
+export { CTASection } from './cta-section'
+export { DeveloperFocusedSection } from './developer-focused-section'
+export { PowerfulYetSimpleSection } from './powerful-yet-simple-section'
+export { FeatureHighlightsSection } from './feature-highlights-section'
+export { SocialProofSection } from './social-proof-section'
