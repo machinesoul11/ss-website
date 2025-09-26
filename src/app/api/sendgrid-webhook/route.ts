@@ -85,12 +85,12 @@ export async function POST(request: NextRequest) {
 
     const mockRes = {
       status: (code: number) => ({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         json: (data: any) => ({ status: code, data }),
       }),
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     await SendGridWebhookService.processWebhookEvents(
       mockReq as any,
       mockRes as any
