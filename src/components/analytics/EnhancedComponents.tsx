@@ -452,3 +452,153 @@ export function ConversionFunnelStep({
     </div>
   )
 }
+
+interface EnhancedMultiStepFormProps {
+  children: React.ReactNode
+  totalSteps: number
+  currentStep: number
+  onStepChange?: (step: number) => void
+  formId?: string
+  className?: string
+}
+
+/**
+ * Multi-step form wrapper with step tracking
+ */
+export function EnhancedMultiStepForm({
+  children,
+  totalSteps,
+  currentStep,
+  onStepChange,
+  formId = 'multi-step-form',
+  className = '',
+}: EnhancedMultiStepFormProps) {
+  const { trackFormInteraction } = useEnhancedAnalyticsContext()
+
+  useEffect(() => {
+    trackFormInteraction({
+      formId,
+      fieldName: `step-${currentStep}`,
+      action: 'focus',
+      value: currentStep.toString(),
+      stepNumber: currentStep,
+      totalSteps,
+    })
+  }, [currentStep, formId, totalSteps, trackFormInteraction])
+
+  const handleStepChange = (step: number) => {
+    trackFormInteraction({
+      formId,
+      fieldName: `step-${step}`,
+      action: 'change',
+      value: step.toString(),
+      stepNumber: step,
+      totalSteps,
+    })
+    onStepChange?.(step)
+  }
+
+  return (
+    <div className={`multi-step-form ${className}`} data-form-id={formId}>
+      <div className="step-indicator mb-6">
+        <div className="flex justify-between items-center">
+          {Array.from({ length: totalSteps }, (_, i) => (
+            <div
+              key={i}
+              className={`step ${i + 1 <= currentStep ? 'completed' : 'pending'}`}
+              onClick={() => handleStepChange(i + 1)}
+            >
+              <div className={`step-number ${i + 1 === currentStep ? 'active' : ''}`}>
+                {i + 1}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="progress-bar mt-2">
+          <div 
+            className="progress-fill"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          />
+        </div>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+interface TrackedFormFieldProps {
+  fieldId: string
+  label: string
+  children: React.ReactNode
+  formId?: string
+  required?: boolean
+  helpText?: string
+  className?: string
+}
+
+/**
+ * Form field wrapper with interaction tracking
+ */
+export function TrackedFormField({
+  fieldId,
+  label,
+  children,
+  formId = 'form',
+  required = false,
+  helpText,
+  className = '',
+}: TrackedFormFieldProps) {
+  const { trackFormInteraction } = useEnhancedAnalyticsContext()
+  const [focused, setFocused] = useState(false)
+  const [touched, setTouched] = useState(false)
+
+  const handleFocus = () => {
+    setFocused(true)
+    if (!touched) {
+      setTouched(true)
+      trackFormInteraction({
+        formId,
+        fieldName: fieldId,
+        action: 'focus',
+        value: '',
+      })
+    }
+  }
+
+  const handleBlur = () => {
+    setFocused(false)
+    trackFormInteraction({
+      formId,
+      fieldName: fieldId,
+      action: 'blur',
+      value: '',
+    })
+  }
+
+  const handleChange = (value: string) => {
+    trackFormInteraction({
+      formId,
+      fieldName: fieldId,
+      action: 'change',
+      value: value.length.toString(), // Track length, not actual value for privacy
+    })
+  }
+
+  return (
+    <div className={`form-field ${className} ${focused ? 'focused' : ''}`}>
+      <label htmlFor={fieldId} className="field-label">
+        {label}
+        {required && <span className="required">*</span>}
+      </label>
+      <div
+        className="field-wrapper"
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onChange={(e: any) => handleChange(e.target.value)}
+      >
+        {children}
+      </div>
+      {helpText && <div className="field-help">{helpText}</div>}
+    </div>
+  )
+}

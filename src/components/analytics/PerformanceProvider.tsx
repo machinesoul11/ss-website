@@ -16,7 +16,7 @@ interface PerformanceContextValue {
   reportPerformanceIssue: (
     type: string,
     message: string,
-    severity?: string
+    severity?: 'low' | 'medium' | 'high' | 'critical'
   ) => void
   getCurrentMetrics: () => any
   isMonitoring: boolean
@@ -235,7 +235,7 @@ export function PerformanceProvider({
         severity,
         message,
         page: window.location.pathname,
-        metrics: getCurrentMetrics() || {},
+        metrics: getCurrentMetrics() as Record<string, number> || {},
         timestamp: Date.now(),
         userAgent: navigator.userAgent,
       })

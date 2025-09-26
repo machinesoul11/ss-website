@@ -40,6 +40,8 @@ export {
   EnhancedButton,
   EnhancedForm,
   EnhancedInput,
+  EnhancedMultiStepForm,
+  TrackedFormField,
   ScrollDepthTracker,
   ConversionFunnelStep,
 } from './EnhancedComponents'

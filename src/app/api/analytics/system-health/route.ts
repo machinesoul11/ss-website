@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const { component, status, metrics } = body
 
     // Store health check result
-    await storeHealthMetric(component, status, metrics, request)
+    await storeHealthMetric(component, status, metrics)
 
     return NextResponse.json({
       success: true,
@@ -404,36 +404,48 @@ async function checkErrorHealth() {
   }
 }
 
-/*
- * Store health metric
+/**
+ * Store health metric to analytics
  */
-// async function logHealthMetrics(
-//   status: string,
-//   metrics: Record<string, any>,
-//   _request: NextRequest
-// ) {
-//   if (!supabaseAdmin) return
+async function storeHealthMetric(
+  component: string,
+  status: string,
+  metrics: Record<string, any>
+) {
+  try {
+    if (!supabaseAdmin) {
+      console.warn('Supabase admin client not available for health metrics')
+      return
+    }
 
-//   const { error } = await (supabaseAdmin as any)
-//     .from('page_analytics')
-//     .insert([
-//       {
-//         page_path: '/health',
-//         event_type: 'health_metric',
-//         timestamp: new Date().toISOString(),
-//         metadata: {
-//           health: {
-//             component,
-//             status,
-//             metrics,
-//             recordedAt: new Date().toISOString()
-//           }
-//         }
-//       }
-//     ])
+    const { error } = await supabaseAdmin
+      .from('page_analytics')
+      .insert([
+        {
+          page_path: '/system/health',
+          event_type: 'health_metric',
+          timestamp: new Date().toISOString(),
+          visitor_id: null,
+          session_id: null,
+          referrer: null,
+          user_agent_hash: null,
+          metadata: {
+            health: {
+              component,
+              status,
+              metrics,
+              recordedAt: new Date().toISOString()
+            }
+          }
+        }
+      ])
 
-//   if (error) {
-//     console.error('Failed to store health metric:', error)
-//     throw new Error(`Database error: ${error.message}`)
-//   }
-// }
+    if (error) {
+      console.error('Failed to store health metric:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+  } catch (error) {
+    console.error('Error storing health metric:', error)
+    // Don't throw - health monitoring shouldn't break the API
+  }
+}

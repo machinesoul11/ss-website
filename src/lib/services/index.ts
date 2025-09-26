@@ -28,10 +28,12 @@ export {
   type DevelopmentUpdateData,
   type FeedbackRequestData,
   type EmailTemplateData,
-  type EmailCampaign,
 } from './email-campaigns'
 
 export { SendGridWebhookService } from './sendgrid-webhook'
+
+// Re-export types from other modules
+export type { EmailCampaign } from '../../types'
 
 // Re-export types for convenience
 export type {

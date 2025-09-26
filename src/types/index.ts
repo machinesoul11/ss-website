@@ -238,6 +238,18 @@ export interface EmailCampaign {
 
 // Analytics Types
 export interface AnalyticsEvent {
+  id?: string
+  visitor_id: string
+  session_id: string
+  event_type: string
+  page_path: string
+  timestamp?: string
+  properties?: Record<string, any>
+  user_agent_hash?: string
+  created_at?: string
+}
+
+export interface LegacyAnalyticsEvent {
   event: string
   properties?: Record<string, unknown>
   timestamp?: number
