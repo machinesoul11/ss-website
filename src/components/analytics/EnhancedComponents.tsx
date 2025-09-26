@@ -10,7 +10,8 @@ import { useEnhancedAnalyticsContext } from './EnhancedAnalyticsProvider'
 import { Button } from '@/components/ui/button'
 import type { CTAClickData, FormInteractionData } from '@/lib/enhanced-tracking'
 
-interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface EnhancedButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   ctaText?: string
   ctaPosition?: CTAClickData['ctaPosition']
   ctaType?: CTAClickData['ctaType']
@@ -25,25 +26,32 @@ interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 /**
  * Enhanced Button with detailed CTA tracking
  */
-export const EnhancedButton = forwardRef<HTMLButtonElement, EnhancedButtonProps>(
-  ({ 
-    ctaText, 
-    ctaPosition = 'content', 
-    ctaType = 'primary',
-    section,
-    destination,
-    userFlow,
-    // trackAsGoal,
-    // goalName,
-    onClick, 
-    children, 
-    ...props 
-  }, ref) => {
+export const EnhancedButton = forwardRef<
+  HTMLButtonElement,
+  EnhancedButtonProps
+>(
+  (
+    {
+      ctaText,
+      ctaPosition = 'content',
+      ctaType = 'primary',
+      section,
+      destination,
+      userFlow,
+      // trackAsGoal,
+      // goalName,
+      onClick,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const { trackCTAClick } = useEnhancedAnalyticsContext()
 
     const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-      const text = ctaText || (typeof children === 'string' ? children : 'Button Click')
-      
+      const text =
+        ctaText || (typeof children === 'string' ? children : 'Button Click')
+
       await trackCTAClick({
         ctaText: text,
         ctaPosition,
@@ -51,7 +59,7 @@ export const EnhancedButton = forwardRef<HTMLButtonElement, EnhancedButtonProps>
         page: typeof window !== 'undefined' ? window.location.pathname : '',
         section,
         destination,
-        userFlow
+        userFlow,
       })
 
       if (onClick) {
@@ -92,23 +100,31 @@ interface EnhancedFormProps extends React.FormHTMLAttributes<HTMLFormElement> {
  * Enhanced Form with detailed interaction and funnel tracking
  */
 export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
-  ({ 
-    formName,
-    totalSteps = 1,
-    funnelName,
-    enableFormTracking = true,
-    enableFunnelTracking = false,
-    onStepComplete,
-    // onAbandon,
-    onComplete,
-    onSubmit, 
-    children, 
-    ...props 
-  }, ref) => {
-    const { startFormTracking, startFunnelTracking } = useEnhancedAnalyticsContext()
-    const formTracker = useRef(enableFormTracking ? startFormTracking(formName, totalSteps) : null)
+  (
+    {
+      formName,
+      totalSteps = 1,
+      funnelName,
+      enableFormTracking = true,
+      enableFunnelTracking = false,
+      onStepComplete,
+      // onAbandon,
+      onComplete,
+      onSubmit,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const { startFormTracking, startFunnelTracking } =
+      useEnhancedAnalyticsContext()
+    const formTracker = useRef(
+      enableFormTracking ? startFormTracking(formName, totalSteps) : null
+    )
     const funnelTracker = useRef(
-      enableFunnelTracking && funnelName ? startFunnelTracking(funnelName, totalSteps) : null
+      enableFunnelTracking && funnelName
+        ? startFunnelTracking(funnelName, totalSteps)
+        : null
     )
     const [currentStep, setCurrentStep] = useState(1)
     // const startTimeRef = useRef(Date.now())
@@ -167,22 +183,28 @@ export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
         setCurrentStep(newStep)
         funnelTracker.current?.trackStep(`step_${newStep}`, newStep)
       },
-      
+
       trackStepCompletion: (step: number) => {
         formTracker.current?.trackStepCompletion(step)
         funnelTracker.current?.trackStep(`step_${step}`, step)
       },
 
-      trackFieldInteraction: (fieldName: string, action: FormInteractionData['action'], value?: string) => {
+      trackFieldInteraction: (
+        fieldName: string,
+        action: FormInteractionData['action'],
+        value?: string
+      ) => {
         formTracker.current?.trackFieldInteraction(fieldName, action, value)
-      }
+      },
     }
 
     // Attach step controls to form element for external access
     React.useImperativeHandle(ref, () => {
-      const form = document.querySelector(`form[data-form-name="${formName}"]`) as HTMLFormElement
+      const form = document.querySelector(
+        `form[data-form-name="${formName}"]`
+      ) as HTMLFormElement
       if (form) {
-        (form as any).stepControls = stepControls
+        ;(form as any).stepControls = stepControls
       }
       return form
     })
@@ -204,7 +226,8 @@ export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
 
 EnhancedForm.displayName = 'EnhancedForm'
 
-interface EnhancedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface EnhancedInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   trackInteractions?: boolean
   fieldName?: string
   formName?: string
@@ -214,18 +237,29 @@ interface EnhancedInputProps extends React.InputHTMLAttributes<HTMLInputElement>
  * Enhanced Input with automatic interaction tracking
  */
 export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
-  ({ trackInteractions = true, fieldName, formName, onFocus, onBlur, onChange, ...props }, ref) => {
+  (
+    {
+      trackInteractions = true,
+      fieldName,
+      formName,
+      onFocus,
+      onBlur,
+      onChange,
+      ...props
+    },
+    ref
+  ) => {
     const { trackFormInteraction } = useEnhancedAnalyticsContext()
     const focusTimeRef = useRef<number>(0)
 
     const handleFocus = async (event: React.FocusEvent<HTMLInputElement>) => {
       focusTimeRef.current = Date.now()
-      
+
       if (trackInteractions && fieldName && formName) {
         await trackFormInteraction({
           formId: formName,
           fieldName,
-          action: 'focus'
+          action: 'focus',
         })
       }
 
@@ -236,14 +270,14 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
 
     const handleBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
       const timeSpent = Date.now() - focusTimeRef.current
-      
+
       if (trackInteractions && fieldName && formName) {
         await trackFormInteraction({
           formId: formName,
           fieldName,
           action: 'blur',
           value: event.target.value,
-          timeSpent
+          timeSpent,
         })
       }
 
@@ -258,7 +292,7 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
           formId: formName,
           fieldName,
           action: 'change',
-          value: event.target.value
+          value: event.target.value,
         })
       }
 
@@ -292,7 +326,10 @@ interface ScrollDepthTrackerProps {
 /**
  * Component that tracks scroll depth within a specific section
  */
-export function ScrollDepthTracker({ children, trackingId }: ScrollDepthTrackerProps) {
+export function ScrollDepthTracker({
+  children,
+  trackingId,
+}: ScrollDepthTrackerProps) {
   const { trackScrollDepth } = useEnhancedAnalyticsContext()
   const elementRef = useRef<HTMLDivElement>(null)
   const trackedMilestones = useRef(new Set<number>())
@@ -309,20 +346,30 @@ export function ScrollDepthTracker({ children, trackingId }: ScrollDepthTrackerP
             const rect = entry.boundingClientRect
             const elementHeight = element.scrollHeight
             const visibleHeight = rect.height
-            const scrollPercentage = Math.round((visibleHeight / elementHeight) * 100)
+            const scrollPercentage = Math.round(
+              (visibleHeight / elementHeight) * 100
+            )
 
             // Track milestones specific to this section
             const milestones = [25, 50, 75, 100]
-            milestones.forEach(milestone => {
-              if (scrollPercentage >= milestone && !trackedMilestones.current.has(milestone)) {
+            milestones.forEach((milestone) => {
+              if (
+                scrollPercentage >= milestone &&
+                !trackedMilestones.current.has(milestone)
+              ) {
                 trackedMilestones.current.add(milestone)
-                
+
                 trackScrollDepth({
                   percentage: milestone,
-                  page: window.location.pathname + (trackingId ? `#${trackingId}` : ''),
+                  page:
+                    window.location.pathname +
+                    (trackingId ? `#${trackingId}` : ''),
                   timeToReach: Date.now() - startTime.current,
-                  maxDepthReached: Math.max(...Array.from(trackedMilestones.current)),
-                  bounced: trackedMilestones.current.size === 1 && milestone === 25
+                  maxDepthReached: Math.max(
+                    ...Array.from(trackedMilestones.current)
+                  ),
+                  bounced:
+                    trackedMilestones.current.size === 1 && milestone === 25,
                 })
               }
             })
@@ -355,13 +402,13 @@ interface ConversionFunnelStepProps {
 /**
  * Component that tracks funnel steps using intersection observer
  */
-export function ConversionFunnelStep({ 
-  children, 
-  stepName, 
-  stepNumber, 
+export function ConversionFunnelStep({
+  children,
+  stepName,
+  stepNumber,
   funnelName,
   onStepEnter,
-  onStepExit
+  onStepExit,
 }: ConversionFunnelStepProps) {
   const { startFunnelTracking } = useEnhancedAnalyticsContext()
   const elementRef = useRef<HTMLDivElement>(null)
@@ -395,8 +442,8 @@ export function ConversionFunnelStep({
   }, [stepName, stepNumber, funnelName, onStepEnter, onStepExit])
 
   return (
-    <div 
-      ref={elementRef} 
+    <div
+      ref={elementRef}
       data-funnel-step={stepName}
       data-funnel-number={stepNumber}
       data-funnel-name={funnelName}

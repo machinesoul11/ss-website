@@ -22,9 +22,7 @@ export default function AdminLayout({
                 </span>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  Admin Dashboard
-                </span>
+                <span className="text-sm text-gray-600">Admin Dashboard</span>
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">A</span>
                 </div>
@@ -34,9 +32,7 @@ export default function AdminLayout({
         </nav>
 
         {/* Main Content */}
-        <main>
-          {children}
-        </main>
+        <main>{children}</main>
       </div>
     </AdminAuth>
   )

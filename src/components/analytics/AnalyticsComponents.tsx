@@ -8,7 +8,8 @@
 import React, { forwardRef } from 'react'
 import { useCombinedAnalytics } from '@/lib/combined-analytics'
 
-interface AnalyticsButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface AnalyticsButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   ctaText?: string
   ctaPosition?: string
   trackAsGoal?: boolean
@@ -19,22 +20,37 @@ interface AnalyticsButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElem
 /**
  * Button component with automatic CTA tracking
  */
-export const AnalyticsButton = forwardRef<HTMLButtonElement, AnalyticsButtonProps>(
-  ({ ctaText, ctaPosition, trackAsGoal, goalName, onClick, children, ...props }, ref) => {
+export const AnalyticsButton = forwardRef<
+  HTMLButtonElement,
+  AnalyticsButtonProps
+>(
+  (
+    {
+      ctaText,
+      ctaPosition,
+      trackAsGoal,
+      goalName,
+      onClick,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const analytics = useCombinedAnalytics()
 
     const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
       // Track the CTA click
-      const text = ctaText || (typeof children === 'string' ? children : 'Button Click')
+      const text =
+        ctaText || (typeof children === 'string' ? children : 'Button Click')
       const position = ctaPosition || 'unknown'
-      
+
       await analytics.trackCTAClick(text, position)
 
       // Track as goal if specified
       if (trackAsGoal && goalName) {
-        await analytics.trackConversion(goalName, 1, { 
-          cta_text: text, 
-          cta_position: position 
+        await analytics.trackConversion(goalName, 1, {
+          cta_text: text,
+          cta_position: position,
         })
       }
 
@@ -60,7 +76,8 @@ export const AnalyticsButton = forwardRef<HTMLButtonElement, AnalyticsButtonProp
 
 AnalyticsButton.displayName = 'AnalyticsButton'
 
-interface AnalyticsLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface AnalyticsLinkProps
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   trackClick?: boolean
   eventName?: string
   eventProperties?: Record<string, any>
@@ -71,22 +88,39 @@ interface AnalyticsLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
  * Link component with automatic click tracking
  */
 export const AnalyticsLink = forwardRef<HTMLAnchorElement, AnalyticsLinkProps>(
-  ({ trackClick = true, eventName, eventProperties, onClick, href, children, ...props }, ref) => {
+  (
+    {
+      trackClick = true,
+      eventName,
+      eventProperties,
+      onClick,
+      href,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const analytics = useCombinedAnalytics()
 
     const handleClick = async (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (trackClick) {
-        const isOutbound = href?.startsWith('http') && href && !href.includes(window.location.hostname)
-        const linkText = typeof children === 'string' ? children : href || 'Link'
+        const isOutbound =
+          href?.startsWith('http') &&
+          href &&
+          !href.includes(window.location.hostname)
+        const linkText =
+          typeof children === 'string' ? children : href || 'Link'
 
         await analytics.trackEvent({
-          name: eventName || (isOutbound ? 'outbound_link_click' : 'internal_link_click'),
+          name:
+            eventName ||
+            (isOutbound ? 'outbound_link_click' : 'internal_link_click'),
           properties: {
             link_text: linkText,
             link_url: href,
             is_outbound: isOutbound,
-            ...eventProperties
-          }
+            ...eventProperties,
+          },
         })
       }
 
@@ -96,12 +130,7 @@ export const AnalyticsLink = forwardRef<HTMLAnchorElement, AnalyticsLinkProps>(
     }
 
     return (
-      <a
-        ref={ref}
-        href={href}
-        onClick={handleClick}
-        {...props}
-      >
+      <a ref={ref} href={href} onClick={handleClick} {...props}>
         {children}
       </a>
     )
@@ -127,15 +156,15 @@ export const AnalyticsForm = forwardRef<HTMLFormElement, AnalyticsFormProps>(
       if (trackSubmission) {
         try {
           await analytics.trackFormSubmission(formName, true)
-          
+
           // If this is the beta signup form, track the conversion
           if (formName.toLowerCase().includes('beta')) {
             await analytics.trackBetaSignup({}, 'form')
           }
         } catch (error) {
           console.error('Error tracking form submission:', error)
-          await analytics.trackFormSubmission(formName, false, { 
-            error: error instanceof Error ? error.message : String(error) 
+          await analytics.trackFormSubmission(formName, false, {
+            error: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -160,7 +189,8 @@ export const AnalyticsForm = forwardRef<HTMLFormElement, AnalyticsFormProps>(
 
 AnalyticsForm.displayName = 'AnalyticsForm'
 
-interface AnalyticsImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface AnalyticsImageProps
+  extends React.ImgHTMLAttributes<HTMLImageElement> {
   trackView?: boolean
   eventProperties?: Record<string, any>
 }
@@ -172,15 +202,17 @@ export const AnalyticsImage = forwardRef<HTMLImageElement, AnalyticsImageProps>(
   ({ trackView = false, eventProperties, onLoad, src, alt, ...props }, ref) => {
     const analytics = useCombinedAnalytics()
 
-    const handleLoad = async (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const handleLoad = async (
+      event: React.SyntheticEvent<HTMLImageElement>
+    ) => {
       if (trackView) {
         await analytics.trackEvent({
           name: 'image_view',
           properties: {
             image_src: src,
             image_alt: alt,
-            ...eventProperties
-          }
+            ...eventProperties,
+          },
         })
       }
 
@@ -189,15 +221,7 @@ export const AnalyticsImage = forwardRef<HTMLImageElement, AnalyticsImageProps>(
       }
     }
 
-    return (
-      <img
-        ref={ref}
-        src={src}
-        alt={alt}
-        onLoad={handleLoad}
-        {...props}
-      />
-    )
+    return <img ref={ref} src={src} alt={alt} onLoad={handleLoad} {...props} />
   }
 )
 
@@ -211,12 +235,20 @@ export function withAnalytics<P extends object>(
   defaultEventName: string,
   defaultProperties?: Record<string, any>
 ) {
-  const WrappedComponent = forwardRef<any, P & {
-    trackEvent?: boolean
-    eventName?: string
-    eventProperties?: Record<string, any>
-  }>((props, ref) => {
-    const { trackEvent = true, eventName, eventProperties, ...componentProps } = props
+  const WrappedComponent = forwardRef<
+    any,
+    P & {
+      trackEvent?: boolean
+      eventName?: string
+      eventProperties?: Record<string, any>
+    }
+  >((props, ref) => {
+    const {
+      trackEvent = true,
+      eventName,
+      eventProperties,
+      ...componentProps
+    } = props
     const analytics = useCombinedAnalytics()
 
     const handleInteraction = React.useCallback(async () => {
@@ -225,8 +257,8 @@ export function withAnalytics<P extends object>(
           name: eventName || defaultEventName,
           properties: {
             ...defaultProperties,
-            ...eventProperties
-          }
+            ...eventProperties,
+          },
         })
       }
     }, [trackEvent, eventName, eventProperties, analytics])
@@ -236,13 +268,16 @@ export function withAnalytics<P extends object>(
       ...componentProps,
       onClick: (event: any) => {
         handleInteraction()
-        if ('onClick' in componentProps && typeof componentProps.onClick === 'function') {
+        if (
+          'onClick' in componentProps &&
+          typeof componentProps.onClick === 'function'
+        ) {
           componentProps.onClick(event)
         }
-      }
+      },
     }
 
-    return <Component ref={ref} {...enhancedProps as P} />
+    return <Component ref={ref} {...(enhancedProps as P)} />
   })
 
   WrappedComponent.displayName = `withAnalytics(${Component.displayName || Component.name})`

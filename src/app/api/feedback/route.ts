@@ -9,7 +9,7 @@ const feedbackSchema = z.object({
   surveyId: z.string().optional(),
   responses: z.record(z.string(), z.unknown()).optional(),
   freeFormFeedback: z.string().optional(),
-  rating: z.number().min(1).max(5).optional()
+  rating: z.number().min(1).max(5).optional(),
 })
 
 /**
@@ -29,9 +29,10 @@ export async function POST(request: NextRequest) {
 
     if (userError || !user) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'User not found. Please ensure you are registered for the beta program.' 
+        {
+          success: false,
+          error:
+            'User not found. Please ensure you are registered for the beta program.',
         },
         { status: 404 }
       )
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
         responses: validatedData.responses || null,
         free_form_feedback: validatedData.freeFormFeedback || null,
         rating: validatedData.rating || null,
-        internal_status: 'new'
+        internal_status: 'new',
       })
       .select()
       .single()
@@ -63,18 +64,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Feedback submitted successfully',
-      data: { id: feedback.id }
+      data: { id: feedback.id },
     })
-
   } catch (error) {
     console.error('Feedback submission error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid feedback data',
-          details: error.issues
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -105,13 +105,15 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('feedback_submissions')
-      .select(`
+      .select(
+        `
         *,
         beta_signups (
           email,
           github_username
         )
-      `)
+      `
+      )
       .order('submitted_at', { ascending: false })
       .limit(limit)
 
@@ -135,9 +137,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: feedback
+      data: feedback,
     })
-
   } catch (error) {
     console.error('Feedback GET error:', error)
     return NextResponse.json(
@@ -193,9 +194,8 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Feedback status updated',
-      data
+      data,
     })
-
   } catch (error) {
     console.error('Feedback PATCH error:', error)
     return NextResponse.json(

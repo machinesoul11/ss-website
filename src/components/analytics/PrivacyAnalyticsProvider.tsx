@@ -1,7 +1,7 @@
 /**
  * Privacy Analytics Provider
  * Phase 6: Custom Analytics System Integration
- * 
+ *
  * Wraps the application with privacy-compliant analytics tracking
  */
 
@@ -38,18 +38,18 @@ const defaultConfig: AnalyticsConfig = {
   enableTracking: true,
   respectDoNotTrack: true,
   enablePerformanceMonitoring: true,
-  enableAutoTracking: true
+  enableAutoTracking: true,
 }
 
-export function PrivacyAnalyticsProvider({ 
-  children, 
-  config: userConfig = {} 
+export function PrivacyAnalyticsProvider({
+  children,
+  config: userConfig = {},
 }: PrivacyAnalyticsProviderProps) {
   const [config, setConfig] = useState<AnalyticsConfig>({
     ...defaultConfig,
-    ...userConfig
+    ...userConfig,
   })
-  
+
   const [visitorId, setVisitorId] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
@@ -60,12 +60,12 @@ export function PrivacyAnalyticsProvider({
 
   useEffect(() => {
     // setIsHydrated(true)
-    
+
     if (typeof window === 'undefined') return
 
     // Check Do Not Track preference
     if (config.respectDoNotTrack && navigator.doNotTrack === '1') {
-      setConfig(prev => ({ ...prev, enableTracking: false }))
+      setConfig((prev) => ({ ...prev, enableTracking: false }))
       return
     }
 
@@ -84,7 +84,7 @@ export function PrivacyAnalyticsProvider({
         screenResolution: `${screen.width}x${screen.height}`,
         language: navigator.language,
         referrer: document.referrer,
-        utmParams: extractUTMParams()
+        utmParams: extractUTMParams(),
       }
 
       // Get or create anonymous visitor
@@ -94,15 +94,15 @@ export function PrivacyAnalyticsProvider({
         body: JSON.stringify({
           visitorData,
           pagePath: window.location.pathname,
-          eventType: 'visitor_identification'
-        })
+          eventType: 'visitor_identification',
+        }),
       })
 
       if (response.ok) {
         const result = await response.json()
         setVisitorId(result.data.visitorId)
         setSessionId(result.data.sessionId)
-        
+
         // Track initial page view
         if (config.enableAutoTracking) {
           trackPageView()
@@ -110,7 +110,6 @@ export function PrivacyAnalyticsProvider({
       }
 
       setInitialized(true)
-
     } catch (error) {
       console.error('Analytics initialization error:', error)
     }
@@ -119,13 +118,13 @@ export function PrivacyAnalyticsProvider({
   const extractUTMParams = (): Record<string, string> => {
     const params = new URLSearchParams(window.location.search)
     const utmParams: Record<string, string> = {}
-    
+
     for (const [key, value] of params.entries()) {
       if (key.startsWith('utm_')) {
         utmParams[key] = value
       }
     }
-    
+
     return utmParams
   }
 
@@ -144,16 +143,19 @@ export function PrivacyAnalyticsProvider({
             page: window.location.pathname,
             title: document.title,
             referrer: document.referrer,
-            timestamp: Date.now()
-          }
-        })
+            timestamp: Date.now(),
+          },
+        }),
       })
     } catch (error) {
       console.error('Page view tracking error:', error)
     }
   }
 
-  const trackEvent = async (eventType: string, properties: Record<string, any> = {}) => {
+  const trackEvent = async (
+    eventType: string,
+    properties: Record<string, any> = {}
+  ) => {
     if (!config.enableTracking || !visitorId) return
 
     try {
@@ -167,9 +169,9 @@ export function PrivacyAnalyticsProvider({
           properties: {
             ...properties,
             page: window.location.pathname,
-            timestamp: Date.now()
-          }
-        })
+            timestamp: Date.now(),
+          },
+        }),
       })
     } catch (error) {
       console.error('Event tracking error:', error)
@@ -190,9 +192,9 @@ export function PrivacyAnalyticsProvider({
           conversionValue: value,
           metadata: {
             page: window.location.pathname,
-            timestamp: Date.now()
-          }
-        })
+            timestamp: Date.now(),
+          },
+        }),
       })
     } catch (error) {
       console.error('Conversion tracking error:', error)
@@ -200,7 +202,7 @@ export function PrivacyAnalyticsProvider({
   }
 
   const updateConfig = (newConfig: Partial<AnalyticsConfig>) => {
-    setConfig(prev => ({ ...prev, ...newConfig }))
+    setConfig((prev) => ({ ...prev, ...newConfig }))
   }
 
   // Auto-track page changes in SPAs
@@ -217,12 +219,12 @@ export function PrivacyAnalyticsProvider({
     const originalPushState = window.history.pushState
     const originalReplaceState = window.history.replaceState
 
-    window.history.pushState = function(...args) {
+    window.history.pushState = function (...args) {
       originalPushState.apply(this, args)
       handleRouteChange()
     }
 
-    window.history.replaceState = function(...args) {
+    window.history.replaceState = function (...args) {
       originalReplaceState.apply(this, args)
       handleRouteChange()
     }
@@ -243,7 +245,7 @@ export function PrivacyAnalyticsProvider({
     sessionId,
     trackEvent,
     trackConversion,
-    updateConfig
+    updateConfig,
   }
 
   return (
@@ -258,11 +260,13 @@ export function PrivacyAnalyticsProvider({
  */
 export function usePrivacyAnalytics() {
   const context = useContext(AnalyticsContext)
-  
+
   if (!context) {
-    throw new Error('usePrivacyAnalytics must be used within a PrivacyAnalyticsProvider')
+    throw new Error(
+      'usePrivacyAnalytics must be used within a PrivacyAnalyticsProvider'
+    )
   }
-  
+
   return context
 }
 
@@ -276,23 +280,21 @@ export function withAnalyticsTracking<T extends object>(
   const ComponentWithAnalytics = (props: T) => {
     const { trackEvent } = usePrivacyAnalytics()
 
-    const handleInteraction = (action: string, metadata?: Record<string, any>) => {
+    const handleInteraction = (
+      action: string,
+      metadata?: Record<string, any>
+    ) => {
       trackEvent(`${eventPrefix}_${action}`, {
         component: WrappedComponent.displayName || WrappedComponent.name,
-        ...metadata
+        ...metadata,
       })
     }
 
-    return (
-      <WrappedComponent
-        {...props}
-        onAnalyticsEvent={handleInteraction}
-      />
-    )
+    return <WrappedComponent {...props} onAnalyticsEvent={handleInteraction} />
   }
 
   ComponentWithAnalytics.displayName = `withAnalyticsTracking(${WrappedComponent.displayName || WrappedComponent.name})`
-  
+
   return ComponentWithAnalytics
 }
 

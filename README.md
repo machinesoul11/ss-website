@@ -120,6 +120,7 @@ npm run format && npm run lint:fix
 This project is optimized for Vercel deployment with automatic CI/CD pipeline.
 
 **Quick Deploy:**
+
 1. Connect your GitHub repository to Vercel
 2. Configure environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
@@ -147,12 +148,14 @@ Configure these in your Vercel dashboard:
 This project uses a dual analytics approach for comprehensive yet privacy-compliant tracking:
 
 ### Plausible Analytics (External)
+
 - **Privacy-first**: No cookies, GDPR compliant, respects DNT
 - **Lightweight**: <1KB script, minimal performance impact
 - **Automatic tracking**: Page views, outbound links, file downloads
 - **Custom goals**: Conversion tracking, engagement metrics
 
 ### Custom Analytics (Internal)
+
 - **Detailed tracking**: User journeys, form interactions, engagement
 - **Database storage**: All data stored in Supabase
 - **Real-time updates**: Live dashboard for admin users
@@ -161,6 +164,7 @@ This project uses a dual analytics approach for comprehensive yet privacy-compli
 ### Setup Instructions
 
 1. **Configure Plausible**:
+
    ```bash
    NEXT_PUBLIC_PLAUSIBLE_DOMAIN=silentscribe.dev
    ```
@@ -172,10 +176,10 @@ This project uses a dual analytics approach for comprehensive yet privacy-compli
    - `Scroll Depth`
 
 3. **Use analytics components**:
+
    ```tsx
    import { AnalyticsButton, AnalyticsForm } from '@/components/analytics'
-   
-   <AnalyticsButton ctaText="Join Beta" ctaPosition="hero">
+   ;<AnalyticsButton ctaText="Join Beta" ctaPosition="hero">
      Sign Up
    </AnalyticsButton>
    ```

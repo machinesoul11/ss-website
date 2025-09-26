@@ -1,7 +1,7 @@
 /**
  * Performance Monitoring Integration
  * Phase 6: Performance Monitoring - Application Integration
- * 
+ *
  * Integrates all performance monitoring components into the application
  */
 
@@ -29,7 +29,7 @@ interface PerformanceMonitoringIntegrationProps {
 export function PerformanceMonitoringIntegration({
   children,
   enableInProduction = true,
-  config = {}
+  config = {},
 }: PerformanceMonitoringIntegrationProps) {
   const {
     enableWebVitals = true,
@@ -37,11 +37,12 @@ export function PerformanceMonitoringIntegration({
     enableMemoryMonitoring = true,
     enableBundleMonitoring = true,
     errorSampleRate = 1.0,
-    performanceSampleRate = 0.1
+    performanceSampleRate = 0.1,
   } = config
 
   // Only enable in development or if explicitly enabled in production
-  const isMonitoringEnabled = process.env.NODE_ENV === 'development' || enableInProduction
+  const isMonitoringEnabled =
+    process.env.NODE_ENV === 'development' || enableInProduction
 
   useEffect(() => {
     if (!isMonitoringEnabled || typeof window === 'undefined') return
@@ -51,14 +52,19 @@ export function PerformanceMonitoringIntegration({
       try {
         // Send initial page load metrics
         setTimeout(() => {
-          const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+          const navigation = performance.getEntriesByType(
+            'navigation'
+          )[0] as PerformanceNavigationTiming
           if (navigation) {
             const metrics = {
               loadTime: navigation.loadEventEnd - navigation.loadEventStart,
-              domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+              domContentLoaded:
+                navigation.domContentLoadedEventEnd -
+                navigation.domContentLoadedEventStart,
               firstByte: navigation.responseStart - navigation.requestStart,
-              dnsLookup: navigation.domainLookupEnd - navigation.domainLookupStart,
-              tcpConnect: navigation.connectEnd - navigation.connectStart
+              dnsLookup:
+                navigation.domainLookupEnd - navigation.domainLookupStart,
+              tcpConnect: navigation.connectEnd - navigation.connectStart,
             }
 
             // Sample performance data based on sample rate
@@ -70,8 +76,8 @@ export function PerformanceMonitoringIntegration({
                   metrics,
                   page: window.location.pathname,
                   timestamp: Date.now(),
-                  userAgent: navigator.userAgent
-                })
+                  userAgent: navigator.userAgent,
+                }),
               }).catch(console.warn)
             }
           }
@@ -85,10 +91,9 @@ export function PerformanceMonitoringIntegration({
             memoryMonitoring: enableMemoryMonitoring,
             bundleMonitoring: enableBundleMonitoring,
             errorSampleRate,
-            performanceSampleRate
+            performanceSampleRate,
           })
         }
-
       } catch (error) {
         console.warn('Failed to initialize performance monitoring:', error)
       }
@@ -103,10 +108,13 @@ export function PerformanceMonitoringIntegration({
         const stats = errorTracker.getErrorStats()
         if (stats.queuedErrors > 0 || stats.queuedPerformanceIssues > 0) {
           // This will trigger the automatic flush in error tracker
-          navigator.sendBeacon('/api/analytics/error-tracking', JSON.stringify({
-            flush: true,
-            stats
-          }))
+          navigator.sendBeacon(
+            '/api/analytics/error-tracking',
+            JSON.stringify({
+              flush: true,
+              stats,
+            })
+          )
         }
       }
     }
@@ -116,7 +124,15 @@ export function PerformanceMonitoringIntegration({
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [isMonitoringEnabled, enableWebVitals, enableErrorTracking, enableMemoryMonitoring, enableBundleMonitoring, errorSampleRate, performanceSampleRate])
+  }, [
+    isMonitoringEnabled,
+    enableWebVitals,
+    enableErrorTracking,
+    enableMemoryMonitoring,
+    enableBundleMonitoring,
+    errorSampleRate,
+    performanceSampleRate,
+  ])
 
   if (!isMonitoringEnabled) {
     return <>{children}</>
@@ -156,7 +172,7 @@ function PerformanceMetricsCollector() {
       if (typeof window === 'undefined') return
 
       const metrics = getCurrentMetrics()
-      
+
       // Only send metrics if we have meaningful data
       if (metrics && (metrics.lcp || metrics.fid || metrics.cls)) {
         // This will be handled by the performance monitoring hook
@@ -180,58 +196,68 @@ export function useApplicationPerformance() {
       stack: error.stack,
       severity: 'medium',
       category: 'user',
-      metadata: { context }
+      metadata: { context },
     })
   }, [])
 
-  const trackUserAction = React.useCallback((action: string, data?: Record<string, any>) => {
-    // Track user interactions that might impact performance
-    fetch('/api/analytics/performance', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventType: 'user_action',
-        action,
-        data,
-        page: window.location.pathname,
-        timestamp: Date.now()
+  const trackUserAction = React.useCallback(
+    (action: string, data?: Record<string, any>) => {
+      // Track user interactions that might impact performance
+      fetch('/api/analytics/performance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventType: 'user_action',
+          action,
+          data,
+          page: window.location.pathname,
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {
+        // Silently fail - don't impact user experience
       })
-    }).catch(() => {
-      // Silently fail - don't impact user experience
-    })
-  }, [])
+    },
+    []
+  )
 
-  const measureOperation = React.useCallback(async function<T>(
-    operation: () => Promise<T>,
-    operationName: string
-  ): Promise<T> {
-    const startTime = performance.now()
-    
-    try {
-      const result = await operation()
-      const duration = performance.now() - startTime
+  const measureOperation = React.useCallback(
+    async function <T>(
+      operation: () => Promise<T>,
+      operationName: string
+    ): Promise<T> {
+      const startTime = performance.now()
 
-      // Track successful operations
-      if (duration > 100) { // Only track operations > 100ms
-        trackUserAction('slow_operation', {
-          operation: operationName,
-          duration: Math.round(duration)
-        })
+      try {
+        const result = await operation()
+        const duration = performance.now() - startTime
+
+        // Track successful operations
+        if (duration > 100) {
+          // Only track operations > 100ms
+          trackUserAction('slow_operation', {
+            operation: operationName,
+            duration: Math.round(duration),
+          })
+        }
+
+        return result
+      } catch (error) {
+        const duration = performance.now() - startTime
+
+        reportError(
+          error as Error,
+          `Failed operation: ${operationName} (${Math.round(duration)}ms)`
+        )
+        throw error
       }
-
-      return result
-    } catch (error) {
-      const duration = performance.now() - startTime
-      
-      reportError(error as Error, `Failed operation: ${operationName} (${Math.round(duration)}ms)`)
-      throw error
-    }
-  }, [reportError, trackUserAction])
+    },
+    [reportError, trackUserAction]
+  )
 
   return {
     reportError,
     trackUserAction,
-    measureOperation
+    measureOperation,
   }
 }
 
@@ -245,26 +271,26 @@ export const PerformanceConfig = {
     enableMemoryMonitoring: true,
     enableBundleMonitoring: true,
     errorSampleRate: 1.0,
-    performanceSampleRate: 1.0
+    performanceSampleRate: 1.0,
   },
-  
+
   production: {
     enableWebVitals: true,
     enableErrorTracking: true,
     enableMemoryMonitoring: false, // Might impact performance
     enableBundleMonitoring: false, // Might impact performance
     errorSampleRate: 0.1, // Sample 10% of errors
-    performanceSampleRate: 0.01 // Sample 1% of performance events
+    performanceSampleRate: 0.01, // Sample 1% of performance events
   },
-  
+
   staging: {
     enableWebVitals: true,
     enableErrorTracking: true,
     enableMemoryMonitoring: true,
     enableBundleMonitoring: true,
     errorSampleRate: 0.5,
-    performanceSampleRate: 0.1
-  }
+    performanceSampleRate: 0.1,
+  },
 }
 
 /**
@@ -272,7 +298,7 @@ export const PerformanceConfig = {
  */
 export function getPerformanceConfig() {
   const env = process.env.NODE_ENV
-  
+
   if (env === 'development') {
     return PerformanceConfig.development
   } else if (env === 'production') {

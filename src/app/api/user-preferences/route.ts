@@ -9,8 +9,10 @@ const preferencesSchema = z.object({
   preferredContactMethod: z.string().optional(),
   timezone: z.string().optional(),
   betaTestingAvailability: z.record(z.string(), z.unknown()).optional(),
-  technicalBackground: z.enum(['beginner', 'intermediate', 'expert']).optional(),
-  areasOfInterest: z.array(z.string()).optional()
+  technicalBackground: z
+    .enum(['beginner', 'intermediate', 'expert'])
+    .optional(),
+  areasOfInterest: z.array(z.string()).optional(),
 })
 
 /**
@@ -30,9 +32,10 @@ export async function PUT(request: NextRequest) {
 
     if (userError || !user) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'User not found. Please ensure you are registered for the beta program.' 
+        {
+          success: false,
+          error:
+            'User not found. Please ensure you are registered for the beta program.',
         },
         { status: 404 }
       )
@@ -40,18 +43,21 @@ export async function PUT(request: NextRequest) {
 
     // Prepare preferences data (only include fields that were provided)
     const preferencesData: Record<string, unknown> = { user_id: user.id }
-    
+
     if (validatedData.communicationFrequency) {
-      preferencesData.communication_frequency = validatedData.communicationFrequency
+      preferencesData.communication_frequency =
+        validatedData.communicationFrequency
     }
     if (validatedData.preferredContactMethod) {
-      preferencesData.preferred_contact_method = validatedData.preferredContactMethod
+      preferencesData.preferred_contact_method =
+        validatedData.preferredContactMethod
     }
     if (validatedData.timezone) {
       preferencesData.timezone = validatedData.timezone
     }
     if (validatedData.betaTestingAvailability) {
-      preferencesData.beta_testing_availability = validatedData.betaTestingAvailability
+      preferencesData.beta_testing_availability =
+        validatedData.betaTestingAvailability
     }
     if (validatedData.technicalBackground) {
       preferencesData.technical_background = validatedData.technicalBackground
@@ -78,18 +84,17 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Preferences updated successfully',
-      data: preferences
+      data: preferences,
     })
-
   } catch (error) {
     console.error('Preferences update error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid preferences data',
-          details: error.issues
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -126,9 +131,9 @@ export async function GET(request: NextRequest) {
 
     if (userError || !user) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'User not found' 
+        {
+          success: false,
+          error: 'User not found',
         },
         { status: 404 }
       )
@@ -141,7 +146,8 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .single()
 
-    if (prefError && prefError.code !== 'PGRST116') { // PGRST116 = no rows returned
+    if (prefError && prefError.code !== 'PGRST116') {
+      // PGRST116 = no rows returned
       console.error('Preferences fetch error:', prefError)
       return NextResponse.json(
         { success: false, error: 'Failed to fetch preferences' },
@@ -159,10 +165,9 @@ export async function GET(request: NextRequest) {
         beta_testing_availability: null,
         technical_background: null,
         areas_of_interest: null,
-        updated_at: new Date().toISOString()
-      }
+        updated_at: new Date().toISOString(),
+      },
     })
-
   } catch (error) {
     console.error('Preferences GET error:', error)
     return NextResponse.json(

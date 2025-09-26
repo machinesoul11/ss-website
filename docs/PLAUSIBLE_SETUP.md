@@ -26,21 +26,25 @@ NEXT_PUBLIC_PLAUSIBLE_DOMAIN=silentscribe.dev
 Configure these goals in your Plausible dashboard (`silentscribe.dev` → Settings → Goals):
 
 #### Primary Conversion Goals
+
 - `Beta Signup` - Custom event goal
 - `Newsletter Signup` - Custom event goal
 - `Form Submit` - Custom event goal
 
 #### Engagement Goals
-- `CTA Click` - Custom event goal  
+
+- `CTA Click` - Custom event goal
 - `Scroll Depth` - Custom event goal (with depth_percentage property)
 - `Time on Page` - Custom event goal (with duration property)
 
 #### Funnel Goals
+
 - `Beta Form Start` - Custom event goal
-- `Beta Form Step 2` - Custom event goal  
+- `Beta Form Step 2` - Custom event goal
 - `Beta Form Step 3` - Custom event goal
 
 #### Error Tracking
+
 - `Form Error` - Custom event goal
 - `Page Error` - Custom event goal
 
@@ -68,8 +72,8 @@ trackPlausibleEvent('Button Click')
 trackPlausibleEvent('Beta Signup', {
   props: {
     source: 'homepage',
-    step: 'completed'
-  }
+    step: 'completed',
+  },
 })
 ```
 
@@ -80,7 +84,7 @@ import { useCombinedAnalytics } from '@/lib/combined-analytics'
 
 function MyComponent() {
   const analytics = useCombinedAnalytics()
-  
+
   const handleSignup = async () => {
     // Tracks to both Plausible and internal analytics
     await analytics.trackBetaSignup(formData, 'homepage')
@@ -94,7 +98,7 @@ function MyComponent() {
 import { AnalyticsButton, AnalyticsForm } from '@/components/analytics'
 
 // Button with automatic CTA tracking
-<AnalyticsButton 
+<AnalyticsButton
   ctaText="Join Beta"
   ctaPosition="hero"
   trackAsGoal={true}
@@ -149,7 +153,7 @@ Track the complete user journey:
 // Form start
 analytics.trackEvent({ name: 'Beta Form Start' })
 
-// Step progression  
+// Step progression
 analytics.trackEvent({ name: 'Beta Form Step 2' })
 analytics.trackEvent({ name: 'Beta Form Step 3' })
 
@@ -174,8 +178,8 @@ trackPlausibleEvent('Download', {
   props: {
     file_type: 'whitepaper',
     file_name: 'silent-scribe-architecture.pdf',
-    download_source: 'footer'
-  }
+    download_source: 'footer',
+  },
 })
 ```
 
@@ -184,11 +188,13 @@ trackPlausibleEvent('Download', {
 ### Public Dashboard
 
 We maintain a public dashboard for transparency:
+
 - URL: `https://plausible.io/silentscribe.dev` (if configured as public)
 
 ### Team Access
 
 Admin access requires:
+
 1. Plausible account invitation
 2. Two-factor authentication enabled
 3. Read-only access for non-admin team members
@@ -207,13 +213,15 @@ Plausible has minimal performance impact:
 ### Script Not Loading
 
 Check environment variables:
+
 ```bash
 echo $NEXT_PUBLIC_PLAUSIBLE_DOMAIN
 ```
 
-### Events Not Tracking  
+### Events Not Tracking
 
 Verify in browser console:
+
 ```javascript
 // Check if Plausible is available
 window.plausible
@@ -226,12 +234,14 @@ window.plausible('Test Event', { props: { test: true } })
 ### AdBlockers
 
 Plausible may be blocked by some ad blockers:
+
 - Encourage users to whitelist `plausible.io`
 - Consider proxy setup for business-critical tracking
 
 ## Data Export
 
 Plausible provides:
+
 - **CSV Exports**: Download raw data
 - **API Access**: Programmatic data access
 - **Real-time API**: Live statistics
@@ -244,6 +254,7 @@ Access requires API key configuration in Plausible dashboard.
 ### GDPR Compliance
 
 Plausible is GDPR compliant by design:
+
 - No personal data collection
 - No consent banner required
 - Data processing lawful basis: legitimate interest
@@ -252,6 +263,7 @@ Plausible is GDPR compliant by design:
 ### CCPA Compliance
 
 No personal information collected = automatic CCPA compliance:
+
 - No sale of personal information
 - No personal information to opt-out of
 - No personal information rights requests needed

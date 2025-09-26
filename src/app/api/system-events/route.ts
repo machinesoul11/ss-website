@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     // Verify webhook signature (simplified - in production, verify with proper HMAC)
     const signature = request.headers.get('x-webhook-signature')
     const expectedSignature = process.env.WEBHOOK_SECRET
-    
+
     if (!signature || signature !== expectedSignature) {
       console.warn('Invalid webhook signature received')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
@@ -68,7 +68,12 @@ export async function POST(request: NextRequest) {
         await RealtimeService.broadcastNotification(
           'error',
           `🚨 Security Alert: ${data.description}`,
-          { source, ip: data.ip, userAgent: data.userAgent, description: data.description }
+          {
+            source,
+            ip: data.ip,
+            userAgent: data.userAgent,
+            description: data.description,
+          }
         )
         break
 
@@ -76,7 +81,12 @@ export async function POST(request: NextRequest) {
         await RealtimeService.broadcastNotification(
           'warning',
           `API rate limit exceeded from ${data.ip}`,
-          { source, ip: data.ip, endpoint: data.endpoint, requestCount: data.requestCount }
+          {
+            source,
+            ip: data.ip,
+            endpoint: data.endpoint,
+            requestCount: data.requestCount,
+          }
         )
         break
 
@@ -84,7 +94,12 @@ export async function POST(request: NextRequest) {
         await RealtimeService.broadcastNotification(
           'info',
           `Negative feedback received (rating: ${data.rating}/5)`,
-          { source, rating: data.rating, feedback: data.feedback, userId: data.userId }
+          {
+            source,
+            rating: data.rating,
+            feedback: data.feedback,
+            userId: data.userId,
+          }
         )
         break
 
@@ -92,7 +107,11 @@ export async function POST(request: NextRequest) {
         await RealtimeService.broadcastNotification(
           'warning',
           `Conversion rate drop detected: ${data.currentRate}% (was ${data.previousRate}%)`,
-          { source, currentRate: data.currentRate, previousRate: data.previousRate }
+          {
+            source,
+            currentRate: data.currentRate,
+            previousRate: data.previousRate,
+          }
         )
         break
 
@@ -117,12 +136,11 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Event processed successfully',
       eventType: type,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
     console.error('Webhook processing error:', error)
-    
+
     // Broadcast error notification
     try {
       await RealtimeService.broadcastNotification(
@@ -131,13 +149,19 @@ export async function POST(request: NextRequest) {
         { error: error instanceof Error ? error.message : 'Unknown error' }
       )
     } catch (broadcastError) {
-      console.error('Failed to broadcast webhook error notification:', broadcastError)
+      console.error(
+        'Failed to broadcast webhook error notification:',
+        broadcastError
+      )
     }
 
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to process webhook event'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to process webhook event',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -168,18 +192,20 @@ export async function GET(request: NextRequest) {
           'api.rate_limit_exceeded',
           'feedback.negative_sentiment',
           'conversion.drop',
-          'system.backup_completed'
+          'system.backup_completed',
         ],
         status: 'active',
-        lastReceived: new Date().toISOString()
-      }
+        lastReceived: new Date().toISOString(),
+      },
     })
-
   } catch (error) {
     console.error('Webhook status error:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to get webhook status'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to get webhook status',
+      },
+      { status: 500 }
+    )
   }
 }

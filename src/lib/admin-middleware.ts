@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
  * Admin API Middleware
  * Validates authentication for all admin API endpoints
  */
-export async function adminApiMiddleware(request: NextRequest): Promise<NextResponse | null> {
+export async function adminApiMiddleware(
+  request: NextRequest
+): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl
 
   // Skip authentication for the auth endpoint itself
@@ -17,9 +19,12 @@ export async function adminApiMiddleware(request: NextRequest): Promise<NextResp
   const adminApiKey = process.env.ADMIN_API_KEY
 
   if (!authHeader && !adminApiKey) {
-    return NextResponse.json({ 
-      error: 'Admin API authentication not configured' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Admin API authentication not configured',
+      },
+      { status: 500 }
+    )
   }
 
   // Check API key authentication
@@ -34,9 +39,13 @@ export async function adminApiMiddleware(request: NextRequest): Promise<NextResp
       // Validate session token - token is already base64 encoded
       const decoded = Buffer.from(token, 'base64').toString()
       const [prefix, timestamp] = decoded.split(':')
-      
-      console.log('Validating token:', { prefix, timestamp, decoded: decoded.substring(0, 20) + '...' })
-      
+
+      console.log('Validating token:', {
+        prefix,
+        timestamp,
+        decoded: decoded.substring(0, 20) + '...',
+      })
+
       if (prefix === 'admin' && timestamp) {
         const tokenTime = parseInt(timestamp)
         const now = Date.now()
@@ -63,7 +72,7 @@ export async function adminApiMiddleware(request: NextRequest): Promise<NextResp
       // Validate session token - token is already base64 encoded
       const decoded = Buffer.from(sessionCookie, 'base64').toString()
       const [prefix, timestamp] = decoded.split(':')
-      
+
       if (prefix === 'admin' && timestamp) {
         const tokenTime = parseInt(timestamp)
         const now = Date.now()
@@ -79,9 +88,12 @@ export async function adminApiMiddleware(request: NextRequest): Promise<NextResp
   }
 
   // Authentication failed
-  return NextResponse.json({ 
-    error: 'Unauthorized - Admin access required' 
-  }, { status: 401 })
+  return NextResponse.json(
+    {
+      error: 'Unauthorized - Admin access required',
+    },
+    { status: 401 }
+  )
 }
 
 /**
@@ -103,7 +115,7 @@ export function isAdminAuthenticated(request: NextRequest): boolean {
       if (token.startsWith('YWRtaW4:')) {
         const decoded = Buffer.from(token, 'base64').toString()
         const [prefix, timestamp] = decoded.split(':')
-        
+
         if (prefix === 'admin' && timestamp) {
           const tokenTime = parseInt(timestamp)
           const now = Date.now()
@@ -124,7 +136,7 @@ export function isAdminAuthenticated(request: NextRequest): boolean {
       if (sessionCookie.startsWith('YWRtaW4:')) {
         const decoded = Buffer.from(sessionCookie, 'base64').toString()
         const [prefix, timestamp] = decoded.split(':')
-        
+
         if (prefix === 'admin' && timestamp) {
           const tokenTime = parseInt(timestamp)
           const now = Date.now()

@@ -51,33 +51,32 @@ export function AnalyticsDashboard() {
           { page: '/beta', views: 234 },
           { page: '/about', views: 156 },
           { page: '/privacy', views: 89 },
-          { page: '/contact', views: 67 }
+          { page: '/contact', views: 67 },
         ],
         topSources: [
           { source: 'Direct', visits: 456 },
           { source: 'Google', visits: 234 },
           { source: 'GitHub', visits: 123 },
           { source: 'Twitter', visits: 67 },
-          { source: 'Reddit', visits: 45 }
+          { source: 'Reddit', visits: 45 },
         ],
         goals: [
           { name: 'Beta Signup', conversions: 45 },
           { name: 'Form Submit', conversions: 78 },
           { name: 'CTA Click', conversions: 156 },
-          { name: 'Page View', conversions: 1250 }
+          { name: 'Page View', conversions: 1250 },
         ],
-        realTimeVisitors: 8
+        realTimeVisitors: 8,
       }
 
       // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
       setAnalyticsData(mockData)
 
       // If Plausible is available, log that it's enabled
       if (analytics.isPlausibleEnabled) {
         console.log('Plausible Analytics is enabled')
       }
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -89,8 +88,6 @@ export function AnalyticsDashboard() {
     fetchAnalyticsData()
   }, [fetchAnalyticsData])
 
-
-
   // const fetchPlausibleStats = async () => {
   //   try {
   //     // Note: This would require Plausible API key configuration
@@ -101,7 +98,9 @@ export function AnalyticsDashboard() {
   //   }
   // }
 
-  const handleTimeframeChange = (newTimeframe: '24h' | '7d' | '30d' | '90d') => {
+  const handleTimeframeChange = (
+    newTimeframe: '24h' | '7d' | '30d' | '90d'
+  ) => {
     setTimeframe(newTimeframe)
   }
 
@@ -125,9 +124,11 @@ export function AnalyticsDashboard() {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center text-red-600">
-          <h3 className="text-lg font-semibold mb-2">Error Loading Analytics</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            Error Loading Analytics
+          </h3>
           <p>{error}</p>
-          <button 
+          <button
             onClick={fetchAnalyticsData}
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
@@ -150,8 +151,10 @@ export function AnalyticsDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-        
+        <h2 className="text-2xl font-bold text-gray-900">
+          Analytics Dashboard
+        </h2>
+
         {/* Timeframe Selector */}
         <div className="flex space-x-2">
           {(['24h', '7d', '30d', '90d'] as const).map((period) => (
@@ -164,10 +167,13 @@ export function AnalyticsDashboard() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {period === '24h' ? 'Last 24h' : 
-               period === '7d' ? 'Last 7 days' :
-               period === '30d' ? 'Last 30 days' :
-               'Last 90 days'}
+              {period === '24h'
+                ? 'Last 24h'
+                : period === '7d'
+                  ? 'Last 7 days'
+                  : period === '30d'
+                    ? 'Last 30 days'
+                    : 'Last 90 days'}
             </button>
           ))}
         </div>
@@ -208,8 +214,13 @@ export function AnalyticsDashboard() {
           <h3 className="text-lg font-semibold mb-4">Top Pages</h3>
           <div className="space-y-3">
             {analyticsData.topPages.map((page) => (
-              <div key={page.page} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 truncate">{page.page}</span>
+              <div
+                key={page.page}
+                className="flex justify-between items-center"
+              >
+                <span className="text-sm text-gray-600 truncate">
+                  {page.page}
+                </span>
                 <span className="text-sm font-medium">{page.views}</span>
               </div>
             ))}
@@ -221,7 +232,10 @@ export function AnalyticsDashboard() {
           <h3 className="text-lg font-semibold mb-4">Traffic Sources</h3>
           <div className="space-y-3">
             {analyticsData.topSources.map((source) => (
-              <div key={source.source} className="flex justify-between items-center">
+              <div
+                key={source.source}
+                className="flex justify-between items-center"
+              >
                 <span className="text-sm text-gray-600">{source.source}</span>
                 <span className="text-sm font-medium">{source.visits}</span>
               </div>
@@ -234,7 +248,10 @@ export function AnalyticsDashboard() {
           <h3 className="text-lg font-semibold mb-4">Goal Conversions</h3>
           <div className="space-y-3">
             {analyticsData.goals.map((goal) => (
-              <div key={goal.name} className="flex justify-between items-center">
+              <div
+                key={goal.name}
+                className="flex justify-between items-center"
+              >
                 <span className="text-sm text-gray-600">{goal.name}</span>
                 <span className="text-sm font-medium">{goal.conversions}</span>
               </div>
@@ -265,13 +282,12 @@ export function AnalyticsDashboard() {
               Plausible Analytics Integration
             </h3>
             <p className="mt-1 text-sm text-blue-700">
-              {analytics.isPlausibleEnabled ? 
-                'Plausible Analytics is active. Visit your Plausible dashboard for additional privacy-compliant insights.' :
-                'Enable Plausible Analytics by setting NEXT_PUBLIC_PLAUSIBLE_DOMAIN environment variable.'
-              }
+              {analytics.isPlausibleEnabled
+                ? 'Plausible Analytics is active. Visit your Plausible dashboard for additional privacy-compliant insights.'
+                : 'Enable Plausible Analytics by setting NEXT_PUBLIC_PLAUSIBLE_DOMAIN environment variable.'}
             </p>
             {analytics.isPlausibleEnabled && (
-              <a 
+              <a
                 href={`https://plausible.io/${process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -302,7 +318,9 @@ function MetricCard({ title, value, change, icon }: MetricCardProps) {
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
           {change !== null && (
-            <p className={`text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p
+              className={`text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
               {change >= 0 ? '↗' : '↘'} {Math.abs(change)}%
             </p>
           )}

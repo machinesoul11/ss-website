@@ -11,10 +11,23 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, helperText, success, placeholder, id, children, ...props }, ref) => {
+  (
+    {
+      className,
+      label,
+      error,
+      helperText,
+      success,
+      placeholder,
+      id,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const generatedId = useId()
     const selectId = id || generatedId
-    
+
     return (
       <div className="space-y-1">
         {label && (

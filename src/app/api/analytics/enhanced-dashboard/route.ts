@@ -11,10 +11,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const dateRange = searchParams.get('range') || '7d' // 7d, 30d, 90d
     const metric = searchParams.get('metric') // specific metric to query
-    
+
     const endDate = new Date()
     const startDate = new Date()
-    
+
     switch (dateRange) {
       case '7d':
         startDate.setDate(endDate.getDate() - 7)
@@ -46,17 +46,16 @@ export async function GET(request: NextRequest) {
       dateRange: {
         start: startDate.toISOString(),
         end: endDate.toISOString(),
-        range: dateRange
-      }
+        range: dateRange,
+      },
     })
-
   } catch (error) {
     console.error('Enhanced analytics dashboard error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch analytics data',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -71,24 +70,44 @@ async function getComprehensiveAnalytics(startDate: Date, endDate: Date) {
     getEngagementAnalytics(startDate, endDate),
     getReferrerAnalytics(startDate, endDate),
     getFunnelAnalytics(startDate, endDate),
-    getConversionAnalytics(startDate, endDate)
+    getConversionAnalytics(startDate, endDate),
   ])
 
   return {
     formAnalytics: results[0].status === 'fulfilled' ? results[0].value : null,
     ctaAnalytics: results[1].status === 'fulfilled' ? results[1].value : null,
-    scrollDepthAnalytics: results[2].status === 'fulfilled' ? results[2].value : null,
-    engagementAnalytics: results[3].status === 'fulfilled' ? results[3].value : null,
-    referrerAnalytics: results[4].status === 'fulfilled' ? results[4].value : null,
-    funnelAnalytics: results[5].status === 'fulfilled' ? results[5].value : null,
-    conversionAnalytics: results[6].status === 'fulfilled' ? results[6].value : null,
+    scrollDepthAnalytics:
+      results[2].status === 'fulfilled' ? results[2].value : null,
+    engagementAnalytics:
+      results[3].status === 'fulfilled' ? results[3].value : null,
+    referrerAnalytics:
+      results[4].status === 'fulfilled' ? results[4].value : null,
+    funnelAnalytics:
+      results[5].status === 'fulfilled' ? results[5].value : null,
+    conversionAnalytics:
+      results[6].status === 'fulfilled' ? results[6].value : null,
     errors: results
-      .filter(r => r.status === 'rejected')
-      .map((r, i) => ({ metric: ['form', 'cta', 'scroll', 'engagement', 'referrer', 'funnel', 'conversion'][i], error: r.reason }))
+      .filter((r) => r.status === 'rejected')
+      .map((r, i) => ({
+        metric: [
+          'form',
+          'cta',
+          'scroll',
+          'engagement',
+          'referrer',
+          'funnel',
+          'conversion',
+        ][i],
+        error: r.reason,
+      })),
   }
 }
 
-async function getSpecificMetric(metric: string, startDate: Date, endDate: Date) {
+async function getSpecificMetric(
+  metric: string,
+  startDate: Date,
+  endDate: Date
+) {
   switch (metric) {
     case 'forms':
       return getFormAnalytics(startDate, endDate)
@@ -134,14 +153,17 @@ async function getFormAnalytics(startDate: Date, endDate: Date) {
     averageTimePerField: number
     dropOffByStep: Record<string, number>
     mostProblematicFields: Array<{ field: string; errors: number }>
-    formPerformance: Record<string, {
-      completionRate: number
-      averageTimeSpent: number
-      dropOffStep: any
-      totalAttempts: number
-      completions: number
-      abandonments: number
-    }>
+    formPerformance: Record<
+      string,
+      {
+        completionRate: number
+        averageTimeSpent: number
+        dropOffStep: any
+        totalAttempts: number
+        completions: number
+        abandonments: number
+      }
+    >
   } = {
     totalInteractions: interactions?.length || 0,
     totalAbandonments: abandonments?.length || 0,
@@ -149,7 +171,7 @@ async function getFormAnalytics(startDate: Date, endDate: Date) {
     averageTimePerField: 0,
     dropOffByStep: {},
     mostProblematicFields: [],
-    formPerformance: {}
+    formPerformance: {},
   }
 
   if (interactions && interactions.length > 0) {
@@ -160,21 +182,24 @@ async function getFormAnalytics(startDate: Date, endDate: Date) {
         acc[formId] = {
           interactions: [],
           completions: 0,
-          abandonments: 0
+          abandonments: 0,
         }
       }
       acc[formId].interactions.push(interaction)
-      
-      if (interaction.properties?.action === 'submit' && 
-          interaction.properties?.step_number === interaction.properties?.total_steps) {
+
+      if (
+        interaction.properties?.action === 'submit' &&
+        interaction.properties?.step_number ===
+          interaction.properties?.total_steps
+      ) {
         acc[formId].completions++
       }
-      
+
       return acc
     }, {})
 
     // Add abandonment data
-    abandonments?.forEach(abandonment => {
+    abandonments?.forEach((abandonment) => {
       const formId = abandonment.properties?.form_id
       if (formGroups[formId]) {
         formGroups[formId].abandonments++
@@ -183,32 +208,43 @@ async function getFormAnalytics(startDate: Date, endDate: Date) {
 
     // Calculate metrics per form
     Object.entries(formGroups).forEach(([formId, data]: [string, any]) => {
-      const totalAttempts = new Set(data.interactions.map((i: any) => i.visitor_id)).size
+      const totalAttempts = new Set(
+        data.interactions.map((i: any) => i.visitor_id)
+      ).size
       formMetrics.formPerformance[formId] = {
-        completionRate: totalAttempts > 0 ? (data.completions / totalAttempts) * 100 : 0,
-        averageTimeSpent: data.interactions.reduce((sum: number, i: any) => 
-          sum + (i.properties?.time_spent || 0), 0) / data.interactions.length,
+        completionRate:
+          totalAttempts > 0 ? (data.completions / totalAttempts) * 100 : 0,
+        averageTimeSpent:
+          data.interactions.reduce(
+            (sum: number, i: any) => sum + (i.properties?.time_spent || 0),
+            0
+          ) / data.interactions.length,
         dropOffStep: calculateDropOffStep(data.interactions),
         totalAttempts,
         completions: data.completions,
-        abandonments: data.abandonments
+        abandonments: data.abandonments,
       }
     })
 
     // Overall metrics
-    const totalAttempts = new Set(interactions.map(i => i.visitor_id)).size
-    const totalCompletions = interactions.filter(i => 
-      i.properties?.action === 'submit' && 
-      i.properties?.step_number === i.properties?.total_steps
+    const totalAttempts = new Set(interactions.map((i) => i.visitor_id)).size
+    const totalCompletions = interactions.filter(
+      (i) =>
+        i.properties?.action === 'submit' &&
+        i.properties?.step_number === i.properties?.total_steps
     ).length
 
-    formMetrics.completionRate = totalAttempts > 0 ? (totalCompletions / totalAttempts) * 100 : 0
-    formMetrics.averageTimePerField = interactions.reduce((sum, i) => 
-      sum + (i.properties?.time_spent || 0), 0) / interactions.length
+    formMetrics.completionRate =
+      totalAttempts > 0 ? (totalCompletions / totalAttempts) * 100 : 0
+    formMetrics.averageTimePerField =
+      interactions.reduce(
+        (sum, i) => sum + (i.properties?.time_spent || 0),
+        0
+      ) / interactions.length
 
     // Calculate most problematic fields (highest error rates)
     const fieldErrors = interactions
-      .filter(i => i.properties?.has_errors)
+      .filter((i) => i.properties?.has_errors)
       .reduce((acc, interaction) => {
         const fieldName = interaction.properties?.field_name
         acc[fieldName] = (acc[fieldName] || 0) + 1
@@ -216,7 +252,7 @@ async function getFormAnalytics(startDate: Date, endDate: Date) {
       }, {})
 
     formMetrics.mostProblematicFields = Object.entries(fieldErrors)
-      .sort(([,a], [,b]) => (b as number) - (a as number))
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 5)
       .map(([field, errors]) => ({ field, errors: errors as number }))
   }
@@ -250,7 +286,7 @@ async function getCTAAnalytics(startDate: Date, endDate: Date) {
     clicksByPosition: {},
     clicksByType: {},
     topPerformingCTAs: [],
-    conversionRates: {}
+    conversionRates: {},
   }
 
   if (ctaClicks && ctaClicks.length > 0) {
@@ -276,13 +312,15 @@ async function getCTAAnalytics(startDate: Date, endDate: Date) {
           clicks: 0,
           uniqueUsers: new Set(),
           positions: new Set(),
-          destinations: new Set()
+          destinations: new Set(),
         }
       }
       acc[ctaText].clicks++
       acc[ctaText].uniqueUsers.add(click.visitor_id)
-      if (click.properties?.cta_position) acc[ctaText].positions.add(click.properties.cta_position)
-      if (click.properties?.destination) acc[ctaText].destinations.add(click.properties.destination)
+      if (click.properties?.cta_position)
+        acc[ctaText].positions.add(click.properties.cta_position)
+      if (click.properties?.destination)
+        acc[ctaText].destinations.add(click.properties.destination)
       return acc
     }, {})
 
@@ -291,9 +329,10 @@ async function getCTAAnalytics(startDate: Date, endDate: Date) {
         text,
         clicks: data.clicks as number,
         uniqueUsers: data.uniqueUsers.size as number,
-        clickThroughRate: (data.uniqueUsers.size as number) / (data.clicks as number),
+        clickThroughRate:
+          (data.uniqueUsers.size as number) / (data.clicks as number),
         positions: Array.from(data.positions) as string[],
-        destinations: Array.from(data.destinations) as string[]
+        destinations: Array.from(data.destinations) as string[],
       }))
       .sort((a, b) => b.clicks - a.clicks)
       .slice(0, 10)
@@ -315,13 +354,15 @@ async function getScrollDepthAnalytics(startDate: Date, endDate: Date) {
     scrollDistribution: {},
     bounceRate: 0,
     engagementByDepth: {},
-    pagePerformance: {}
+    pagePerformance: {},
   }
 
   if (scrollEvents && scrollEvents.length > 0) {
     // Calculate average scroll depth
-    const totalDepth = scrollEvents.reduce((sum, event) => 
-      sum + (event.properties?.depth_percentage || 0), 0)
+    const totalDepth = scrollEvents.reduce(
+      (sum, event) => sum + (event.properties?.depth_percentage || 0),
+      0
+    )
     scrollMetrics.averageScrollDepth = totalDepth / scrollEvents.length
 
     // Scroll distribution by milestones
@@ -333,14 +374,12 @@ async function getScrollDepthAnalytics(startDate: Date, endDate: Date) {
     }, {})
 
     // Bounce rate (users who scrolled less than 25%)
-    const uniqueUsers = new Set(scrollEvents.map(e => e.visitor_id))
+    const uniqueUsers = new Set(scrollEvents.map((e) => e.visitor_id))
     const bouncedUsers = new Set(
-      scrollEvents
-        .filter(e => e.properties?.bounced)
-        .map(e => e.visitor_id)
+      scrollEvents.filter((e) => e.properties?.bounced).map((e) => e.visitor_id)
     )
-    scrollMetrics.bounceRate = uniqueUsers.size > 0 ? 
-      (bouncedUsers.size / uniqueUsers.size) * 100 : 0
+    scrollMetrics.bounceRate =
+      uniqueUsers.size > 0 ? (bouncedUsers.size / uniqueUsers.size) * 100 : 0
 
     // Engagement by scroll depth
     const depthGroups = scrollEvents.reduce((acc, event) => {
@@ -349,11 +388,11 @@ async function getScrollDepthAnalytics(startDate: Date, endDate: Date) {
         acc[depth] = {
           users: new Set(),
           totalTime: 0,
-          engagementScores: []
+          engagementScores: [],
         }
       }
       acc[depth].users.add(event.visitor_id)
-      acc[depth].totalTime += (event.properties?.time_to_reach || 0)
+      acc[depth].totalTime += event.properties?.time_to_reach || 0
       if (event.properties?.engagement_score) {
         acc[depth].engagementScores.push(event.properties.engagement_score)
       }
@@ -365,8 +404,13 @@ async function getScrollDepthAnalytics(startDate: Date, endDate: Date) {
         depth: parseInt(depth),
         uniqueUsers: data.users.size,
         averageTimeToReach: data.totalTime / data.users.size,
-        averageEngagementScore: data.engagementScores.length > 0 ? 
-          data.engagementScores.reduce((sum: number, score: number) => sum + score, 0) / data.engagementScores.length : 0
+        averageEngagementScore:
+          data.engagementScores.length > 0
+            ? data.engagementScores.reduce(
+                (sum: number, score: number) => sum + score,
+                0
+              ) / data.engagementScores.length
+            : 0,
       }))
       .sort((a, b) => a.depth - b.depth)
   }
@@ -383,12 +427,20 @@ async function getEngagementAnalytics(startDate: Date, endDate: Date) {
     .lte('created_at', endDate.toISOString())
 
   return {
-    averageSessionTime: engagementEvents?.reduce((sum, event) => 
-      sum + (event.properties?.active_time || 0), 0) / (engagementEvents?.length || 1),
-    averageInteractions: engagementEvents?.reduce((sum, event) => 
-      sum + (event.properties?.interactions || 0), 0) / (engagementEvents?.length || 1),
-    engagementDistribution: calculateEngagementDistribution(engagementEvents || []),
-    bounceScore: calculateAverageBounceScore(engagementEvents || [])
+    averageSessionTime:
+      engagementEvents?.reduce(
+        (sum, event) => sum + (event.properties?.active_time || 0),
+        0
+      ) / (engagementEvents?.length || 1),
+    averageInteractions:
+      engagementEvents?.reduce(
+        (sum, event) => sum + (event.properties?.interactions || 0),
+        0
+      ) / (engagementEvents?.length || 1),
+    engagementDistribution: calculateEngagementDistribution(
+      engagementEvents || []
+    ),
+    bounceScore: calculateAverageBounceScore(engagementEvents || []),
   }
 }
 
@@ -403,7 +455,7 @@ async function getReferrerAnalytics(startDate: Date, endDate: Date) {
   return {
     topSources: calculateTopSources(referrerEvents || []),
     campaignPerformance: calculateCampaignPerformance(referrerEvents || []),
-    channelDistribution: calculateChannelDistribution(referrerEvents || [])
+    channelDistribution: calculateChannelDistribution(referrerEvents || []),
   }
 }
 
@@ -418,7 +470,7 @@ async function getFunnelAnalytics(startDate: Date, endDate: Date) {
   return {
     funnelPerformance: calculateFunnelPerformance(funnelEvents || []),
     dropOffAnalysis: calculateDropOffAnalysis(funnelEvents || []),
-    conversionTimes: calculateConversionTimes(funnelEvents || [])
+    conversionTimes: calculateConversionTimes(funnelEvents || []),
   }
 }
 
@@ -434,7 +486,7 @@ async function getConversionAnalytics(startDate: Date, endDate: Date) {
     totalConversions: conversions?.length || 0,
     conversionRate: await calculateConversionRate(startDate, endDate),
     conversionsBySource: calculateConversionsBySource(conversions || []),
-    timeToConversion: calculateTimeToConversion(conversions || [])
+    timeToConversion: calculateTimeToConversion(conversions || []),
   }
 }
 
@@ -454,7 +506,7 @@ function calculateDropOffStep(interactions: any[]) {
     const currentStep = steps[i]
     const nextStep = steps[i + 1]
     const dropOff = stepGroups[currentStep] - stepGroups[nextStep]
-    
+
     if (dropOff > maxDropOff) {
       maxDropOff = dropOff
       dropOffStep = currentStep
@@ -475,8 +527,12 @@ function calculateEngagementDistribution(events: any[]) {
 
 function calculateAverageBounceScore(events: any[]) {
   if (events.length === 0) return 0
-  return events.reduce((sum, event) => 
-    sum + (event.properties?.bounce_probability || 0), 0) / events.length
+  return (
+    events.reduce(
+      (sum, event) => sum + (event.properties?.bounce_probability || 0),
+      0
+    ) / events.length
+  )
 }
 
 function getTimeBucket(timeMs: number) {
@@ -497,7 +553,7 @@ function calculateTopSources(events: any[]) {
 
 function calculateCampaignPerformance(events: any[]) {
   return events
-    .filter(event => event.properties?.utm_campaign)
+    .filter((event) => event.properties?.utm_campaign)
     .reduce((acc, event) => {
       const campaign = event.properties.utm_campaign
       if (!acc[campaign]) {
@@ -523,11 +579,11 @@ function calculateFunnelPerformance(events: any[]) {
     if (!acc[funnelName]) {
       acc[funnelName] = { steps: {}, users: new Set() }
     }
-    
+
     const step = event.properties?.step_number || 1
     acc[funnelName].steps[step] = (acc[funnelName].steps[step] || 0) + 1
     acc[funnelName].users.add(event.visitor_id)
-    
+
     return acc
   }, {})
 
@@ -535,7 +591,7 @@ function calculateFunnelPerformance(events: any[]) {
     name,
     totalUsers: data.users.size,
     stepPerformance: data.steps,
-    overallConversionRate: calculateOverallConversionRate(data.steps)
+    overallConversionRate: calculateOverallConversionRate(data.steps),
   }))
 }
 
@@ -565,8 +621,9 @@ async function calculateConversionRate(startDate: Date, endDate: Date) {
     .gte('created_at', startDate.toISOString())
     .lte('created_at', endDate.toISOString())
 
-  return totalVisitors && totalVisitors > 0 ? 
-    ((totalConversions || 0) / totalVisitors) * 100 : 0
+  return totalVisitors && totalVisitors > 0
+    ? ((totalConversions || 0) / totalVisitors) * 100
+    : 0
 }
 
 function calculateConversionsBySource(conversions: any[]) {
@@ -585,9 +642,9 @@ function calculateTimeToConversion(_conversions: any[]) {
 function calculateOverallConversionRate(steps: Record<string, number>) {
   const stepNumbers = Object.keys(steps).map(Number).sort()
   if (stepNumbers.length < 2) return 0
-  
+
   const firstStep = steps[stepNumbers[0]]
   const lastStep = steps[stepNumbers[stepNumbers.length - 1]]
-  
+
   return firstStep > 0 ? (lastStep / firstStep) * 100 : 0
 }

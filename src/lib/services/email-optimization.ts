@@ -67,7 +67,6 @@ export interface OptimalSendTimeAnalysis {
 }
 
 export class EmailOptimizationService {
-  
   /**
    * Create A/B test for email campaigns
    */
@@ -77,27 +76,29 @@ export class EmailOptimizationService {
   }> {
     try {
       const testId = `ab-test-${Date.now()}`
-      
+
       if (!supabaseAdmin) {
         throw new Error('Database not available')
       }
 
       // Store A/B test configuration
-      const { error } = await (supabaseAdmin?.from('ab_tests') as any)?.insert([{
-        test_id: testId,
-        campaign_id: config.campaign_id,
-        test_name: config.test_name,
-        test_type: config.test_type,
-        variant_a: config.variant_a,
-        variant_b: config.variant_b,
-        split_percentage: config.split_percentage,
-        sample_size: config.sample_size,
-        duration_hours: config.duration_hours,
-        success_metric: config.success_metric,
-        confidence_level: config.confidence_level,
-        status: 'running',
-        start_date: new Date().toISOString()
-      }])
+      const { error } = await (supabaseAdmin?.from('ab_tests') as any)?.insert([
+        {
+          test_id: testId,
+          campaign_id: config.campaign_id,
+          test_name: config.test_name,
+          test_type: config.test_type,
+          variant_a: config.variant_a,
+          variant_b: config.variant_b,
+          split_percentage: config.split_percentage,
+          sample_size: config.sample_size,
+          duration_hours: config.duration_hours,
+          success_metric: config.success_metric,
+          confidence_level: config.confidence_level,
+          status: 'running',
+          start_date: new Date().toISOString(),
+        },
+      ])
 
       if (error) {
         return { test_id: '', error: error.message }
@@ -145,10 +146,10 @@ export class EmailOptimizationService {
 
       // Calculate results for each variant
       const variantAResults = this.calculateVariantResults(
-        (events as any[])?.filter(e => e.metadata?.ab_variant === 'a') || []
+        (events as any[])?.filter((e) => e.metadata?.ab_variant === 'a') || []
       )
       const variantBResults = this.calculateVariantResults(
-        (events as any[])?.filter(e => e.metadata?.ab_variant === 'b') || []
+        (events as any[])?.filter((e) => e.metadata?.ab_variant === 'b') || []
       )
 
       // Determine statistical significance and winner
@@ -177,7 +178,7 @@ export class EmailOptimizationService {
         variant_b_results: variantBResults,
         winner: winner as 'variant_a' | 'variant_b' | 'inconclusive',
         statistical_significance: significance,
-        recommendations
+        recommendations,
       }
 
       return { results, error: null }
@@ -190,13 +191,11 @@ export class EmailOptimizationService {
   /**
    * Analyze optimal send times for different user segments
    */
-  static async analyzeOptimalSendTimes(
-    segmentFilter?: {
-      engagement_level?: 'high' | 'medium' | 'low'
-      team_size?: string[]
-      signup_age_days?: number
-    }
-  ): Promise<{
+  static async analyzeOptimalSendTimes(segmentFilter?: {
+    engagement_level?: 'high' | 'medium' | 'low'
+    team_size?: string[]
+    signup_age_days?: number
+  }): Promise<{
     analysis: OptimalSendTimeAnalysis[]
     error: string | null
   }> {
@@ -211,10 +210,12 @@ export class EmailOptimizationService {
 
       const { data: events, error } = await supabaseAdmin
         .from('email_events')
-        .select(`
+        .select(
+          `
           *,
           beta_signups!inner(*)
-        `)
+        `
+        )
         .gte('timestamp', ninetyDaysAgo.toISOString())
         .in('event_type', ['opened', 'clicked'])
 
@@ -223,16 +224,21 @@ export class EmailOptimizationService {
       }
 
       // Group events by user segments and time patterns
-      const timeAnalysis = this.groupEventsByTimeAndSegment(events, segmentFilter)
-      
+      const timeAnalysis = this.groupEventsByTimeAndSegment(
+        events,
+        segmentFilter
+      )
+
       // Calculate optimal send times for each segment
-      const analysis = timeAnalysis.map(segment => {
+      const analysis = timeAnalysis.map((segment) => {
         const recommendedTimes = this.calculateOptimalTimes(segment.events)
         return {
           user_segment: segment.name,
           recommended_times: recommendedTimes,
           timezone: 'UTC', // Could be enhanced to detect user timezones
-          confidence_score: this.calculateConfidenceScore(segment.events.length)
+          confidence_score: this.calculateConfidenceScore(
+            segment.events.length
+          ),
         }
       })
 
@@ -286,7 +292,8 @@ export class EmailOptimizationService {
         throw new Error('Database not available')
       }
 
-      const timeframeDays = timeframe === 'week' ? 7 : timeframe === 'month' ? 30 : 90
+      const timeframeDays =
+        timeframe === 'week' ? 7 : timeframe === 'month' ? 30 : 90
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - timeframeDays)
 
@@ -297,83 +304,130 @@ export class EmailOptimizationService {
         .gte('timestamp', startDate.toISOString())
 
       if (error || !events) {
-        return { 
+        return {
           analytics: {
             overall_rates: { open_rate: 0, click_rate: 0, unsubscribe_rate: 0 },
             by_campaign_type: [],
             by_day_of_week: [],
             by_hour: [],
-            trends: { open_rate_trend: 0, click_rate_trend: 0, growth_rate: 0 }
-          }, 
-          error: 'Failed to fetch analytics data' 
+            trends: { open_rate_trend: 0, click_rate_trend: 0, growth_rate: 0 },
+          },
+          error: 'Failed to fetch analytics data',
         }
       }
 
       // Calculate overall rates
-      const sentEvents = (events as any[]).filter(e => e.event_type === 'sent')
-      const openedEvents = (events as any[]).filter(e => e.event_type === 'opened')
-      const clickedEvents = (events as any[]).filter(e => e.event_type === 'clicked')
-      const unsubscribeEvents = (events as any[]).filter(e => e.event_type === 'unsubscribe')
+      const sentEvents = (events as any[]).filter(
+        (e) => e.event_type === 'sent'
+      )
+      const openedEvents = (events as any[]).filter(
+        (e) => e.event_type === 'opened'
+      )
+      const clickedEvents = (events as any[]).filter(
+        (e) => e.event_type === 'clicked'
+      )
+      const unsubscribeEvents = (events as any[]).filter(
+        (e) => e.event_type === 'unsubscribe'
+      )
 
       const overallRates = {
-        open_rate: sentEvents.length > 0 ? (openedEvents.length / sentEvents.length) * 100 : 0,
-        click_rate: sentEvents.length > 0 ? (clickedEvents.length / sentEvents.length) * 100 : 0,
-        unsubscribe_rate: sentEvents.length > 0 ? (unsubscribeEvents.length / sentEvents.length) * 100 : 0
+        open_rate:
+          sentEvents.length > 0
+            ? (openedEvents.length / sentEvents.length) * 100
+            : 0,
+        click_rate:
+          sentEvents.length > 0
+            ? (clickedEvents.length / sentEvents.length) * 100
+            : 0,
+        unsubscribe_rate:
+          sentEvents.length > 0
+            ? (unsubscribeEvents.length / sentEvents.length) * 100
+            : 0,
       }
 
       // Group by campaign type
-      const campaignTypes = [...new Set((events as any[]).map(e => e.email_type).filter(Boolean))]
-      const byCampaignType = campaignTypes.map(type => {
-        const typeEvents = (events as any[]).filter(e => e.email_type === type)
-        const typeSent = typeEvents.filter(e => e.event_type === 'sent')
-        const typeOpened = typeEvents.filter(e => e.event_type === 'opened')
-        const typeClicked = typeEvents.filter(e => e.event_type === 'clicked')
+      const campaignTypes = [
+        ...new Set((events as any[]).map((e) => e.email_type).filter(Boolean)),
+      ]
+      const byCampaignType = campaignTypes.map((type) => {
+        const typeEvents = (events as any[]).filter(
+          (e) => e.email_type === type
+        )
+        const typeSent = typeEvents.filter((e) => e.event_type === 'sent')
+        const typeOpened = typeEvents.filter((e) => e.event_type === 'opened')
+        const typeClicked = typeEvents.filter((e) => e.event_type === 'clicked')
 
         return {
           type,
-          open_rate: typeSent.length > 0 ? (typeOpened.length / typeSent.length) * 100 : 0,
-          click_rate: typeSent.length > 0 ? (typeClicked.length / typeSent.length) * 100 : 0,
-          send_count: typeSent.length
+          open_rate:
+            typeSent.length > 0
+              ? (typeOpened.length / typeSent.length) * 100
+              : 0,
+          click_rate:
+            typeSent.length > 0
+              ? (typeClicked.length / typeSent.length) * 100
+              : 0,
+          send_count: typeSent.length,
         }
       })
 
       // Group by day of week
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const byDayOfWeek = dayNames.map(dayName => {
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ]
+      const byDayOfWeek = dayNames.map((dayName) => {
         const dayIndex = dayNames.indexOf(dayName)
-        const dayEvents = (events as any[]).filter(e => new Date(e.timestamp).getDay() === dayIndex)
-        const daySent = dayEvents.filter(e => e.event_type === 'sent')
-        const dayOpened = dayEvents.filter(e => e.event_type === 'opened')
-        const dayClicked = dayEvents.filter(e => e.event_type === 'clicked')
+        const dayEvents = (events as any[]).filter(
+          (e) => new Date(e.timestamp).getDay() === dayIndex
+        )
+        const daySent = dayEvents.filter((e) => e.event_type === 'sent')
+        const dayOpened = dayEvents.filter((e) => e.event_type === 'opened')
+        const dayClicked = dayEvents.filter((e) => e.event_type === 'clicked')
 
         return {
           day: dayName,
-          open_rate: daySent.length > 0 ? (dayOpened.length / daySent.length) * 100 : 0,
-          click_rate: daySent.length > 0 ? (dayClicked.length / daySent.length) * 100 : 0,
-          send_count: daySent.length
+          open_rate:
+            daySent.length > 0 ? (dayOpened.length / daySent.length) * 100 : 0,
+          click_rate:
+            daySent.length > 0 ? (dayClicked.length / daySent.length) * 100 : 0,
+          send_count: daySent.length,
         }
       })
 
       // Group by hour of day
       const byHour = Array.from({ length: 24 }, (_, hour) => {
-        const hourEvents = (events as any[]).filter(e => new Date(e.timestamp).getHours() === hour)
-        const hourSent = hourEvents.filter(e => e.event_type === 'sent')
-        const hourOpened = hourEvents.filter(e => e.event_type === 'opened')
-        const hourClicked = hourEvents.filter(e => e.event_type === 'clicked')
+        const hourEvents = (events as any[]).filter(
+          (e) => new Date(e.timestamp).getHours() === hour
+        )
+        const hourSent = hourEvents.filter((e) => e.event_type === 'sent')
+        const hourOpened = hourEvents.filter((e) => e.event_type === 'opened')
+        const hourClicked = hourEvents.filter((e) => e.event_type === 'clicked')
 
         return {
           hour,
-          open_rate: hourSent.length > 0 ? (hourOpened.length / hourSent.length) * 100 : 0,
-          click_rate: hourSent.length > 0 ? (hourClicked.length / hourSent.length) * 100 : 0,
-          send_count: hourSent.length
+          open_rate:
+            hourSent.length > 0
+              ? (hourOpened.length / hourSent.length) * 100
+              : 0,
+          click_rate:
+            hourSent.length > 0
+              ? (hourClicked.length / hourSent.length) * 100
+              : 0,
+          send_count: hourSent.length,
         }
       })
 
       // Calculate trends (simplified - comparing to previous period)
       const trends = {
         open_rate_trend: 0, // Would need historical data
-        click_rate_trend: 0, // Would need historical data  
-        growth_rate: 0 // Would calculate based on new signups
+        click_rate_trend: 0, // Would need historical data
+        growth_rate: 0, // Would calculate based on new signups
       }
 
       return {
@@ -382,30 +436,30 @@ export class EmailOptimizationService {
           by_campaign_type: byCampaignType,
           by_day_of_week: byDayOfWeek,
           by_hour: byHour,
-          trends
+          trends,
         },
-        error: null
+        error: null,
       }
     } catch (err) {
       console.error('Error getting engagement analytics:', err)
-      return { 
+      return {
         analytics: {
           overall_rates: { open_rate: 0, click_rate: 0, unsubscribe_rate: 0 },
           by_campaign_type: [],
           by_day_of_week: [],
           by_hour: [],
-          trends: { open_rate_trend: 0, click_rate_trend: 0, growth_rate: 0 }
-        }, 
-        error: 'Failed to calculate analytics' 
+          trends: { open_rate_trend: 0, click_rate_trend: 0, growth_rate: 0 },
+        },
+        error: 'Failed to calculate analytics',
       }
     }
   }
 
   // Private helper methods
   private static calculateVariantResults(events: EmailEvent[]) {
-    const sent = events.filter(e => e.event_type === 'sent').length
-    const opened = events.filter(e => e.event_type === 'opened').length
-    const clicked = events.filter(e => e.event_type === 'clicked').length
+    const sent = events.filter((e) => e.event_type === 'sent').length
+    const opened = events.filter((e) => e.event_type === 'opened').length
+    const clicked = events.filter((e) => e.event_type === 'clicked').length
     const converted = 0 // Would need conversion tracking
 
     return {
@@ -415,7 +469,7 @@ export class EmailOptimizationService {
       converted,
       open_rate: sent > 0 ? (opened / sent) * 100 : 0,
       click_rate: sent > 0 ? (clicked / sent) * 100 : 0,
-      conversion_rate: sent > 0 ? (converted / sent) * 100 : 0
+      conversion_rate: sent > 0 ? (converted / sent) * 100 : 0,
     }
   }
 
@@ -429,23 +483,30 @@ export class EmailOptimizationService {
     // In production, use proper statistical methods like Chi-square test
     const getMetricValue = (variant: any, metric: string) => {
       switch (metric) {
-        case 'open_rate': return variant.open_rate
-        case 'click_rate': return variant.click_rate
-        case 'conversion_rate': return variant.conversion_rate
-        default: return 0
+        case 'open_rate':
+          return variant.open_rate
+        case 'click_rate':
+          return variant.click_rate
+        case 'conversion_rate':
+          return variant.conversion_rate
+        default:
+          return 0
       }
     }
 
     const valueA = getMetricValue(variantA, metric)
     const valueB = getMetricValue(variantB, metric)
     const difference = Math.abs(valueA - valueB)
-    
+
     // Simplified significance calculation (would use proper statistical test in production)
     const significance = Math.min(difference * 10, 99) // Placeholder calculation
 
-    const winner = significance >= (100 - confidenceLevel) 
-      ? (valueA > valueB ? 'variant_a' : 'variant_b')
-      : 'inconclusive'
+    const winner =
+      significance >= 100 - confidenceLevel
+        ? valueA > valueB
+          ? 'variant_a'
+          : 'variant_b'
+        : 'inconclusive'
 
     return { winner, significance }
   }
@@ -460,40 +521,58 @@ export class EmailOptimizationService {
     const recommendations: string[] = []
 
     if (winner === 'inconclusive') {
-      recommendations.push('Test is inconclusive. Consider running longer or with a larger sample size.')
+      recommendations.push(
+        'Test is inconclusive. Consider running longer or with a larger sample size.'
+      )
     } else if (winner === 'variant_a') {
-      recommendations.push('Variant A performed better. Consider implementing these changes.')
+      recommendations.push(
+        'Variant A performed better. Consider implementing these changes.'
+      )
     } else {
-      recommendations.push('Variant B performed better. Consider implementing these changes.')
+      recommendations.push(
+        'Variant B performed better. Consider implementing these changes.'
+      )
     }
 
     // Add specific recommendations based on test type
     if (testConfig.test_type === 'subject_line') {
       if (variantA.open_rate > variantB.open_rate) {
-        recommendations.push('Consider using more engaging subject lines similar to Variant A.')
+        recommendations.push(
+          'Consider using more engaging subject lines similar to Variant A.'
+        )
       }
     }
 
     if (significance < 95) {
-      recommendations.push('Statistical significance is low. Results may not be reliable.')
+      recommendations.push(
+        'Statistical significance is low. Results may not be reliable.'
+      )
     }
 
     return recommendations
   }
 
-  private static groupEventsByTimeAndSegment(events: any[], _segmentFilter?: any) {
+  private static groupEventsByTimeAndSegment(
+    events: any[],
+    _segmentFilter?: any
+  ) {
     // Simplified segmentation - would be more sophisticated in production
-    return [{
-      name: 'all_users',
-      events: events
-    }]
+    return [
+      {
+        name: 'all_users',
+        events: events,
+      },
+    ]
   }
 
   private static calculateOptimalTimes(events: any[]) {
     // Group events by hour and day of week, calculate engagement rates
-    const timeSlots: Record<string, { opens: number, clicks: number, total: number }> = {}
+    const timeSlots: Record<
+      string,
+      { opens: number; clicks: number; total: number }
+    > = {}
 
-    events.forEach(event => {
+    events.forEach((event) => {
       const date = new Date(event.timestamp)
       const hour = date.getHours()
       const dayOfWeek = date.getDay()
@@ -517,10 +596,10 @@ export class EmailOptimizationService {
           day_of_week: dayOfWeek,
           open_rate: stats.total > 0 ? (stats.opens / stats.total) * 100 : 0,
           click_rate: stats.total > 0 ? (stats.clicks / stats.total) * 100 : 0,
-          sample_size: stats.total
+          sample_size: stats.total,
         }
       })
-      .filter(time => time.sample_size >= 10) // Only include times with sufficient data
+      .filter((time) => time.sample_size >= 10) // Only include times with sufficient data
       .sort((a, b) => b.open_rate - a.open_rate)
       .slice(0, 5) // Top 5 times
   }

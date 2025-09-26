@@ -1,7 +1,7 @@
 /**
  * Error Monitoring Initialization
  * Phase 6: Performance Monitoring - Error Handling System Setup
- * 
+ *
  * Initializes error tracking, performance monitoring, and recovery systems
  */
 
@@ -23,7 +23,7 @@ export function ErrorMonitoringProvider({
   enablePerformanceMonitoring = true,
   enableWebVitalsTracking = true,
   enableMemoryMonitoring = true,
-  enableBundleMonitoring = true
+  enableBundleMonitoring = true,
 }: ErrorMonitoringProviderProps) {
   useEffect(() => {
     // Initialize error monitoring only on client side
@@ -36,11 +36,11 @@ export function ErrorMonitoringProvider({
       if (enableWebVitalsTracking) {
         PerformanceMonitor.monitorWebVitals()
       }
-      
+
       if (enableMemoryMonitoring) {
         PerformanceMonitor.monitorMemoryUsage()
       }
-      
+
       if (enableBundleMonitoring) {
         PerformanceMonitor.monitorBundlePerformance()
       }
@@ -72,7 +72,12 @@ export function ErrorMonitoringProvider({
       clearInterval(statsInterval)
       console.log('🛑 Error monitoring cleanup completed')
     }
-  }, [enablePerformanceMonitoring, enableWebVitalsTracking, enableMemoryMonitoring, enableBundleMonitoring])
+  }, [
+    enablePerformanceMonitoring,
+    enableWebVitalsTracking,
+    enableMemoryMonitoring,
+    enableBundleMonitoring,
+  ])
 
   return <>{children}</>
 }
@@ -82,15 +87,15 @@ export function ErrorMonitoringProvider({
  */
 export function useErrorMonitoringStats() {
   const [stats, setStats] = React.useState(() => errorTracker.getErrorStats())
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       setStats(errorTracker.getErrorStats())
     }, 5000)
-    
+
     return () => clearInterval(interval)
   }, [])
-  
+
   return stats
 }
 
@@ -105,7 +110,7 @@ export function ErrorTestingWidget() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key === 'E') {
-        setIsVisible(prev => !prev)
+        setIsVisible((prev) => !prev)
       }
     }
 
@@ -135,10 +140,9 @@ export function ErrorTestingWidget() {
   }
 
   const triggerComponentError = () => {
-    errorTracker.captureComponentError(
-      new Error('Test component error'),
-      { componentStack: 'ErrorTestingWidget > TestButton' }
-    )
+    errorTracker.captureComponentError(new Error('Test component error'), {
+      componentStack: 'ErrorTestingWidget > TestButton',
+    })
   }
 
   if (!isVisible) {
@@ -213,8 +217,9 @@ export function ErrorMonitoringStatusIndicator() {
         <div className="text-sm">
           {stats.queuedErrors > 0 && `${stats.queuedErrors} errors`}
           {stats.queuedErrors > 0 && stats.queuedPerformanceIssues > 0 && ', '}
-          {stats.queuedPerformanceIssues > 0 && `${stats.queuedPerformanceIssues} perf issues`}
-          {' '}pending
+          {stats.queuedPerformanceIssues > 0 &&
+            `${stats.queuedPerformanceIssues} perf issues`}{' '}
+          pending
         </div>
       </div>
       <div className="text-xs text-amber-600 mt-1">

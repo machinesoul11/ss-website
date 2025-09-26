@@ -8,11 +8,11 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Container } from '@/components/layout/containers'
-import { 
-  EnhancedButton, 
+import {
+  EnhancedButton,
   ScrollDepthTracker,
   ConversionFunnelStep,
-  useEnhancedAnalyticsContext
+  useEnhancedAnalyticsContext,
 } from '@/components/analytics'
 // import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,26 +24,26 @@ export default function AnalyticsDemo() {
 
   const handleEmailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
-    
+
     // Track form interaction with enhanced analytics
     await trackFormInteraction({
       formId: 'analytics_demo',
       fieldName: 'email',
       action: 'change',
-      value: e.target.value
+      value: e.target.value,
     })
   }
 
   const handleSubmit = async () => {
     setIsSubmitted(true)
-    
+
     // Track form completion
     await trackFormInteraction({
       formId: 'analytics_demo',
       fieldName: 'submit',
       action: 'submit',
       stepNumber: 1,
-      totalSteps: 1
+      totalSteps: 1,
     })
   }
 
@@ -53,7 +53,7 @@ export default function AnalyticsDemo() {
       ctaPosition: position as any,
       ctaType: 'primary',
       page: '/demo/analytics',
-      section: 'demo'
+      section: 'demo',
     })
   }
 
@@ -77,8 +77,8 @@ export default function AnalyticsDemo() {
                   Enhanced Analytics Demo
                 </h1>
                 <p className="text-lg text-text-gray max-w-2xl mx-auto">
-                  This page demonstrates Phase 6 custom event tracking. Every interaction 
-                  is being tracked with detailed analytics data.
+                  This page demonstrates Phase 6 custom event tracking. Every
+                  interaction is being tracked with detailed analytics data.
                 </p>
               </motion.div>
 
@@ -95,10 +95,10 @@ export default function AnalyticsDemo() {
                     CTA Click Tracking
                   </h2>
                   <p className="text-text-gray mb-6">
-                    These buttons track detailed click analytics including position, 
-                    type, user flow, and conversion data.
+                    These buttons track detailed click analytics including
+                    position, type, user flow, and conversion data.
                   </p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <EnhancedButton
                       onClick={() => handleCTAClick('Hero CTA', 'hero')}
@@ -156,14 +156,18 @@ export default function AnalyticsDemo() {
                       Form Interaction Tracking
                     </h2>
                     <p className="text-text-gray mb-6">
-                      This form tracks detailed interactions including focus time, 
-                      field changes, validation errors, and completion rates.
+                      This form tracks detailed interactions including focus
+                      time, field changes, validation errors, and completion
+                      rates.
                     </p>
 
                     {!isSubmitted ? (
                       <div className="space-y-6 max-w-md">
                         <div>
-                          <label htmlFor="demo-email" className="block text-ui-label font-medium text-text-gray mb-2">
+                          <label
+                            htmlFor="demo-email"
+                            className="block text-ui-label font-medium text-text-gray mb-2"
+                          >
                             Email Address
                           </label>
                           <Input
@@ -176,7 +180,7 @@ export default function AnalyticsDemo() {
                               await trackFormInteraction({
                                 formId: 'analytics_demo',
                                 fieldName: 'email',
-                                action: 'focus'
+                                action: 'focus',
                               })
                             }}
                             onBlur={async () => {
@@ -184,13 +188,13 @@ export default function AnalyticsDemo() {
                                 formId: 'analytics_demo',
                                 fieldName: 'email',
                                 action: 'blur',
-                                value: email
+                                value: email,
                               })
                             }}
                             className="w-full"
                           />
                         </div>
-                        
+
                         <EnhancedButton
                           onClick={handleSubmit}
                           disabled={!email.includes('@')}
@@ -215,14 +219,27 @@ export default function AnalyticsDemo() {
                         <div className="bg-suggestion-green/10 border border-suggestion-green/20 rounded-lg p-6">
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-suggestion-green rounded-full flex items-center justify-center mr-3">
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <svg
+                                className="w-4 h-4 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-suggestion-green">Form Submitted Successfully!</h3>
+                              <h3 className="font-semibold text-suggestion-green">
+                                Form Submitted Successfully!
+                              </h3>
                               <p className="text-caption text-text-gray">
-                                Check your analytics dashboard to see the tracked data.
+                                Check your analytics dashboard to see the
+                                tracked data.
                               </p>
                             </div>
                           </div>
@@ -243,19 +260,25 @@ export default function AnalyticsDemo() {
                     Scroll Depth Tracking
                   </h2>
                   <p className="text-text-gray mb-6">
-                    As you scroll through this page, we're tracking engagement milestones 
-                    at 25%, 50%, 75%, and 100% depth.
+                    As you scroll through this page, we're tracking engagement
+                    milestones at 25%, 50%, 75%, and 100% depth.
                   </p>
-                  
+
                   <div className="space-y-4">
                     <div className="h-32 bg-gradient-to-r from-quill-blue/20 to-suggestion-green/20 rounded-lg flex items-center justify-center">
-                      <p className="text-text-gray">Scroll tracking content area 1</p>
+                      <p className="text-text-gray">
+                        Scroll tracking content area 1
+                      </p>
                     </div>
                     <div className="h-32 bg-gradient-to-r from-suggestion-green/20 to-error-red/20 rounded-lg flex items-center justify-center">
-                      <p className="text-text-gray">Scroll tracking content area 2</p>
+                      <p className="text-text-gray">
+                        Scroll tracking content area 2
+                      </p>
                     </div>
                     <div className="h-32 bg-gradient-to-r from-error-red/20 to-quill-blue/20 rounded-lg flex items-center justify-center">
-                      <p className="text-text-gray">Scroll tracking content area 3</p>
+                      <p className="text-text-gray">
+                        Scroll tracking content area 3
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -270,10 +293,12 @@ export default function AnalyticsDemo() {
                   <h2 className="text-2xl font-semibold text-ink-black mb-4">
                     What Data is Being Tracked?
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-semibold text-ink-black mb-3">Form Interactions</h3>
+                      <h3 className="font-semibold text-ink-black mb-3">
+                        Form Interactions
+                      </h3>
                       <ul className="space-y-2 text-caption text-text-gray">
                         <li>• Field focus and blur events</li>
                         <li>• Time spent on each field</li>
@@ -282,9 +307,11 @@ export default function AnalyticsDemo() {
                         <li>• Step completion rates</li>
                       </ul>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-semibold text-ink-black mb-3">CTA Analytics</h3>
+                      <h3 className="font-semibold text-ink-black mb-3">
+                        CTA Analytics
+                      </h3>
                       <ul className="space-y-2 text-caption text-text-gray">
                         <li>• Click position and context</li>
                         <li>• Button type and styling</li>
@@ -293,9 +320,11 @@ export default function AnalyticsDemo() {
                         <li>• A/B testing support</li>
                       </ul>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-semibold text-ink-black mb-3">Scroll Engagement</h3>
+                      <h3 className="font-semibold text-ink-black mb-3">
+                        Scroll Engagement
+                      </h3>
                       <ul className="space-y-2 text-caption text-text-gray">
                         <li>• Depth percentage milestones</li>
                         <li>• Time to reach each milestone</li>
@@ -304,9 +333,11 @@ export default function AnalyticsDemo() {
                         <li>• Section-specific tracking</li>
                       </ul>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-semibold text-ink-black mb-3">Funnel Analysis</h3>
+                      <h3 className="font-semibold text-ink-black mb-3">
+                        Funnel Analysis
+                      </h3>
                       <ul className="space-y-2 text-caption text-text-gray">
                         <li>• Step progression tracking</li>
                         <li>• Drop-off point identification</li>

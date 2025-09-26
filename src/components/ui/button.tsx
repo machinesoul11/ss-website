@@ -3,7 +3,8 @@ import { forwardRef, ButtonHTMLAttributes, AnchorHTMLAttributes } from 'react'
 
 type ButtonElement = HTMLButtonElement | HTMLAnchorElement
 
-export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href'> {
+export interface ButtonProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href'> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
@@ -12,7 +13,20 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const Button = forwardRef<ButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', loading = false, children, disabled, href, target, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      loading = false,
+      children,
+      disabled,
+      href,
+      target,
+      ...props
+    },
+    ref
+  ) => {
     const baseClasses = cn(
       // Base styles
       'inline-flex items-center justify-center rounded-card font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-focus-purple focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -24,10 +38,14 @@ const Button = forwardRef<ButtonElement, ButtonProps>(
       },
       // Color variants
       {
-        'bg-quill-blue text-parchment-white hover:bg-blue-700 active:bg-blue-800': variant === 'primary',
-        'bg-document-gray text-text-gray border border-border-gray hover:bg-gray-50 active:bg-gray-100': variant === 'secondary',
-        'text-text-gray hover:bg-document-gray active:bg-gray-100': variant === 'ghost',
-        'bg-error-crimson text-parchment-white hover:bg-red-600 active:bg-red-700': variant === 'danger',
+        'bg-quill-blue text-parchment-white hover:bg-blue-700 active:bg-blue-800':
+          variant === 'primary',
+        'bg-document-gray text-text-gray border border-border-gray hover:bg-gray-50 active:bg-gray-100':
+          variant === 'secondary',
+        'text-text-gray hover:bg-document-gray active:bg-gray-100':
+          variant === 'ghost',
+        'bg-error-crimson text-parchment-white hover:bg-red-600 active:bg-red-700':
+          variant === 'danger',
       },
       className
     )

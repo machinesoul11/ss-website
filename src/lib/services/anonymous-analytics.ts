@@ -1,7 +1,7 @@
 /**
  * Anonymous Visitor Analytics Service
  * Phase 6: Privacy-Compliant Analytics Implementation
- * 
+ *
  * Provides anonymous visitor identification and session-based tracking
  * without cookies or personal data collection
  */
@@ -17,7 +17,6 @@ export type SessionData = AnalyticsSession
  * Anonymous visitor identification and tracking service
  */
 export class AnonymousAnalyticsService {
-  
   /**
    * Generate anonymous visitor ID from browser fingerprint
    * Uses timezone, screen resolution, and user agent for identification
@@ -33,9 +32,11 @@ export class AnonymousAnalyticsService {
       this.hashString(userAgent, 8), // First 8 chars of UA hash
       timezone.toString(),
       screenResolution,
-      acceptLanguage.split(',')[0] // Primary language only
-    ].filter(Boolean).join('|')
-    
+      acceptLanguage.split(',')[0], // Primary language only
+    ]
+      .filter(Boolean)
+      .join('|')
+
     return this.hashString(fingerprint, 12)
   }
 
@@ -52,7 +53,6 @@ export class AnonymousAnalyticsService {
       utmData?: Record<string, string>
     }
   ): Promise<{ visitor: AnonymousVisitor; isNew: boolean }> {
-    
     try {
       // Try to find existing visitor
       const { data: existingVisitor } = await supabaseAdmin
@@ -68,7 +68,7 @@ export class AnonymousAnalyticsService {
           .update({
             last_seen: new Date().toISOString(),
             page_views: existingVisitor.page_views + 1,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
           .eq('id', existingVisitor.id)
           .select()
@@ -85,14 +85,18 @@ export class AnonymousAnalyticsService {
         last_seen: new Date().toISOString(),
         page_views: 1,
         total_sessions: 1,
-        user_agent_hash: sessionData.userAgent ? this.hashString(sessionData.userAgent, 10) : undefined,
+        user_agent_hash: sessionData.userAgent
+          ? this.hashString(sessionData.userAgent, 10)
+          : undefined,
         timezone_offset: sessionData.timezone,
         screen_resolution: sessionData.screenResolution,
-        referrer_domain: sessionData.referrer ? this.extractDomain(sessionData.referrer) : undefined,
+        referrer_domain: sessionData.referrer
+          ? this.extractDomain(sessionData.referrer)
+          : undefined,
         utm_source: sessionData.utmData?.utm_source,
         utm_medium: sessionData.utmData?.utm_medium,
         utm_campaign: sessionData.utmData?.utm_campaign,
-        is_returning: false
+        is_returning: false,
       }
 
       const { data: createdVisitor } = await supabaseAdmin
@@ -106,7 +110,6 @@ export class AnonymousAnalyticsService {
       }
 
       return { visitor: createdVisitor, isNew: true }
-
     } catch (error) {
       console.error('Error managing anonymous visitor:', error)
       throw error
@@ -123,9 +126,8 @@ export class AnonymousAnalyticsService {
     utmData?: Record<string, string>,
     deviceData?: Record<string, any>
   ): Promise<SessionData> {
-    
     // const sessionId = this.generateSessionId()
-    
+
     const sessionData: Partial<SessionData> = {
       visitor_id: visitorId,
       session_start: new Date().toISOString(),
@@ -139,7 +141,7 @@ export class AnonymousAnalyticsService {
       device_data: deviceData,
       engagement_score: 0,
       converted: false,
-      bounce: true // Will be updated if user interacts
+      bounce: true, // Will be updated if user interacts
     }
 
     const { data: createdSession } = await supabaseAdmin
@@ -171,17 +173,15 @@ export class AnonymousAnalyticsService {
       bounce: boolean
     }>
   ): Promise<void> {
-    
     try {
       await supabaseAdmin
         .from('analytics_sessions')
         .update({
           ...updates,
           session_end: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', sessionId)
-
     } catch (error) {
       console.error('Error updating session:', error)
       throw error
@@ -199,7 +199,6 @@ export class AnonymousAnalyticsService {
     properties?: Record<string, any>,
     userAgentHash?: string
   ): Promise<void> {
-    
     try {
       const eventData: Partial<AnalyticsEvent> = {
         visitor_id: visitorId,
@@ -208,13 +207,10 @@ export class AnonymousAnalyticsService {
         page_path: pagePath,
         timestamp: new Date().toISOString(),
         properties: properties,
-        user_agent_hash: userAgentHash
+        user_agent_hash: userAgentHash,
       }
 
-      await supabaseAdmin
-        .from('analytics_events')
-        .insert([eventData])
-
+      await supabaseAdmin.from('analytics_events').insert([eventData])
     } catch (error) {
       console.error('Error tracking analytics event:', error)
       throw error
@@ -228,7 +224,6 @@ export class AnonymousAnalyticsService {
     visitorId: string,
     limit: number = 10
   ): Promise<SessionData[]> {
-    
     const { data: sessions } = await supabaseAdmin
       .from('analytics_sessions')
       .select('*')
@@ -253,9 +248,12 @@ export class AnonymousAnalyticsService {
     avg_session_duration: number
     top_pages: Array<{ page: string; views: number }>
     referrer_breakdown: Array<{ referrer: string; count: number }>
-    utm_performance: Array<{ campaign: string; visitors: number; conversions: number }>
+    utm_performance: Array<{
+      campaign: string
+      visitors: number
+      conversions: number
+    }>
   }> {
-    
     try {
       const [
         visitorsData,
@@ -264,7 +262,7 @@ export class AnonymousAnalyticsService {
         bounceData,
         topPagesData,
         referrerData,
-        utmData
+        utmData,
       ] = await Promise.all([
         // Unique visitors
         supabaseAdmin
@@ -297,43 +295,45 @@ export class AnonymousAnalyticsService {
           .lte('session_start', endDate.toISOString()),
 
         // Top pages
-        supabaseAdmin
-          .rpc('get_top_pages_by_period', {
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString(),
-            limit_count: 10
-          }),
+        supabaseAdmin.rpc('get_top_pages_by_period', {
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          limit_count: 10,
+        }),
 
         // Referrer breakdown
-        supabaseAdmin
-          .rpc('get_referrer_breakdown', {
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString()
-          }),
+        supabaseAdmin.rpc('get_referrer_breakdown', {
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+        }),
 
         // UTM performance
-        supabaseAdmin
-          .rpc('get_utm_performance', {
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString()
-          })
+        supabaseAdmin.rpc('get_utm_performance', {
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+        }),
       ])
 
       const totalSessions = sessionsData.data?.length || 0
       const bouncedSessions = bounceData.data?.length || 0
-      const totalSessionTime = sessionsData.data?.reduce((sum, session) => sum + (session.time_on_site || 0), 0) || 0
+      const totalSessionTime =
+        sessionsData.data?.reduce(
+          (sum, session) => sum + (session.time_on_site || 0),
+          0
+        ) || 0
 
       return {
         unique_visitors: visitorsData.data?.length || 0,
         total_sessions: totalSessions,
         total_page_views: pageViewsData.data?.length || 0,
-        bounce_rate: totalSessions > 0 ? (bouncedSessions / totalSessions) * 100 : 0,
-        avg_session_duration: totalSessions > 0 ? totalSessionTime / totalSessions : 0,
+        bounce_rate:
+          totalSessions > 0 ? (bouncedSessions / totalSessions) * 100 : 0,
+        avg_session_duration:
+          totalSessions > 0 ? totalSessionTime / totalSessions : 0,
         top_pages: topPagesData.data || [],
         referrer_breakdown: referrerData.data || [],
-        utm_performance: utmData.data || []
+        utm_performance: utmData.data || [],
       }
-
     } catch (error) {
       console.error('Error generating aggregated metrics:', error)
       throw error

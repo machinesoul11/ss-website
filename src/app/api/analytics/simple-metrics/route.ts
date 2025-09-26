@@ -26,14 +26,17 @@ export async function GET(request: NextRequest) {
 
     const { supabaseAdmin } = await import('@/lib/supabase')
     if (!supabaseAdmin) {
-      return NextResponse.json({ 
-        error: 'Database connection not available' 
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Database connection not available',
+        },
+        { status: 500 }
+      )
     }
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '7')
-    
+
     // Calculate date range
     const endDate = new Date()
     const startDate = new Date()
@@ -49,9 +52,12 @@ export async function GET(request: NextRequest) {
 
     if (fetchError) {
       console.error('Error fetching analytics records:', fetchError)
-      return NextResponse.json({ 
-        error: 'Failed to fetch analytics data' 
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Failed to fetch analytics data',
+        },
+        { status: 500 }
+      )
     }
 
     if (!records || records.length === 0) {
@@ -61,8 +67,8 @@ export async function GET(request: NextRequest) {
           unique_visitors: 0,
           total_pageviews: 0,
           top_pages: [],
-          recent_activity: []
-        } as SimpleMetrics
+          recent_activity: [],
+        } as SimpleMetrics,
       })
     }
 
@@ -88,7 +94,7 @@ export async function GET(request: NextRequest) {
         recentActivity.push({
           page_path: record.page_path || 'Unknown',
           timestamp: record.timestamp,
-          visitor_id: record.visitor_id
+          visitor_id: record.visitor_id,
         })
       }
     })
@@ -103,19 +109,21 @@ export async function GET(request: NextRequest) {
       unique_visitors: uniqueVisitors.size,
       total_pageviews: records.length,
       top_pages: topPages,
-      recent_activity: recentActivity
+      recent_activity: recentActivity,
     }
 
     return NextResponse.json({
       success: true,
-      data: metrics
+      data: metrics,
     })
-
   } catch (error) {
     console.error('Aggregated metrics API error:', error)
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -131,9 +139,12 @@ export async function POST(request: NextRequest) {
 
     const { supabaseAdmin } = await import('@/lib/supabase')
     if (!supabaseAdmin) {
-      return NextResponse.json({ 
-        error: 'Database connection not available' 
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Database connection not available',
+        },
+        { status: 500 }
+      )
     }
 
     const body = await request.json()
@@ -151,8 +162,8 @@ export async function POST(request: NextRequest) {
       metadata: {
         metrics,
         dateRange,
-        generatedAt: new Date().toISOString()
-      }
+        generatedAt: new Date().toISOString(),
+      },
     }
 
     const { error: insertError } = await supabaseAdmin
@@ -161,20 +172,25 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Error storing analytics summary:', insertError)
-      return NextResponse.json({ 
-        error: 'Failed to store summary' 
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Failed to store summary',
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Analytics summary stored successfully'
+      message: 'Analytics summary stored successfully',
     })
-
   } catch (error) {
     console.error('Store analytics summary error:', error)
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+      },
+      { status: 500 }
+    )
   }
 }

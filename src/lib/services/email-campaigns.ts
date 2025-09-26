@@ -1,11 +1,11 @@
 import { supabaseAdmin } from '../supabase'
 import { EmailEventService } from './database'
-import type { 
-  BetaSignup, 
-  EarlyAccessEmailData, 
-  ReEngagementEmailData, 
-  MonthlyNewsletterData, 
-  EmailCampaign 
+import type {
+  BetaSignup,
+  EarlyAccessEmailData,
+  ReEngagementEmailData,
+  MonthlyNewsletterData,
+  EmailCampaign,
 } from '../../types'
 
 /**
@@ -19,21 +19,21 @@ export const EMAIL_TEMPLATES = {
   WELCOME_IMMEDIATE: 'd-d81e561c996840d494c15dd695b1b57b',
   WELCOME_DAY_3: 'd-welcome-day3-silentscribe-dev',
   WELCOME_WEEK_1: 'd-welcome-week1-silentscribe-dev',
-  
+
   // Regular Communications
   DEVELOPMENT_UPDATE: 'd-afa3d31882344069a28ecd9b982a6b6e',
   MONTHLY_NEWSLETTER: 'd-monthly-newsletter-silentscribe',
-  
+
   // Feedback & Research
   FEEDBACK_REQUEST: 'd-c0c4ed1081b84e0a883a8d49b872e1a9',
-  
+
   // Special Campaigns
   EARLY_ACCESS_INVITATION: 'd-early-access-silentscribe-dev',
   RE_ENGAGEMENT: 'd-re-engagement-silentscribe-dev',
-  
+
   // Feature-Specific
   BETA_FEATURE_ANNOUNCEMENT: 'd-beta-feature-silentscribe-dev',
-  COMMUNITY_HIGHLIGHTS: 'd-community-highlights-silentscribe'
+  COMMUNITY_HIGHLIGHTS: 'd-community-highlights-silentscribe',
 } as const
 
 // Template variable interfaces based on common SendGrid patterns
@@ -73,9 +73,13 @@ export interface FeedbackRequestData {
   request_date: string
 }
 
-export type EmailTemplateData = WelcomeEmailData | DevelopmentUpdateData | FeedbackRequestData | EarlyAccessEmailData | ReEngagementEmailData | MonthlyNewsletterData
-
-
+export type EmailTemplateData =
+  | WelcomeEmailData
+  | DevelopmentUpdateData
+  | FeedbackRequestData
+  | EarlyAccessEmailData
+  | ReEngagementEmailData
+  | MonthlyNewsletterData
 
 export class EmailCampaignService {
   private static sendGridApiKey = process.env.SENDGRID_API_KEY!
@@ -85,10 +89,10 @@ export class EmailCampaignService {
   /**
    * Send welcome email to new beta signup
    */
-  static async sendWelcomeEmail(user: BetaSignup): Promise<{ 
-    success: boolean; 
-    error: string | null;
-    messageId?: string;
+  static async sendWelcomeEmail(user: BetaSignup): Promise<{
+    success: boolean
+    error: string | null
+    messageId?: string
   }> {
     try {
       const templateData: WelcomeEmailData = {
@@ -96,16 +100,19 @@ export class EmailCampaignService {
         github_username: user.github_username || '',
         user_email: user.email,
         unsubscribe_url: `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?email=${encodeURIComponent(user.email)}`,
-        beta_signup_date: new Date(user.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
+        beta_signup_date: new Date(user.created_at).toLocaleDateString(
+          'en-US',
+          {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }
+        ),
         community_links: {
           discord: 'https://discord.gg/silentscribe', // Replace with actual links
           github: 'https://github.com/silentscribe',
-          twitter: 'https://twitter.com/silentscribe'
-        }
+          twitter: 'https://twitter.com/silentscribe',
+        },
       }
 
       const result = await this.sendTemplateEmail({
@@ -114,7 +121,7 @@ export class EmailCampaignService {
         template_data: templateData,
         subject: 'Welcome to Silent Scribe Beta! 🚀',
         user_id: user.id,
-        email_type: 'welcome'
+        email_type: 'welcome',
       })
 
       return result
@@ -127,10 +134,10 @@ export class EmailCampaignService {
   /**
    * Send welcome email series - Day 3 follow-up
    */
-  static async sendWelcomeDayThree(user: BetaSignup): Promise<{ 
-    success: boolean; 
-    error: string | null;
-    messageId?: string;
+  static async sendWelcomeDayThree(user: BetaSignup): Promise<{
+    success: boolean
+    error: string | null
+    messageId?: string
   }> {
     try {
       const templateData: WelcomeEmailData = {
@@ -138,16 +145,19 @@ export class EmailCampaignService {
         github_username: user.github_username || '',
         user_email: user.email,
         unsubscribe_url: `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?email=${encodeURIComponent(user.email)}`,
-        beta_signup_date: new Date(user.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
+        beta_signup_date: new Date(user.created_at).toLocaleDateString(
+          'en-US',
+          {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }
+        ),
         community_links: {
           discord: 'https://discord.gg/silentscribe',
           github: 'https://github.com/silentscribe',
-          twitter: 'https://twitter.com/silentscribe'
-        }
+          twitter: 'https://twitter.com/silentscribe',
+        },
       }
 
       const result = await this.sendTemplateEmail({
@@ -156,7 +166,7 @@ export class EmailCampaignService {
         template_data: templateData,
         subject: 'Silent Scribe Development Philosophy - Privacy First 🔒',
         user_id: user.id,
-        email_type: 'welcome'
+        email_type: 'welcome',
       })
 
       return result
@@ -169,10 +179,10 @@ export class EmailCampaignService {
   /**
    * Send welcome email series - Week 1 community highlights
    */
-  static async sendWelcomeWeekOne(user: BetaSignup): Promise<{ 
-    success: boolean; 
-    error: string | null;
-    messageId?: string;
+  static async sendWelcomeWeekOne(user: BetaSignup): Promise<{
+    success: boolean
+    error: string | null
+    messageId?: string
   }> {
     try {
       const templateData: WelcomeEmailData = {
@@ -180,25 +190,28 @@ export class EmailCampaignService {
         github_username: user.github_username || '',
         user_email: user.email,
         unsubscribe_url: `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?email=${encodeURIComponent(user.email)}`,
-        beta_signup_date: new Date(user.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
+        beta_signup_date: new Date(user.created_at).toLocaleDateString(
+          'en-US',
+          {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }
+        ),
         community_links: {
           discord: 'https://discord.gg/silentscribe',
           github: 'https://github.com/silentscribe',
-          twitter: 'https://twitter.com/silentscribe'
-        }
+          twitter: 'https://twitter.com/silentscribe',
+        },
       }
 
       const result = await this.sendTemplateEmail({
         to_email: user.email,
         template_id: EMAIL_TEMPLATES.WELCOME_WEEK_1,
         template_data: templateData,
-        subject: 'Community Highlights & What\'s Coming Next 🚀',
+        subject: "Community Highlights & What's Coming Next 🚀",
         user_id: user.id,
-        email_type: 'welcome'
+        email_type: 'welcome',
       })
 
       return result
@@ -212,26 +225,29 @@ export class EmailCampaignService {
    * Send monthly development update newsletter
    */
   static async sendMonthlyNewsletter(
-    newsletterData: Omit<DevelopmentUpdateData, 'first_name' | 'user_email' | 'unsubscribe_url' | 'update_date'>,
+    newsletterData: Omit<
+      DevelopmentUpdateData,
+      'first_name' | 'user_email' | 'unsubscribe_url' | 'update_date'
+    >,
     segmentFilter?: {
       engagement_level?: 'high' | 'medium' | 'low'
       beta_status?: 'pending' | 'invited' | 'active'
       team_size?: string[]
     }
   ): Promise<{
-    campaign_id: string;
-    total_sent: number;
-    errors: string[];
+    campaign_id: string
+    total_sent: number
+    errors: string[]
   }> {
     try {
       const campaignId = `newsletter-${Date.now()}`
       const users = await this.getSegmentedUsers(segmentFilter)
-      
+
       if (users.length === 0) {
         return {
           campaign_id: campaignId,
           total_sent: 0,
-          errors: ['No users found matching segment criteria']
+          errors: ['No users found matching segment criteria'],
         }
       }
 
@@ -242,7 +258,7 @@ export class EmailCampaignService {
         subject: newsletterData.update_title,
         segment_filter: JSON.stringify(segmentFilter),
         total_recipients: users.length,
-        status: 'sending'
+        status: 'sending',
       })
 
       const errors: string[] = []
@@ -256,9 +272,9 @@ export class EmailCampaignService {
           unsubscribe_url: `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?email=${encodeURIComponent(user.email)}`,
           update_date: new Date().toLocaleDateString('en-US', {
             year: 'numeric',
-            month: 'long', 
-            day: 'numeric'
-          })
+            month: 'long',
+            day: 'numeric',
+          }),
         }
 
         const result = await this.sendTemplateEmail({
@@ -268,7 +284,7 @@ export class EmailCampaignService {
           subject: newsletterData.update_title,
           user_id: user.id,
           email_type: 'update',
-          campaign_id: campaignId
+          campaign_id: campaignId,
         })
 
         if (result.success) {
@@ -278,7 +294,7 @@ export class EmailCampaignService {
         }
 
         // Small delay between emails
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
       // Update campaign status
@@ -286,20 +302,20 @@ export class EmailCampaignService {
         status: 'sent',
         sent_count: sentCount,
         error_count: errors.length,
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
       })
 
       return {
         campaign_id: campaignId,
         total_sent: sentCount,
-        errors
+        errors,
       }
     } catch (err) {
       console.error('Error sending monthly newsletter:', err)
       return {
         campaign_id: '',
         total_sent: 0,
-        errors: ['Failed to send monthly newsletter']
+        errors: ['Failed to send monthly newsletter'],
       }
     }
   }
@@ -316,13 +332,13 @@ export class EmailCampaignService {
       exclusive_features: string[]
     }
   ): Promise<{
-    campaign_id: string;
-    total_sent: number;
-    errors: string[];
+    campaign_id: string
+    total_sent: number
+    errors: string[]
   }> {
     try {
       const campaignId = `early-access-${Date.now()}`
-      
+
       if (!supabaseAdmin) {
         throw new Error('Supabase admin client not available')
       }
@@ -332,7 +348,7 @@ export class EmailCampaignService {
         .from('beta_signups')
         .select('*')
         .in('id', targetUsers)
-      
+
       if (error || !users) {
         throw new Error(error?.message || 'Failed to fetch users')
       }
@@ -344,7 +360,7 @@ export class EmailCampaignService {
         return {
           campaign_id: campaignId,
           total_sent: 0,
-          errors: ['No users found with provided IDs']
+          errors: ['No users found with provided IDs'],
         }
       }
 
@@ -355,7 +371,7 @@ export class EmailCampaignService {
         subject: `Silent Scribe ${invitationData.access_level.toUpperCase()} Access - You're In! 🎉`,
         segment_filter: JSON.stringify({ user_ids: targetUsers }),
         total_recipients: typedUsers.length,
-        status: 'sending'
+        status: 'sending',
       })
 
       const errors: string[] = []
@@ -373,8 +389,8 @@ export class EmailCampaignService {
           invitation_date: new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
-          })
+            day: 'numeric',
+          }),
         }
 
         const result = await this.sendTemplateEmail({
@@ -384,7 +400,7 @@ export class EmailCampaignService {
           subject: `Silent Scribe ${invitationData.access_level.toUpperCase()} Access - You're In! 🎉`,
           user_id: user.id,
           email_type: 'early_access',
-          campaign_id: campaignId
+          campaign_id: campaignId,
         })
 
         if (result.success) {
@@ -393,9 +409,9 @@ export class EmailCampaignService {
           if (supabaseAdmin) {
             await (supabaseAdmin as any)
               .from('beta_signups')
-              .update({ 
+              .update({
                 beta_status: 'active',
-                notes: `Granted ${invitationData.access_level} access on ${new Date().toISOString()}`
+                notes: `Granted ${invitationData.access_level} access on ${new Date().toISOString()}`,
               })
               .eq('id', user.id)
           }
@@ -404,7 +420,7 @@ export class EmailCampaignService {
         }
 
         // Small delay between emails
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
       // Update campaign status
@@ -412,20 +428,20 @@ export class EmailCampaignService {
         status: 'sent',
         sent_count: sentCount,
         error_count: errors.length,
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
       })
 
       return {
         campaign_id: campaignId,
         total_sent: sentCount,
-        errors
+        errors,
       }
     } catch (err) {
       console.error('Error sending early access invitations:', err)
       return {
         campaign_id: '',
         total_sent: 0,
-        errors: ['Failed to send early access invitations']
+        errors: ['Failed to send early access invitations'],
       }
     }
   }
@@ -436,13 +452,13 @@ export class EmailCampaignService {
   static async sendReEngagementCampaign(
     inactivityThresholdDays: number = 30
   ): Promise<{
-    campaign_id: string;
-    total_sent: number;
-    errors: string[];
+    campaign_id: string
+    total_sent: number
+    errors: string[]
   }> {
     try {
       const campaignId = `re-engagement-${Date.now()}`
-      
+
       if (!supabaseAdmin) {
         throw new Error('Supabase admin client not available')
       }
@@ -450,14 +466,14 @@ export class EmailCampaignService {
       // Get users who haven't engaged in the threshold period
       const thresholdDate = new Date()
       thresholdDate.setDate(thresholdDate.getDate() - inactivityThresholdDays)
-      
+
       const { data: users, error } = await supabaseAdmin
         .from('beta_signups')
         .select('*')
         .eq('opted_in_marketing', true)
         .lt('engagement_score', 20) // Low engagement score
         .lt('created_at', thresholdDate.toISOString()) // Signed up before threshold
-      
+
       if (error || !users) {
         throw new Error(error?.message || 'Failed to fetch inactive users')
       }
@@ -469,7 +485,7 @@ export class EmailCampaignService {
         return {
           campaign_id: campaignId,
           total_sent: 0,
-          errors: ['No inactive users found']
+          errors: ['No inactive users found'],
         }
       }
 
@@ -477,13 +493,14 @@ export class EmailCampaignService {
       await this.insertCampaign({
         campaign_id: campaignId,
         campaign_type: 're_engagement',
-        subject: 'We Miss You! Silent Scribe Updates & What You Might Have Missed',
-        segment_filter: JSON.stringify({ 
+        subject:
+          'We Miss You! Silent Scribe Updates & What You Might Have Missed',
+        segment_filter: JSON.stringify({
           engagement_level: 'low',
-          inactivity_days: inactivityThresholdDays 
+          inactivity_days: inactivityThresholdDays,
         }),
         total_recipients: typedUsers.length,
-        status: 'sending'
+        status: 'sending',
       })
 
       const errors: string[] = []
@@ -497,25 +514,26 @@ export class EmailCampaignService {
           recent_updates: [
             'Privacy-first architecture completed',
             'Local processing engine optimized',
-            'VS Code extension alpha ready'
+            'VS Code extension alpha ready',
           ],
           feedback_link: `${process.env.NEXT_PUBLIC_SITE_URL}/feedback`,
           unsubscribe_url: `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?email=${encodeURIComponent(user.email)}`,
           campaign_date: new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
-          })
+            day: 'numeric',
+          }),
         }
 
         const result = await this.sendTemplateEmail({
           to_email: user.email,
           template_id: EMAIL_TEMPLATES.RE_ENGAGEMENT,
           template_data: templateData,
-          subject: 'We Miss You! Silent Scribe Updates & What You Might Have Missed',
+          subject:
+            'We Miss You! Silent Scribe Updates & What You Might Have Missed',
           user_id: user.id,
           email_type: 'update',
-          campaign_id: campaignId
+          campaign_id: campaignId,
         })
 
         if (result.success) {
@@ -525,7 +543,7 @@ export class EmailCampaignService {
         }
 
         // Small delay between emails
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
       // Update campaign status
@@ -533,20 +551,20 @@ export class EmailCampaignService {
         status: 'sent',
         sent_count: sentCount,
         error_count: errors.length,
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
       })
 
       return {
         campaign_id: campaignId,
         total_sent: sentCount,
-        errors
+        errors,
       }
     } catch (err) {
       console.error('Error sending re-engagement campaign:', err)
       return {
         campaign_id: '',
         total_sent: 0,
-        errors: ['Failed to send re-engagement campaign']
+        errors: ['Failed to send re-engagement campaign'],
       }
     }
   }
@@ -556,9 +574,11 @@ export class EmailCampaignService {
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not available')
     }
-    
+
     // Type assertion to bypass the 'never' type issue
-    const { error } = await (supabaseAdmin as any).from('email_campaigns').insert([campaignData])
+    const { error } = await (supabaseAdmin as any)
+      .from('email_campaigns')
+      .insert([campaignData])
     if (error) {
       throw new Error(`Failed to create campaign: ${error.message}`)
     }
@@ -568,13 +588,13 @@ export class EmailCampaignService {
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not available')
     }
-    
+
     // Type assertion to bypass the 'never' type issue
     const { error } = await (supabaseAdmin as any)
       .from('email_campaigns')
       .update(updates)
       .eq('campaign_id', campaignId)
-      
+
     if (error) {
       throw new Error(`Failed to update campaign: ${error.message}`)
     }
@@ -584,29 +604,32 @@ export class EmailCampaignService {
    * Send development update to user segments
    */
   static async sendDevelopmentUpdate(
-    updateData: Omit<DevelopmentUpdateData, 'first_name' | 'user_email' | 'unsubscribe_url' | 'update_date'>,
+    updateData: Omit<
+      DevelopmentUpdateData,
+      'first_name' | 'user_email' | 'unsubscribe_url' | 'update_date'
+    >,
     segmentFilter?: {
       engagement_level?: 'high' | 'medium' | 'low'
       beta_status?: 'pending' | 'invited' | 'active'
       team_size?: string[]
     }
   ): Promise<{
-    campaign_id: string;
-    total_sent: number;
-    errors: string[];
+    campaign_id: string
+    total_sent: number
+    errors: string[]
   }> {
     try {
       // Generate campaign ID
       const campaignId = `dev-update-${Date.now()}`
-      
+
       // Get target users based on segment filter
       const users = await this.getSegmentedUsers(segmentFilter)
-      
+
       if (users.length === 0) {
         return {
           campaign_id: campaignId,
           total_sent: 0,
-          errors: ['No users found matching segment criteria']
+          errors: ['No users found matching segment criteria'],
         }
       }
 
@@ -617,7 +640,7 @@ export class EmailCampaignService {
         subject: updateData.update_title,
         segment_filter: JSON.stringify(segmentFilter),
         total_recipients: users.length,
-        status: 'sending'
+        status: 'sending',
       })
 
       const errors: string[] = []
@@ -627,7 +650,7 @@ export class EmailCampaignService {
       const batchSize = 10
       for (let i = 0; i < users.length; i += batchSize) {
         const batch = users.slice(i, i + batchSize)
-        
+
         const batchPromises = batch.map(async (user) => {
           const templateData: DevelopmentUpdateData = {
             ...updateData,
@@ -636,9 +659,9 @@ export class EmailCampaignService {
             unsubscribe_url: `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?email=${encodeURIComponent(user.email)}`,
             update_date: new Date().toLocaleDateString('en-US', {
               year: 'numeric',
-              month: 'long', 
-              day: 'numeric'
-            })
+              month: 'long',
+              day: 'numeric',
+            }),
           }
 
           const result = await this.sendTemplateEmail({
@@ -648,7 +671,7 @@ export class EmailCampaignService {
             subject: updateData.update_title,
             user_id: user.id,
             email_type: 'update',
-            campaign_id: campaignId
+            campaign_id: campaignId,
           })
 
           if (result.success) {
@@ -661,10 +684,10 @@ export class EmailCampaignService {
         })
 
         await Promise.all(batchPromises)
-        
+
         // Small delay between batches
         if (i + batchSize < users.length) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          await new Promise((resolve) => setTimeout(resolve, 1000))
         }
       }
 
@@ -673,20 +696,20 @@ export class EmailCampaignService {
         status: 'sent',
         sent_count: sentCount,
         error_count: errors.length,
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
       })
 
       return {
         campaign_id: campaignId,
         total_sent: sentCount,
-        errors
+        errors,
       }
     } catch (err) {
       console.error('Error sending development update:', err)
       return {
         campaign_id: '',
         total_sent: 0,
-        errors: ['Failed to send development update']
+        errors: ['Failed to send development update'],
       }
     }
   }
@@ -695,22 +718,25 @@ export class EmailCampaignService {
    * Send feedback request to specific users or segments
    */
   static async sendFeedbackRequest(
-    feedbackData: Omit<FeedbackRequestData, 'first_name' | 'user_email' | 'unsubscribe_url' | 'request_date'>,
+    feedbackData: Omit<
+      FeedbackRequestData,
+      'first_name' | 'user_email' | 'unsubscribe_url' | 'request_date'
+    >,
     targetUsers?: string[], // User IDs, if not provided will use segment
     segmentFilter?: {
       engagement_level?: 'high' | 'medium' | 'low'
       beta_status?: 'pending' | 'invited' | 'active'
     }
   ): Promise<{
-    campaign_id: string;
-    total_sent: number;
-    errors: string[];
+    campaign_id: string
+    total_sent: number
+    errors: string[]
   }> {
     try {
       const campaignId = `feedback-${Date.now()}`
-      
+
       let users: BetaSignup[]
-      
+
       if (!supabaseAdmin) {
         throw new Error('Supabase admin client not available')
       }
@@ -721,11 +747,11 @@ export class EmailCampaignService {
           .from('beta_signups')
           .select('*')
           .in('id', targetUsers)
-        
+
         if (error) {
           throw new Error(error.message)
         }
-        
+
         users = data as BetaSignup[]
       } else {
         // Get segmented users
@@ -736,7 +762,7 @@ export class EmailCampaignService {
         return {
           campaign_id: campaignId,
           total_sent: 0,
-          errors: ['No users found matching criteria']
+          errors: ['No users found matching criteria'],
         }
       }
 
@@ -747,13 +773,13 @@ export class EmailCampaignService {
         subject: `Help us improve Silent Scribe - ${feedbackData.feedback_type} feedback`,
         segment_filter: JSON.stringify(segmentFilter || {}),
         total_recipients: users.length,
-        status: 'sending'
+        status: 'sending',
       }
 
-      const { error: insertError } = await (supabaseAdmin
-        .from('email_campaigns') as any)
-        .insert([campaignData])
-      
+      const { error: insertError } = await (
+        supabaseAdmin.from('email_campaigns') as any
+      ).insert([campaignData])
+
       if (insertError) {
         throw new Error(`Failed to record campaign: ${insertError.message}`)
       }
@@ -770,8 +796,8 @@ export class EmailCampaignService {
           request_date: new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
-          })
+            day: 'numeric',
+          }),
         }
 
         const result = await this.sendTemplateEmail({
@@ -781,7 +807,7 @@ export class EmailCampaignService {
           subject: `Help us improve Silent Scribe - ${feedbackData.feedback_type} feedback`,
           user_id: user.id,
           email_type: 'feedback_request',
-          campaign_id: campaignId
+          campaign_id: campaignId,
         })
 
         if (result.success) {
@@ -791,7 +817,7 @@ export class EmailCampaignService {
         }
 
         // Small delay between emails
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
       // Update campaign status
@@ -800,21 +826,21 @@ export class EmailCampaignService {
           status: 'sent',
           sent_count: sentCount,
           error_count: errors.length,
-          sent_at: new Date().toISOString()
+          sent_at: new Date().toISOString(),
         })
         .eq('campaign_id', campaignId)
 
       return {
         campaign_id: campaignId,
         total_sent: sentCount,
-        errors
+        errors,
       }
     } catch (err) {
       console.error('Error sending feedback request:', err)
       return {
         campaign_id: '',
         total_sent: 0,
-        errors: ['Failed to send feedback request']
+        errors: ['Failed to send feedback request'],
       }
     }
   }
@@ -829,14 +855,20 @@ export class EmailCampaignService {
     subject,
     user_id,
     email_type,
-    campaign_id
+    campaign_id,
   }: {
     to_email: string
     template_id: string
     template_data: EmailTemplateData
     subject: string
     user_id: string
-    email_type: 'welcome' | 'update' | 'feedback_request' | 'early_access' | 're_engagement' | 'monthly_newsletter'
+    email_type:
+      | 'welcome'
+      | 'update'
+      | 'feedback_request'
+      | 'early_access'
+      | 're_engagement'
+      | 'monthly_newsletter'
     campaign_id?: string
   }): Promise<{ success: boolean; error: string | null; messageId?: string }> {
     try {
@@ -847,7 +879,7 @@ export class EmailCampaignService {
         to: to_email,
         from: {
           email: this.fromEmail,
-          name: this.fromName
+          name: this.fromName,
         },
         templateId: template_id,
         dynamicTemplateData: template_data,
@@ -856,34 +888,34 @@ export class EmailCampaignService {
           user_id,
           email_type,
           campaign_id: campaign_id || '',
-          sent_at: new Date().toISOString()
+          sent_at: new Date().toISOString(),
         },
         // Enable click and open tracking
         trackingSettings: {
           clickTracking: { enable: true },
-          openTracking: { enable: true }
-        }
+          openTracking: { enable: true },
+        },
       }
 
       const [response] = await sgMail.default.send(msg)
-      
+
       // Log the email event
       await EmailEventService.logEvent({
         user_id,
         email_type: email_type as any,
         event_type: 'sent',
         email_subject: subject,
-        campaign_id: campaign_id || undefined
+        campaign_id: campaign_id || undefined,
       })
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         error: null,
-        messageId: response.headers['x-message-id'] as string
+        messageId: response.headers['x-message-id'] as string,
       }
     } catch (err: any) {
       console.error('SendGrid error:', err)
-      
+
       // Log failed send as sent with metadata indicating failure
       await EmailEventService.logEvent({
         user_id,
@@ -891,16 +923,16 @@ export class EmailCampaignService {
         event_type: 'sent',
         email_subject: subject,
         campaign_id: campaign_id || undefined,
-        metadata: { 
+        metadata: {
           error: err.message,
           code: err.code,
-          failed: true
-        }
+          failed: true,
+        },
       })
-      
-      return { 
-        success: false, 
-        error: err.message || 'Failed to send email' 
+
+      return {
+        success: false,
+        error: err.message || 'Failed to send email',
       }
     }
   }
@@ -992,14 +1024,21 @@ export class EmailCampaignService {
       }
 
       // Get email event stats
-      const { data: stats, error: statsError } = await EmailEventService.getCampaignStats(campaignId)
+      const { data: stats, error: statsError } =
+        await EmailEventService.getCampaignStats(campaignId)
 
       if (statsError || !stats) {
-        return { campaign, stats: null, error: statsError || 'No stats available' }
+        return {
+          campaign,
+          stats: null,
+          error: statsError || 'No stats available',
+        }
       }
 
-      const openRate = stats.delivered > 0 ? (stats.opened / stats.delivered) * 100 : 0
-      const clickRate = stats.delivered > 0 ? (stats.clicked / stats.delivered) * 100 : 0
+      const openRate =
+        stats.delivered > 0 ? (stats.opened / stats.delivered) * 100 : 0
+      const clickRate =
+        stats.delivered > 0 ? (stats.clicked / stats.delivered) * 100 : 0
 
       return {
         campaign,
@@ -1010,29 +1049,31 @@ export class EmailCampaignService {
           clicked: stats.clicked,
           bounced: 0, // Will be updated by webhook
           open_rate: Math.round(openRate * 100) / 100,
-          click_rate: Math.round(clickRate * 100) / 100
+          click_rate: Math.round(clickRate * 100) / 100,
         },
-        error: null
+        error: null,
       }
     } catch (err) {
       console.error('Error getting campaign stats:', err)
-      return { campaign: null, stats: null, error: 'Failed to get campaign stats' }
+      return {
+        campaign: null,
+        stats: null,
+        error: 'Failed to get campaign stats',
+      }
     }
   }
 
   /**
    * Schedule a campaign for later sending
    */
-  static async scheduleCampaign(
-    campaignData: {
-      name: string
-      template_id: string
-      subject: string
-      template_data: Partial<EmailTemplateData>
-      segment_filter?: any
-      scheduled_at: string
-    }
-  ): Promise<{ campaign_id: string; error: string | null }> {
+  static async scheduleCampaign(campaignData: {
+    name: string
+    template_id: string
+    subject: string
+    template_data: Partial<EmailTemplateData>
+    segment_filter?: any
+    scheduled_at: string
+  }): Promise<{ campaign_id: string; error: string | null }> {
     try {
       if (!supabaseAdmin) {
         throw new Error('Supabase admin client not available')
@@ -1040,14 +1081,18 @@ export class EmailCampaignService {
 
       const campaignId = `scheduled-${Date.now()}`
 
-      const { error } = await (supabaseAdmin.from('email_campaigns') as any).insert([{
-        campaign_id: campaignId,
-        campaign_type: 'scheduled',
-        ...campaignData,
-        segment_filter: JSON.stringify(campaignData.segment_filter || {}),
-        status: 'scheduled',
-        total_recipients: 0 // Will be calculated when sent
-      }])
+      const { error } = await (
+        supabaseAdmin.from('email_campaigns') as any
+      ).insert([
+        {
+          campaign_id: campaignId,
+          campaign_type: 'scheduled',
+          ...campaignData,
+          segment_filter: JSON.stringify(campaignData.segment_filter || {}),
+          status: 'scheduled',
+          total_recipients: 0, // Will be calculated when sent
+        },
+      ])
 
       if (error) {
         return { campaign_id: '', error: error.message }

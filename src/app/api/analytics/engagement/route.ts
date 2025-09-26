@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       ctaPosition,
       mouseMovements,
       keystrokes,
-      metadata = {}
+      metadata = {},
     } = body
 
     if (!visitorId || !eventType) {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       clickTarget,
       formField,
       mouseMovements,
-      keystrokes
+      keystrokes,
     })
 
     // Enhanced engagement metadata
@@ -53,23 +53,22 @@ export async function POST(request: NextRequest) {
       keystroke_count: keystrokes,
       engagement_score: engagementScore,
       interaction_quality: getInteractionQuality(engagementScore),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
 
     // Log engagement event
-    const { error } = await supabaseAdmin
-      .from('page_analytics')
-      .insert({
-        page_path: pagePath || '/',
-        visitor_id: visitorId,
-        session_id: sessionId,
-        event_type: eventType,
-        user_agent_hash: crypto.createHash('sha256')
-          .update(request.headers.get('user-agent') || '')
-          .digest('hex')
-          .substring(0, 16),
-        metadata: engagementMetadata
-      })
+    const { error } = await supabaseAdmin.from('page_analytics').insert({
+      page_path: pagePath || '/',
+      visitor_id: visitorId,
+      session_id: sessionId,
+      event_type: eventType,
+      user_agent_hash: crypto
+        .createHash('sha256')
+        .update(request.headers.get('user-agent') || '')
+        .digest('hex')
+        .substring(0, 16),
+      metadata: engagementMetadata,
+    })
 
     if (error) {
       throw error
@@ -81,9 +80,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       engagementScore,
-      message: 'Engagement tracked successfully'
+      message: 'Engagement tracked successfully',
     })
-
   } catch (error) {
     console.error('Engagement tracking error:', error)
     return NextResponse.json(
@@ -106,16 +104,25 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '7')
     const page = searchParams.get('page')
-    
-    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+
+    const startDate = new Date(
+      Date.now() - days * 24 * 60 * 60 * 1000
+    ).toISOString()
 
     // Get engagement events
     let query = supabaseAdmin
       .from('page_analytics')
-      .select('visitor_id, session_id, event_type, page_path, timestamp, metadata')
+      .select(
+        'visitor_id, session_id, event_type, page_path, timestamp, metadata'
+      )
       .in('event_type', [
-        'scroll_depth', 'time_on_page', 'cta_click', 'form_interaction',
-        'mouse_movement', 'keystroke', 'engagement_score'
+        'scroll_depth',
+        'time_on_page',
+        'cta_click',
+        'form_interaction',
+        'mouse_movement',
+        'keystroke',
+        'engagement_score',
       ])
       .gte('timestamp', startDate)
 
@@ -138,14 +145,13 @@ export async function GET(request: NextRequest) {
       engagementTrend: getEngagementTrend(engagementEvents || []),
       bounceRate: await calculateBounceRate(startDate),
       averageTimeOnSite: getAverageTimeOnSite(engagementEvents || []),
-      ctaEffectiveness: getCTAEffectiveness(engagementEvents || [])
+      ctaEffectiveness: getCTAEffectiveness(engagementEvents || []),
     }
 
     return NextResponse.json({
       success: true,
-      data: engagementStats
+      data: engagementStats,
     })
-
   } catch (error) {
     console.error('Engagement analytics error:', error)
     return NextResponse.json(
@@ -196,7 +202,11 @@ function getInteractionQuality(score: number): string {
   return 'minimal'
 }
 
-async function updateCumulativeEngagement(visitorId: string, sessionId: string | null, score: number) {
+async function updateCumulativeEngagement(
+  visitorId: string,
+  sessionId: string | null,
+  score: number
+) {
   try {
     // Get existing cumulative score
     const { data: existingScore } = await supabaseAdmin
@@ -211,20 +221,18 @@ async function updateCumulativeEngagement(visitorId: string, sessionId: string |
     const newScore = currentScore + score
 
     // Update cumulative engagement
-    await supabaseAdmin
-      .from('page_analytics')
-      .insert({
-        page_path: '/engagement/cumulative',
-        visitor_id: visitorId,
-        session_id: sessionId,
-        event_type: 'cumulative_engagement',
-        metadata: {
-          total_score: newScore,
-          score_increment: score,
-          engagement_level: getEngagementLevel(newScore),
-          timestamp: new Date().toISOString()
-        }
-      })
+    await supabaseAdmin.from('page_analytics').insert({
+      page_path: '/engagement/cumulative',
+      visitor_id: visitorId,
+      session_id: sessionId,
+      event_type: 'cumulative_engagement',
+      metadata: {
+        total_score: newScore,
+        score_increment: score,
+        engagement_level: getEngagementLevel(newScore),
+        timestamp: new Date().toISOString(),
+      },
+    })
   } catch (error) {
     console.error('Cumulative engagement update error:', error)
   }
@@ -239,21 +247,29 @@ function getEngagementLevel(score: number): string {
 }
 
 function getUniqueEngagedVisitors(events: any[]): number {
-  return new Set(events.map(e => e.visitor_id)).size
+  return new Set(events.map((e) => e.visitor_id)).size
 }
 
 function getAverageEngagementScore(events: any[]): number {
-  const scoreEvents = events.filter(e => e.metadata?.engagement_score)
+  const scoreEvents = events.filter((e) => e.metadata?.engagement_score)
   if (scoreEvents.length === 0) return 0
 
-  const totalScore = scoreEvents.reduce((sum, e) => sum + (e.metadata.engagement_score || 0), 0)
+  const totalScore = scoreEvents.reduce(
+    (sum, e) => sum + (e.metadata.engagement_score || 0),
+    0
+  )
   return Math.round((totalScore / scoreEvents.length) * 100) / 100
 }
 
-function getEngagementByPage(events: any[]): Record<string, { events: number; avgScore: number }> {
-  const pageStats: Record<string, { total: number; count: number; scores: number[] }> = {}
+function getEngagementByPage(
+  events: any[]
+): Record<string, { events: number; avgScore: number }> {
+  const pageStats: Record<
+    string,
+    { total: number; count: number; scores: number[] }
+  > = {}
 
-  events.forEach(e => {
+  events.forEach((e) => {
     const page = e.page_path
     if (!pageStats[page]) {
       pageStats[page] = { total: 0, count: 0, scores: [] }
@@ -268,8 +284,13 @@ function getEngagementByPage(events: any[]): Record<string, { events: number; av
   Object.entries(pageStats).forEach(([page, stats]) => {
     result[page] = {
       events: stats.count,
-      avgScore: stats.scores.length > 0 ? 
-        Math.round((stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length) * 100) / 100 : 0
+      avgScore:
+        stats.scores.length > 0
+          ? Math.round(
+              (stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length) *
+                100
+            ) / 100
+          : 0,
     }
   })
 
@@ -279,7 +300,7 @@ function getEngagementByPage(events: any[]): Record<string, { events: number; av
 function getEngagementDistribution(events: any[]): Record<string, number> {
   const distribution = { minimal: 0, low: 0, medium: 0, high: 0 }
 
-  events.forEach(e => {
+  events.forEach((e) => {
     const quality = e.metadata?.interaction_quality
     if (quality && quality in distribution) {
       distribution[quality as keyof typeof distribution]++
@@ -289,10 +310,12 @@ function getEngagementDistribution(events: any[]): Record<string, number> {
   return distribution
 }
 
-function getTopEngagementEvents(events: any[]): Array<{ eventType: string; count: number; avgScore: number }> {
+function getTopEngagementEvents(
+  events: any[]
+): Array<{ eventType: string; count: number; avgScore: number }> {
   const eventStats: Record<string, { count: number; scores: number[] }> = {}
 
-  events.forEach(e => {
+  events.forEach((e) => {
     if (!eventStats[e.event_type]) {
       eventStats[e.event_type] = { count: 0, scores: [] }
     }
@@ -306,8 +329,13 @@ function getTopEngagementEvents(events: any[]): Array<{ eventType: string; count
     .map(([eventType, stats]) => ({
       eventType,
       count: stats.count,
-      avgScore: stats.scores.length > 0 ? 
-        Math.round((stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length) * 100) / 100 : 0
+      avgScore:
+        stats.scores.length > 0
+          ? Math.round(
+              (stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length) *
+                100
+            ) / 100
+          : 0,
     }))
     .sort((a, b) => b.avgScore - a.avgScore)
 }
@@ -315,7 +343,7 @@ function getTopEngagementEvents(events: any[]): Array<{ eventType: string; count
 function getEngagementTrend(events: any[]): Record<string, number> {
   const trendData: Record<string, number> = {}
 
-  events.forEach(e => {
+  events.forEach((e) => {
     const date = new Date(e.timestamp).toISOString().split('T')[0]
     const score = e.metadata?.engagement_score || 0
     trendData[date] = (trendData[date] || 0) + score
@@ -335,14 +363,18 @@ async function calculateBounceRate(startDate: string): Promise<number> {
     if (!sessions) return 0
 
     const sessionCounts: Record<string, number> = {}
-    sessions.forEach(s => {
+    sessions.forEach((s) => {
       sessionCounts[s.session_id] = (sessionCounts[s.session_id] || 0) + 1
     })
 
     const totalSessions = Object.keys(sessionCounts).length
-    const bounceSessions = Object.values(sessionCounts).filter(count => count === 1).length
+    const bounceSessions = Object.values(sessionCounts).filter(
+      (count) => count === 1
+    ).length
 
-    return totalSessions > 0 ? Math.round((bounceSessions / totalSessions) * 100) : 0
+    return totalSessions > 0
+      ? Math.round((bounceSessions / totalSessions) * 100)
+      : 0
   } catch (error) {
     console.error('Bounce rate calculation error:', error)
     return 0
@@ -350,36 +382,49 @@ async function calculateBounceRate(startDate: string): Promise<number> {
 }
 
 function getAverageTimeOnSite(events: any[]): number {
-  const timeEvents = events.filter(e => e.metadata?.time_on_page)
+  const timeEvents = events.filter((e) => e.metadata?.time_on_page)
   if (timeEvents.length === 0) return 0
 
-  const totalTime = timeEvents.reduce((sum, e) => sum + (e.metadata.time_on_page || 0), 0)
-  return Math.round((totalTime / timeEvents.length) / 1000) // Convert to seconds
+  const totalTime = timeEvents.reduce(
+    (sum, e) => sum + (e.metadata.time_on_page || 0),
+    0
+  )
+  return Math.round(totalTime / timeEvents.length / 1000) // Convert to seconds
 }
 
-function getCTAEffectiveness(events: any[]): Record<string, { clicks: number; impressions: number; ctr: number }> {
+function getCTAEffectiveness(
+  events: any[]
+): Record<string, { clicks: number; impressions: number; ctr: number }> {
   const ctaStats: Record<string, { clicks: number; impressions: number }> = {}
 
-  events.forEach(e => {
+  events.forEach((e) => {
     if (e.event_type === 'cta_click' && e.metadata?.cta_position) {
       const position = e.metadata.cta_position
-      if (!ctaStats[position]) ctaStats[position] = { clicks: 0, impressions: 0 }
+      if (!ctaStats[position])
+        ctaStats[position] = { clicks: 0, impressions: 0 }
       ctaStats[position].clicks++
     }
     // Note: We'd need separate impression tracking for accurate CTR
     if (e.event_type === 'cta_view' && e.metadata?.cta_position) {
       const position = e.metadata.cta_position
-      if (!ctaStats[position]) ctaStats[position] = { clicks: 0, impressions: 0 }
+      if (!ctaStats[position])
+        ctaStats[position] = { clicks: 0, impressions: 0 }
       ctaStats[position].impressions++
     }
   })
 
-  const result: Record<string, { clicks: number; impressions: number; ctr: number }> = {}
+  const result: Record<
+    string,
+    { clicks: number; impressions: number; ctr: number }
+  > = {}
   Object.entries(ctaStats).forEach(([position, stats]) => {
     result[position] = {
       clicks: stats.clicks,
       impressions: stats.impressions,
-      ctr: stats.impressions > 0 ? Math.round((stats.clicks / stats.impressions) * 100) : 0
+      ctr:
+        stats.impressions > 0
+          ? Math.round((stats.clicks / stats.impressions) * 100)
+          : 0,
     }
   })
 

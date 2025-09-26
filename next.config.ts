@@ -9,16 +9,16 @@ const nextConfig: NextConfig = {
       'framer-motion',
     ],
   },
-  
+
   // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31536000, // 1 year
   },
-  
+
   // Compression and performance
   compress: true,
-  
+
   // Security headers
   async headers() {
     return [
@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  
+
   // Redirects for SEO
   async redirects() {
     return [
@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  
+
   // Environment variables validation
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,

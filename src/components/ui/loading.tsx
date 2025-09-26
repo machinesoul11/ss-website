@@ -5,7 +5,10 @@ interface LoadingSpinnerProps {
   className?: string
 }
 
-export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  size = 'md',
+  className,
+}: LoadingSpinnerProps) {
   return (
     <div
       className={cn(
@@ -31,10 +34,20 @@ interface LoadingDotsProps {
 
 export function LoadingDots({ className }: LoadingDotsProps) {
   return (
-    <div className={cn('flex space-x-1', className)} role="status" aria-label="Loading">
+    <div
+      className={cn('flex space-x-1', className)}
+      role="status"
+      aria-label="Loading"
+    >
       <div className="h-2 w-2 bg-current rounded-full animate-pulse"></div>
-      <div className="h-2 w-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
-      <div className="h-2 w-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+      <div
+        className="h-2 w-2 bg-current rounded-full animate-pulse"
+        style={{ animationDelay: '0.1s' }}
+      ></div>
+      <div
+        className="h-2 w-2 bg-current rounded-full animate-pulse"
+        style={{ animationDelay: '0.2s' }}
+      ></div>
       <span className="sr-only">Loading...</span>
     </div>
   )
@@ -45,9 +58,16 @@ interface LoadingSkeletonProps {
   lines?: number
 }
 
-export function LoadingSkeleton({ className, lines = 1 }: LoadingSkeletonProps) {
+export function LoadingSkeleton({
+  className,
+  lines = 1,
+}: LoadingSkeletonProps) {
   return (
-    <div className={cn('animate-pulse', className)} role="status" aria-label="Loading content">
+    <div
+      className={cn('animate-pulse', className)}
+      role="status"
+      aria-label="Loading content"
+    >
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}

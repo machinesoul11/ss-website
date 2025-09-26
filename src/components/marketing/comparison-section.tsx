@@ -67,7 +67,9 @@ function FeatureCell({ value }: { value: boolean | string }) {
       <XMarkIcon className="h-5 w-5 text-error-crimson mx-auto" />
     )
   }
-  return <span className="text-sm text-text-gray text-center block">{value}</span>
+  return (
+    <span className="text-sm text-text-gray text-center block">{value}</span>
+  )
 }
 
 export function ComparisonSection() {
@@ -75,13 +77,16 @@ export function ComparisonSection() {
     <section id="comparison" className="py-24 sm:py-32 bg-parchment-white">
       <Container>
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-quill-blue">How We Compare</h2>
+          <h2 className="text-base font-semibold leading-7 text-quill-blue">
+            How We Compare
+          </h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-ink-black sm:text-4xl">
             The best of both worlds
           </p>
           <p className="mt-6 text-lg leading-8 text-text-gray">
-            Silent Scribe combines the ease of use you expect from Grammarly with the privacy 
-            and technical focus of Vale, without the complexity or privacy concerns.
+            Silent Scribe combines the ease of use you expect from Grammarly
+            with the privacy and technical focus of Vale, without the complexity
+            or privacy concerns.
           </p>
         </div>
 
@@ -106,7 +111,14 @@ export function ComparisonSection() {
               </thead>
               <tbody className="bg-parchment-white divide-y divide-border-gray">
                 {comparisonFeatures.map((row, index) => (
-                  <tr key={row.feature} className={index % 2 === 0 ? 'bg-parchment-white' : 'bg-document-gray'}>
+                  <tr
+                    key={row.feature}
+                    className={
+                      index % 2 === 0
+                        ? 'bg-parchment-white'
+                        : 'bg-document-gray'
+                    }
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-body font-medium text-ink-black">
                       {row.feature}
                     </td>
@@ -128,7 +140,8 @@ export function ComparisonSection() {
 
         <div className="mt-12 text-center">
           <p className="text-body text-muted-gray">
-            Ready to experience the perfect balance of power, privacy, and simplicity?
+            Ready to experience the perfect balance of power, privacy, and
+            simplicity?
           </p>
         </div>
       </Container>

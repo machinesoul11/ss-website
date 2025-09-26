@@ -6,7 +6,7 @@ export {
   CTATracker,
   FormTracker,
   FieldTracker,
-  PageViewTracker
+  PageViewTracker,
 } from './AnalyticsProvider'
 
 export {
@@ -14,25 +14,32 @@ export {
   AnalyticsLink,
   AnalyticsForm,
   AnalyticsImage,
-  withAnalytics
+  withAnalytics,
 } from './AnalyticsComponents'
 
-export { EnhancedAnalyticsProvider, useEnhancedAnalyticsContext } from './EnhancedAnalyticsProvider'
+export {
+  EnhancedAnalyticsProvider,
+  useEnhancedAnalyticsContext,
+} from './EnhancedAnalyticsProvider'
 
 export { PrivacyAnalyticsProvider } from './PrivacyAnalyticsProvider'
 
 // Phase 6: Performance Monitoring Components
-export { PerformanceProvider, usePerformanceContext, withPerformanceMonitoring } from './PerformanceProvider'
-export { 
-  PerformanceMonitoringIntegration, 
+export {
+  PerformanceProvider,
+  usePerformanceContext,
+  withPerformanceMonitoring,
+} from './PerformanceProvider'
+export {
+  PerformanceMonitoringIntegration,
   useApplicationPerformance,
   getPerformanceConfig,
-  PerformanceConfig
+  PerformanceConfig,
 } from './PerformanceMonitoringIntegration'
-export { 
-  EnhancedButton, 
-  EnhancedForm, 
-  EnhancedInput, 
+export {
+  EnhancedButton,
+  EnhancedForm,
+  EnhancedInput,
   ScrollDepthTracker,
-  ConversionFunnelStep 
+  ConversionFunnelStep,
 } from './EnhancedComponents'

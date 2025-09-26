@@ -32,7 +32,7 @@ export async function sendEmail(options: EmailOptions) {
       to: options.to,
       from: {
         email: process.env.SENDGRID_FROM_EMAIL || 'hello@silentscribe.dev',
-        name: 'Silent Scribe Team'
+        name: 'Silent Scribe Team',
       },
       subject: options.subject,
       html: options.html,
@@ -44,7 +44,7 @@ export async function sendEmail(options: EmailOptions) {
     }
 
     const response = await sgMail.send(msg)
-    
+
     // Note: Email event logging moved to calling function where user_id is available
 
     return { success: true, data: response }
@@ -58,10 +58,12 @@ export async function sendEmail(options: EmailOptions) {
  * Send comprehensive welcome email to new beta signups
  */
 export async function sendWelcomeEmail(email: string, githubUsername?: string) {
-  const personalizedGreeting = githubUsername ? `Hi ${githubUsername},` : 'Hi there,'
-  
+  const personalizedGreeting = githubUsername
+    ? `Hi ${githubUsername},`
+    : 'Hi there,'
+
   const subject = 'Welcome to the Silent Scribe Beta Program!'
-  
+
   const text = `
 ${personalizedGreeting}
 
@@ -91,7 +93,7 @@ The Silent Scribe Team
 ---
 Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(email)}
   `
-  
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -156,7 +158,7 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
     subject,
     html,
     text,
-    templateId: 'welcome'
+    templateId: 'welcome',
   })
 }
 
@@ -164,14 +166,16 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
  * Send development update email to beta users
  */
 export async function sendDevelopmentUpdate(
-  email: string, 
+  email: string,
   updateContent: string,
   githubUsername?: string
 ): Promise<{ success: boolean; data?: any; error?: any }> {
-  const personalizedGreeting = githubUsername ? `Hi ${githubUsername},` : 'Hi there,'
-  
+  const personalizedGreeting = githubUsername
+    ? `Hi ${githubUsername},`
+    : 'Hi there,'
+
   const subject = 'Silent Scribe Development Update'
-  
+
   const text = `
 ${personalizedGreeting}
 
@@ -187,7 +191,7 @@ The Silent Scribe Team
 ---
 Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(email)}
   `
-  
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -204,7 +208,10 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
   <p>${personalizedGreeting}</p>
   
   <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-    ${updateContent.split('\n').map(line => line.trim() ? `<p>${line}</p>` : '').join('')}
+    ${updateContent
+      .split('\n')
+      .map((line) => (line.trim() ? `<p>${line}</p>` : ''))
+      .join('')}
   </div>
   
   <p>We're making great progress and can't wait to get this into your hands!</p>
@@ -224,18 +231,23 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
     subject,
     html,
     text,
-    templateId: 'development_update'
+    templateId: 'development_update',
   })
 }
 
 /**
  * Send feedback request email
  */
-export async function sendFeedbackRequest(email: string, githubUsername?: string): Promise<{ success: boolean; data?: any; error?: any }> {
-  const personalizedGreeting = githubUsername ? `Hi ${githubUsername},` : 'Hi there,'
-  
+export async function sendFeedbackRequest(
+  email: string,
+  githubUsername?: string
+): Promise<{ success: boolean; data?: any; error?: any }> {
+  const personalizedGreeting = githubUsername
+    ? `Hi ${githubUsername},`
+    : 'Hi there,'
+
   const subject = "We'd love your feedback on Silent Scribe"
-  
+
   const text = `
 ${personalizedGreeting}
 
@@ -257,7 +269,7 @@ The Silent Scribe Team
 ---
 Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(email)}
   `
-  
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -308,18 +320,23 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
     subject,
     html,
     text,
-    templateId: 'feedback_request'
+    templateId: 'feedback_request',
   })
 }
 
 /**
  * Send re-engagement email to inactive users
  */
-export async function sendReEngagementEmail(email: string, githubUsername?: string): Promise<{ success: boolean; data?: any; error?: any }> {
-  const personalizedGreeting = githubUsername ? `Hi ${githubUsername},` : 'Hi there,'
-  
-  const subject = "We miss you! Silent Scribe updates inside"
-  
+export async function sendReEngagementEmail(
+  email: string,
+  githubUsername?: string
+): Promise<{ success: boolean; data?: any; error?: any }> {
+  const personalizedGreeting = githubUsername
+    ? `Hi ${githubUsername},`
+    : 'Hi there,'
+
+  const subject = 'We miss you! Silent Scribe updates inside'
+
   const text = `
 ${personalizedGreeting}
 
@@ -346,7 +363,7 @@ The Silent Scribe Team
 ---
 Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(email)}
   `
-  
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -406,18 +423,24 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
     subject,
     html,
     text,
-    templateId: 're_engagement'
+    templateId: 're_engagement',
   })
 }
 
 /**
  * Send early access invitation email
  */
-export async function sendEarlyAccessInvite(email: string, downloadLink: string, githubUsername?: string): Promise<{ success: boolean; data?: any; error?: any }> {
-  const personalizedGreeting = githubUsername ? `Hi ${githubUsername},` : 'Hi there,'
-  
-  const subject = "🎉 Your Silent Scribe early access is ready!"
-  
+export async function sendEarlyAccessInvite(
+  email: string,
+  downloadLink: string,
+  githubUsername?: string
+): Promise<{ success: boolean; data?: any; error?: any }> {
+  const personalizedGreeting = githubUsername
+    ? `Hi ${githubUsername},`
+    : 'Hi there,'
+
+  const subject = '🎉 Your Silent Scribe early access is ready!'
+
   const text = `
 ${personalizedGreeting}
 
@@ -449,7 +472,7 @@ The Silent Scribe Team
 ---
 Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(email)}
   `
-  
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -519,7 +542,7 @@ Unsubscribe: https://silentscribe.dev/unsubscribe?email=${encodeURIComponent(ema
     subject,
     html,
     text,
-    templateId: 'early_access'
+    templateId: 'early_access',
   })
 }
 
@@ -534,7 +557,7 @@ export async function createCampaign(campaignData: {
   testMode?: boolean
 }): Promise<{ id: string; campaignId: string }> {
   const campaignId = `camp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  
+
   const { data, error } = await supabaseAdmin
     .from('email_campaigns')
     .insert({
@@ -545,7 +568,7 @@ export async function createCampaign(campaignData: {
       scheduled_at: campaignData.scheduledAt,
       test_mode: campaignData.testMode || false,
       status: campaignData.scheduledAt ? 'scheduled' : 'draft',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     })
     .select()
     .single()
@@ -571,10 +594,10 @@ export async function getEmailTemplates(): Promise<{
   // For now, return the template types we support
   return {
     welcome: 'welcome_template_id',
-    development_update: 'dev_update_template_id', 
+    development_update: 'dev_update_template_id',
     feedback_request: 'feedback_template_id',
     early_access: 'early_access_template_id',
-    re_engagement: 're_engagement_template_id'
+    re_engagement: 're_engagement_template_id',
   }
 }
 
@@ -584,7 +607,16 @@ export async function getEmailTemplates(): Promise<{
 export async function handleSendGridWebhook(events: any[]): Promise<void> {
   for (const event of events) {
     // Process all event types including bounces and spam complaints
-    const supportedEvents = ['sent', 'delivered', 'opened', 'clicked', 'bounce', 'dropped', 'spamreport', 'unsubscribe']
+    const supportedEvents = [
+      'sent',
+      'delivered',
+      'opened',
+      'clicked',
+      'bounce',
+      'dropped',
+      'spamreport',
+      'unsubscribe',
+    ]
     if (!supportedEvents.includes(event.event)) {
       console.warn(`Unsupported event type: ${event.event}`)
       continue
@@ -615,7 +647,15 @@ export async function handleSendGridWebhook(events: any[]): Promise<void> {
     await logEmailEvent({
       userId: user.id,
       emailType: event.email_type || 'update',
-      eventType: event.event as 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounce' | 'dropped' | 'spamreport' | 'unsubscribe',
+      eventType: event.event as
+        | 'sent'
+        | 'delivered'
+        | 'opened'
+        | 'clicked'
+        | 'bounce'
+        | 'dropped'
+        | 'spamreport'
+        | 'unsubscribe',
       emailSubject: event.subject || 'Unknown Subject',
       campaignId: event.campaign_id,
       metadata: {
@@ -627,8 +667,8 @@ export async function handleSendGridWebhook(events: any[]): Promise<void> {
         bounce_reason: event.reason, // for bounces
         bounce_type: event.type, // hard or soft bounce
         status: event.status,
-        response: event.response
-      }
+        response: event.response,
+      },
     })
   }
 }
@@ -636,21 +676,27 @@ export async function handleSendGridWebhook(events: any[]): Promise<void> {
 /**
  * Handle email bounces - mark users as undeliverable if hard bounce
  */
-async function handleEmailBounce(email: string, reason: string, event: any): Promise<void> {
+async function handleEmailBounce(
+  email: string,
+  reason: string,
+  event: any
+): Promise<void> {
   try {
     // Check if it's a hard bounce (permanent failure)
     const hardBounceReasons = ['550', '551', '553', '554', '556']
-    const isHardBounce = hardBounceReasons.some(code => event.status?.includes(code)) || event.type === 'bounce'
+    const isHardBounce =
+      hardBounceReasons.some((code) => event.status?.includes(code)) ||
+      event.type === 'bounce'
 
     if (isHardBounce) {
       // Mark user as undeliverable to prevent future sends
       await supabaseAdmin
         .from('beta_signups')
-        .update({ 
+        .update({
           opted_in_marketing: false,
           email_status: 'bounced',
           bounce_reason: reason,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('email', email)
 
@@ -658,18 +704,15 @@ async function handleEmailBounce(email: string, reason: string, event: any): Pro
     }
 
     // Log bounce for monitoring
-    await supabaseAdmin
-      .from('email_bounces')
-      .insert({
-        email,
-        bounce_type: isHardBounce ? 'hard' : 'soft',
-        reason,
-        status_code: event.status,
-        response_text: event.response,
-        sg_event_id: event.sg_event_id,
-        timestamp: new Date().toISOString()
-      })
-
+    await supabaseAdmin.from('email_bounces').insert({
+      email,
+      bounce_type: isHardBounce ? 'hard' : 'soft',
+      reason,
+      status_code: event.status,
+      response_text: event.response,
+      sg_event_id: event.sg_event_id,
+      timestamp: new Date().toISOString(),
+    })
   } catch (error) {
     console.error(`Failed to handle bounce for ${email}:`, error)
   }
@@ -683,29 +726,26 @@ async function handleSpamComplaint(email: string, event: any): Promise<void> {
     // Immediately unsubscribe user who reported spam
     await supabaseAdmin
       .from('beta_signups')
-      .update({ 
+      .update({
         opted_in_marketing: false,
         opted_in_research: false,
         email_status: 'spam_complaint',
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('email', email)
 
     // Log spam complaint for review
-    await supabaseAdmin
-      .from('spam_complaints')
-      .insert({
-        email,
-        sg_event_id: event.sg_event_id,
-        timestamp: new Date().toISOString(),
-        metadata: {
-          user_agent: event.useragent,
-          ip: event.ip
-        }
-      })
+    await supabaseAdmin.from('spam_complaints').insert({
+      email,
+      sg_event_id: event.sg_event_id,
+      timestamp: new Date().toISOString(),
+      metadata: {
+        user_agent: event.useragent,
+        ip: event.ip,
+      },
+    })
 
     console.log(`Processed spam complaint for: ${email}`)
-
   } catch (error) {
     console.error(`Failed to handle spam complaint for ${email}:`, error)
   }
@@ -714,19 +754,21 @@ async function handleSpamComplaint(email: string, event: any): Promise<void> {
 /**
  * Handle unsubscribe events from email links
  */
-async function handleUnsubscribeEvent(email: string, _event: any): Promise<void> {
+async function handleUnsubscribeEvent(
+  email: string,
+  _event: any
+): Promise<void> {
   try {
     await supabaseAdmin
       .from('beta_signups')
-      .update({ 
+      .update({
         opted_in_marketing: false,
         email_status: 'unsubscribed',
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('email', email)
 
     console.log(`Processed unsubscribe for: ${email}`)
-
   } catch (error) {
     console.error(`Failed to handle unsubscribe for ${email}:`, error)
   }
@@ -744,10 +786,19 @@ export async function getUserSegments(): Promise<{
 }> {
   const { data: users } = await supabaseAdmin
     .from('beta_signups')
-    .select('id, email, engagement_score, github_username, team_size, created_at')
+    .select(
+      'id, email, engagement_score, github_username, team_size, created_at'
+    )
     .eq('opted_in_marketing', true)
 
-  if (!users) return { highEngagement: [], hasGitHub: [], largeTeams: [], recentSignups: [], inactiveUsers: [] }
+  if (!users)
+    return {
+      highEngagement: [],
+      hasGitHub: [],
+      largeTeams: [],
+      recentSignups: [],
+      inactiveUsers: [],
+    }
 
   const now = new Date()
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -759,28 +810,35 @@ export async function getUserSegments(): Promise<{
     .select('user_id')
     .gte('timestamp', twoWeeksAgo.toISOString())
 
-  const activeUserIds = new Set(recentEmailActivity?.map(e => e.user_id) || [])
+  const activeUserIds = new Set(
+    recentEmailActivity?.map((e) => e.user_id) || []
+  )
 
   return {
     highEngagement: users
-      .filter(u => u.engagement_score > 70)
-      .map(u => u.email),
-    hasGitHub: users
-      .filter(u => u.github_username)
-      .map(u => u.email),
+      .filter((u) => u.engagement_score > 70)
+      .map((u) => u.email),
+    hasGitHub: users.filter((u) => u.github_username).map((u) => u.email),
     largeTeams: users
-      .filter(u => u.team_size && !['individual', 'small_team'].includes(u.team_size))
-      .map(u => u.email),
+      .filter(
+        (u) =>
+          u.team_size && !['individual', 'small_team'].includes(u.team_size)
+      )
+      .map((u) => u.email),
     recentSignups: users
-      .filter(u => new Date(u.created_at) > weekAgo)
-      .map(u => u.email),
+      .filter((u) => new Date(u.created_at) > weekAgo)
+      .map((u) => u.email),
     inactiveUsers: users
-      .filter(u => {
+      .filter((u) => {
         // Find user ID for this email
         const userId = u.id || null
-        return userId && !activeUserIds.has(userId) && new Date(u.created_at) < twoWeeksAgo
+        return (
+          userId &&
+          !activeUserIds.has(userId) &&
+          new Date(u.created_at) < twoWeeksAgo
+        )
       })
-      .map(u => u.email)
+      .map((u) => u.email),
   }
 }
 
@@ -788,8 +846,21 @@ export async function getUserSegments(): Promise<{
 
 interface EmailEventOptions {
   userId: string
-  emailType: 'welcome' | 'update' | 'early_access' | 'feedback_request' | 're_engagement'
-  eventType: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounce' | 'dropped' | 'spamreport' | 'unsubscribe'
+  emailType:
+    | 'welcome'
+    | 'update'
+    | 'early_access'
+    | 'feedback_request'
+    | 're_engagement'
+  eventType:
+    | 'sent'
+    | 'delivered'
+    | 'opened'
+    | 'clicked'
+    | 'bounce'
+    | 'dropped'
+    | 'spamreport'
+    | 'unsubscribe'
   emailSubject: string
   campaignId?: string
   metadata?: Record<string, any>
@@ -797,16 +868,14 @@ interface EmailEventOptions {
 
 async function logEmailEvent(options: EmailEventOptions): Promise<void> {
   try {
-    await supabaseAdmin
-      .from('email_events')
-      .insert({
-        user_id: options.userId,
-        email_type: options.emailType,
-        event_type: options.eventType,
-        email_subject: options.emailSubject,
-        campaign_id: options.campaignId,
-        metadata: options.metadata,
-      })
+    await supabaseAdmin.from('email_events').insert({
+      user_id: options.userId,
+      email_type: options.emailType,
+      event_type: options.eventType,
+      email_subject: options.emailSubject,
+      campaign_id: options.campaignId,
+      metadata: options.metadata,
+    })
   } catch (error) {
     console.error('Failed to log email event:', error)
     // Don't throw - email events are not critical

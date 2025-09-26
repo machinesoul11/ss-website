@@ -1,7 +1,7 @@
 /**
  * Error Tracking API Endpoint
  * Phase 6: Performance Monitoring - Error Handling System
- * 
+ *
  * Receives and stores error reports and performance issues
  */
 
@@ -24,7 +24,12 @@ interface ErrorDetails {
 }
 
 interface PerformanceIssue {
-  type: 'slow-api' | 'memory-leak' | 'large-bundle' | 'poor-vitals' | 'failed-request'
+  type:
+    | 'slow-api'
+    | 'memory-leak'
+    | 'large-bundle'
+    | 'poor-vitals'
+    | 'failed-request'
   severity: 'low' | 'medium' | 'high' | 'critical'
   message: string
   page: string
@@ -39,7 +44,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       errors,
-      performanceIssues
+      performanceIssues,
     }: {
       errors: ErrorDetails[]
       performanceIssues: PerformanceIssue[]
@@ -56,7 +61,7 @@ export async function POST(request: NextRequest) {
     const results = {
       errorsStored: 0,
       performanceIssuesStored: 0,
-      alertsCreated: 0
+      alertsCreated: 0,
     }
 
     // Store errors
@@ -90,16 +95,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Error reports and performance issues recorded',
-      results
+      results,
     })
-
   } catch (error) {
     console.error('Error tracking API error:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to record error reports',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -121,7 +125,7 @@ export async function GET(request: NextRequest) {
       severity,
       category,
       days,
-      limit
+      limit,
     })
 
     // Get performance issues
@@ -129,7 +133,7 @@ export async function GET(request: NextRequest) {
       page,
       severity,
       days,
-      limit
+      limit,
     })
 
     // Calculate error statistics
@@ -140,17 +144,16 @@ export async function GET(request: NextRequest) {
       data: {
         errors: errorData,
         performanceIssues,
-        stats
-      }
+        stats,
+      },
     })
-
   } catch (error) {
     console.error('Get error data error:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to get error data',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -167,33 +170,33 @@ async function storeError(error: ErrorDetails, request: NextRequest) {
 
   // Get IP and hash user agent for anonymity
   const forwarded = request.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown'
+  const ip = forwarded
+    ? forwarded.split(',')[0]
+    : request.headers.get('x-real-ip') || 'unknown'
   const ipHash = await hashString(ip)
   const userAgentHash = await hashString(error.userAgent)
 
-  const { error: dbError } = await supabaseAdmin
-    .from('page_analytics')
-    .insert([
-      {
-        page_path: error.page,
-        visitor_id: ipHash,
-        session_id: `error_${error.timestamp}`,
-        event_type: 'error',
-        timestamp: new Date(error.timestamp).toISOString(),
-        user_agent_hash: userAgentHash,
-        metadata: {
-          error: {
-            message: error.message,
-            stack: error.stack,
-            componentStack: error.componentStack,
-            errorBoundary: error.errorBoundary,
-            severity: error.severity,
-            category: error.category,
-            ...error.metadata
-          }
-        }
-      }
-    ])
+  const { error: dbError } = await supabaseAdmin.from('page_analytics').insert([
+    {
+      page_path: error.page,
+      visitor_id: ipHash,
+      session_id: `error_${error.timestamp}`,
+      event_type: 'error',
+      timestamp: new Date(error.timestamp).toISOString(),
+      user_agent_hash: userAgentHash,
+      metadata: {
+        error: {
+          message: error.message,
+          stack: error.stack,
+          componentStack: error.componentStack,
+          errorBoundary: error.errorBoundary,
+          severity: error.severity,
+          category: error.category,
+          ...error.metadata,
+        },
+      },
+    },
+  ])
 
   if (dbError) {
     console.error('Failed to store error:', dbError)
@@ -204,37 +207,40 @@ async function storeError(error: ErrorDetails, request: NextRequest) {
 /**
  * Store performance issue in database
  */
-async function storePerformanceIssue(issue: PerformanceIssue, request: NextRequest) {
+async function storePerformanceIssue(
+  issue: PerformanceIssue,
+  request: NextRequest
+) {
   if (!supabaseAdmin) {
     throw new Error('Supabase admin client not available')
   }
 
   const forwarded = request.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown'
+  const ip = forwarded
+    ? forwarded.split(',')[0]
+    : request.headers.get('x-real-ip') || 'unknown'
   const ipHash = await hashString(ip)
   const userAgentHash = await hashString(issue.userAgent)
 
-  const { error: dbError } = await supabaseAdmin
-    .from('page_analytics')
-    .insert([
-      {
-        page_path: issue.page,
-        visitor_id: ipHash,
-        session_id: `perf_${issue.timestamp}`,
-        event_type: 'performance_issue',
-        timestamp: new Date(issue.timestamp).toISOString(),
-        user_agent_hash: userAgentHash,
-        metadata: {
-          performance_issue: {
-            type: issue.type,
-            message: issue.message,
-            severity: issue.severity,
-            metrics: issue.metrics,
-            resolved: issue.resolved || false
-          }
-        }
-      }
-    ])
+  const { error: dbError } = await supabaseAdmin.from('page_analytics').insert([
+    {
+      page_path: issue.page,
+      visitor_id: ipHash,
+      session_id: `perf_${issue.timestamp}`,
+      event_type: 'performance_issue',
+      timestamp: new Date(issue.timestamp).toISOString(),
+      user_agent_hash: userAgentHash,
+      metadata: {
+        performance_issue: {
+          type: issue.type,
+          message: issue.message,
+          severity: issue.severity,
+          metrics: issue.metrics,
+          resolved: issue.resolved || false,
+        },
+      },
+    },
+  ])
 
   if (dbError) {
     console.error('Failed to store performance issue:', dbError)
@@ -249,25 +255,23 @@ async function createErrorAlert(error: ErrorDetails) {
   if (!supabaseAdmin) return
 
   // Store alert in system_events table (if it exists) or page_analytics
-  const { error: dbError } = await supabaseAdmin
-    .from('page_analytics')
-    .insert([
-      {
-        page_path: '/admin',
-        event_type: 'system_alert',
-        timestamp: new Date().toISOString(),
-        metadata: {
-          alert: {
-            type: 'error',
-            severity: error.severity,
-            message: `Critical error on ${error.page}: ${error.message}`,
-            page: error.page,
-            category: error.category,
-            timestamp: error.timestamp
-          }
-        }
-      }
-    ])
+  const { error: dbError } = await supabaseAdmin.from('page_analytics').insert([
+    {
+      page_path: '/admin',
+      event_type: 'system_alert',
+      timestamp: new Date().toISOString(),
+      metadata: {
+        alert: {
+          type: 'error',
+          severity: error.severity,
+          message: `Critical error on ${error.page}: ${error.message}`,
+          page: error.page,
+          category: error.category,
+          timestamp: error.timestamp,
+        },
+      },
+    },
+  ])
 
   if (dbError) {
     console.error('Failed to create error alert:', dbError)
@@ -280,26 +284,24 @@ async function createErrorAlert(error: ErrorDetails) {
 async function createPerformanceAlert(issue: PerformanceIssue) {
   if (!supabaseAdmin) return
 
-  const { error: dbError } = await supabaseAdmin
-    .from('page_analytics')
-    .insert([
-      {
-        page_path: '/admin',
-        event_type: 'system_alert',
-        timestamp: new Date().toISOString(),
-        metadata: {
-          alert: {
-            type: 'performance',
-            severity: issue.severity,
-            message: `Performance issue on ${issue.page}: ${issue.message}`,
-            page: issue.page,
-            issueType: issue.type,
-            metrics: issue.metrics,
-            timestamp: issue.timestamp
-          }
-        }
-      }
-    ])
+  const { error: dbError } = await supabaseAdmin.from('page_analytics').insert([
+    {
+      page_path: '/admin',
+      event_type: 'system_alert',
+      timestamp: new Date().toISOString(),
+      metadata: {
+        alert: {
+          type: 'performance',
+          severity: issue.severity,
+          message: `Performance issue on ${issue.page}: ${issue.message}`,
+          page: issue.page,
+          issueType: issue.type,
+          metrics: issue.metrics,
+          timestamp: issue.timestamp,
+        },
+      },
+    },
+  ])
 
   if (dbError) {
     console.error('Failed to create performance alert:', dbError)
@@ -383,7 +385,11 @@ async function getPerformanceIssues(filters: {
   }
 
   if (filters.severity) {
-    query = query.filter('metadata->performance_issue->severity', 'eq', filters.severity)
+    query = query.filter(
+      'metadata->performance_issue->severity',
+      'eq',
+      filters.severity
+    )
   }
 
   const { data, error } = await query
@@ -434,7 +440,7 @@ async function calculateErrorStats(days: number) {
     critical: 0,
     high: 0,
     medium: 0,
-    low: 0
+    low: 0,
   }
 
   const performanceStats = {
@@ -442,11 +448,11 @@ async function calculateErrorStats(days: number) {
     critical: 0,
     high: 0,
     medium: 0,
-    low: 0
+    low: 0,
   }
 
   // Count errors by severity
-  errorData?.forEach(item => {
+  errorData?.forEach((item) => {
     const severity = item.metadata?.error?.severity
     if (severity && severity in errorStats) {
       errorStats[severity as keyof typeof errorStats]++
@@ -454,7 +460,7 @@ async function calculateErrorStats(days: number) {
   })
 
   // Count performance issues by severity
-  perfData?.forEach(item => {
+  perfData?.forEach((item) => {
     const severity = item.metadata?.performance_issue?.severity
     if (severity && severity in performanceStats) {
       performanceStats[severity as keyof typeof performanceStats]++
@@ -464,7 +470,7 @@ async function calculateErrorStats(days: number) {
   return {
     errors: errorStats,
     performance: performanceStats,
-    period: `${days} days`
+    period: `${days} days`,
   }
 }
 
@@ -476,5 +482,5 @@ async function hashString(input: string): Promise<string> {
   const data = encoder.encode(input)
   const hashBuffer = await crypto.subtle.digest('SHA-256', data)
   const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }

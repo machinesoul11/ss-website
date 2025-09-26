@@ -16,13 +16,13 @@ const config: Config = {
         'quill-blue': '#2563EB',
         'quill-blue-light': '#93C5FD',
         'whisper-gray': '#6B7280',
-        
+
         // Secondary Colors (Feedback System)
         'suggestion-green': '#10B981',
         'warning-amber': '#F59E0B',
         'error-crimson': '#EF4444',
         'focus-purple': '#7C3AED',
-        
+
         // Neutral Colors
         'document-gray': '#F9FAFB',
         'border-gray': '#E5E7EB',
@@ -35,12 +35,12 @@ const config: Config = {
       },
       fontSize: {
         // Typography Hierarchy
-        'h1': ['24px', { lineHeight: '32px', fontWeight: '700' }],
-        'h2': ['20px', { lineHeight: '28px', fontWeight: '500' }],
-        'h3': ['16px', { lineHeight: '24px', fontWeight: '500' }],
-        'body': ['14px', { lineHeight: '20px', fontWeight: '400' }],
-        'caption': ['12px', { lineHeight: '16px', fontWeight: '400' }],
-        'code': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+        h1: ['24px', { lineHeight: '32px', fontWeight: '700' }],
+        h2: ['20px', { lineHeight: '28px', fontWeight: '500' }],
+        h3: ['16px', { lineHeight: '24px', fontWeight: '500' }],
+        body: ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        caption: ['12px', { lineHeight: '16px', fontWeight: '400' }],
+        code: ['13px', { lineHeight: '18px', fontWeight: '400' }],
         'ui-label': ['13px', { lineHeight: '18px', fontWeight: '500' }],
       },
       boxShadow: {
@@ -48,7 +48,7 @@ const config: Config = {
         'focus-outline': '0 0 0 2px #7C3AED',
       },
       borderRadius: {
-        'card': '6px',
+        card: '6px',
       },
       animation: {
         'fade-in': 'fadeIn 150ms ease-out',

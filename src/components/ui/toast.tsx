@@ -2,7 +2,13 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { Transition } from '@headlessui/react'
-import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 
 interface Toast {
@@ -42,7 +48,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
   const addToast = (toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9)
     const newToast = { ...toast, id }
-    
+
     setToasts((prev) => [...prev, newToast])
 
     // Auto remove toast after duration
@@ -177,24 +183,36 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 // Convenience hooks for different toast types
 export function useSuccessToast() {
   const { addToast } = useToast()
-  return (title: string, message?: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>) =>
-    addToast({ type: 'success', title, message, ...options })
+  return (
+    title: string,
+    message?: string,
+    options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>
+  ) => addToast({ type: 'success', title, message, ...options })
 }
 
 export function useErrorToast() {
   const { addToast } = useToast()
-  return (title: string, message?: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>) =>
-    addToast({ type: 'error', title, message, ...options })
+  return (
+    title: string,
+    message?: string,
+    options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>
+  ) => addToast({ type: 'error', title, message, ...options })
 }
 
 export function useWarningToast() {
   const { addToast } = useToast()
-  return (title: string, message?: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>) =>
-    addToast({ type: 'warning', title, message, ...options })
+  return (
+    title: string,
+    message?: string,
+    options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>
+  ) => addToast({ type: 'warning', title, message, ...options })
 }
 
 export function useInfoToast() {
   const { addToast } = useToast()
-  return (title: string, message?: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>) =>
-    addToast({ type: 'info', title, message, ...options })
+  return (
+    title: string,
+    message?: string,
+    options?: Partial<Omit<Toast, 'id' | 'type' | 'title' | 'message'>>
+  ) => addToast({ type: 'info', title, message, ...options })
 }

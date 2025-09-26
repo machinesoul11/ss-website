@@ -18,11 +18,7 @@ interface MultiStepFormProps {
 }
 
 export function MultiStepForm({ children, className }: MultiStepFormProps) {
-  return (
-    <div className={cn('space-y-6', className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('space-y-6', className)}>{children}</div>
 }
 
 interface StepIndicatorProps {
@@ -31,26 +27,35 @@ interface StepIndicatorProps {
   className?: string
 }
 
-export function StepIndicator({ steps, currentStep, className }: StepIndicatorProps) {
+export function StepIndicator({
+  steps,
+  currentStep,
+  className,
+}: StepIndicatorProps) {
   return (
     <nav className={cn('mb-8', className)} aria-label="Progress">
       <ol className="flex items-center">
         {steps.map((step, stepIdx) => {
           const isCompleted = stepIdx < currentStep
           const isActive = stepIdx === currentStep
-          
+
           return (
-            <li key={step.id} className={cn('flex items-center', {
-              'flex-1': stepIdx < steps.length - 1,
-            })}>
+            <li
+              key={step.id}
+              className={cn('flex items-center', {
+                'flex-1': stepIdx < steps.length - 1,
+              })}
+            >
               <div className="flex items-center">
                 <div
                   className={cn(
                     'flex h-8 w-8 items-center justify-center rounded-full border-2',
                     {
-                      'bg-suggestion-green border-suggestion-green': isCompleted,
+                      'bg-suggestion-green border-suggestion-green':
+                        isCompleted,
                       'border-quill-blue bg-quill-blue': isActive,
-                      'border-border-gray bg-parchment-white': !isCompleted && !isActive,
+                      'border-border-gray bg-parchment-white':
+                        !isCompleted && !isActive,
                     }
                   )}
                 >
@@ -86,13 +91,10 @@ export function StepIndicator({ steps, currentStep, className }: StepIndicatorPr
               </div>
               {stepIdx < steps.length - 1 && (
                 <div
-                  className={cn(
-                    'ml-6 flex-1 h-0.5',
-                    {
-                      'bg-suggestion-green': isCompleted,
-                      'bg-border-gray': !isCompleted,
-                    }
-                  )}
+                  className={cn('ml-6 flex-1 h-0.5', {
+                    'bg-suggestion-green': isCompleted,
+                    'bg-border-gray': !isCompleted,
+                  })}
                 />
               )}
             </li>
@@ -110,7 +112,12 @@ interface FormStepProps {
   className?: string
 }
 
-export function FormStep({ title, description, children, className }: FormStepProps) {
+export function FormStep({
+  title,
+  description,
+  children,
+  className,
+}: FormStepProps) {
   return (
     <div className={cn('space-y-6', className)}>
       <div>
@@ -119,9 +126,7 @@ export function FormStep({ title, description, children, className }: FormStepPr
           <p className="mt-1 text-body text-muted-gray">{description}</p>
         )}
       </div>
-      <div className="space-y-4">
-        {children}
-      </div>
+      <div className="space-y-4">{children}</div>
     </div>
   )
 }
@@ -158,7 +163,12 @@ export function FormNavigation({
   className,
 }: FormNavigationProps) {
   return (
-    <div className={cn('flex justify-between pt-6 border-t border-border-gray', className)}>
+    <div
+      className={cn(
+        'flex justify-between pt-6 border-t border-border-gray',
+        className
+      )}
+    >
       <div>
         {showPrevious && onPrevious && (
           <button
@@ -171,7 +181,7 @@ export function FormNavigation({
           </button>
         )}
       </div>
-      
+
       <div className="flex space-x-3">
         {showNext && onNext && (
           <button
@@ -183,7 +193,7 @@ export function FormNavigation({
             {nextLabel}
           </button>
         )}
-        
+
         {showSubmit && onSubmit && (
           <button
             type="submit"

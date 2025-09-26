@@ -7,6 +7,7 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
 ## ✅ Completed Features
 
 ### 1. Anonymous Visitor Identification System
+
 - **File**: `src/lib/services/anonymous-analytics.ts`
 - **API**: `/api/analytics/anonymous-visitor`
 - **Features**:
@@ -16,6 +17,7 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
   - Automatic returning visitor detection
 
 ### 2. Aggregated Metrics Storage
+
 - **File**: `/api/analytics/aggregated-metrics`
 - **Features**:
   - Real-time metrics generation
@@ -29,6 +31,7 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
     - Device and timezone distribution
 
 ### 3. Admin Analytics Dashboard
+
 - **Component**: `src/components/admin/PrivacyAnalyticsDashboard.tsx`
 - **Features**:
   - Real-time metrics display
@@ -38,6 +41,7 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
   - Responsive layout using existing design system
 
 ### 4. Performance Monitoring
+
 - **File**: `src/lib/services/performance-monitoring.ts`
 - **API**: `/api/analytics/performance`
 - **Features**:
@@ -48,6 +52,7 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
   - Automatic alerts for poor performance
 
 ### 5. API Performance Tracking
+
 - **API**: `/api/analytics/api-performance`
 - **Features**:
   - API response time monitoring
@@ -57,6 +62,7 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
   - Performance trend analysis
 
 ### 6. Privacy Analytics Provider
+
 - **Component**: `src/components/analytics/PrivacyAnalyticsProvider.tsx`
 - **Features**:
   - React context for analytics integration
@@ -68,18 +74,19 @@ This implementation completes Phase 6 of the Silent Scribe website checklist, sp
 ## 🔧 Technical Implementation
 
 ### Database Schema
+
 The system uses the existing `page_analytics` table with enhanced metadata structure:
 
 ```typescript
 interface PageAnalytics {
   id: string
   page_path: string
-  visitor_id?: string  // Anonymous hash
-  session_id?: string  // Session identifier
-  event_type: string   // Event classification
-  timestamp: string    // Event time
-  referrer?: string    // Referrer domain only
-  user_agent_hash?: string  // Hashed user agent
+  visitor_id?: string // Anonymous hash
+  session_id?: string // Session identifier
+  event_type: string // Event classification
+  timestamp: string // Event time
+  referrer?: string // Referrer domain only
+  user_agent_hash?: string // Hashed user agent
   metadata?: {
     // Flexible JSON structure for event-specific data
     performance?: PerformanceMetrics
@@ -91,6 +98,7 @@ interface PageAnalytics {
 ```
 
 ### Privacy Architecture
+
 1. **No Personal Data**: Only anonymous fingerprints and hashed identifiers
 2. **No Cookies**: All tracking uses session-based identification
 3. **Aggregated Storage**: Personal patterns are aggregated into anonymous metrics
@@ -99,21 +107,26 @@ interface PageAnalytics {
 
 ### API Endpoints
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/analytics/anonymous-visitor` | POST, GET | Visitor identification and session management |
-| `/api/analytics/aggregated-metrics` | POST, GET | Aggregated analytics data |
-| `/api/analytics/performance` | POST, GET | Core Web Vitals and performance metrics |
-| `/api/analytics/api-performance` | POST, GET | API response time and error tracking |
+| Endpoint                            | Method    | Purpose                                       |
+| ----------------------------------- | --------- | --------------------------------------------- |
+| `/api/analytics/anonymous-visitor`  | POST, GET | Visitor identification and session management |
+| `/api/analytics/aggregated-metrics` | POST, GET | Aggregated analytics data                     |
+| `/api/analytics/performance`        | POST, GET | Core Web Vitals and performance metrics       |
+| `/api/analytics/api-performance`    | POST, GET | API response time and error tracking          |
 
 ## 🚀 Integration Guide
 
 ### 1. Wrap Your App with Analytics Provider
+
 ```tsx
 // In your root layout or app component
 import { PrivacyAnalyticsProvider } from '@/components/analytics/PrivacyAnalyticsProvider'
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html>
       <body>
@@ -121,7 +134,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           config={{
             enableTracking: true,
             respectDoNotTrack: true,
-            enablePerformanceMonitoring: true
+            enablePerformanceMonitoring: true,
           }}
         >
           {children}
@@ -133,43 +146,42 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 
 ### 2. Track Events in Components
+
 ```tsx
 import { usePrivacyAnalytics } from '@/components/analytics/PrivacyAnalyticsProvider'
 
 function MyComponent() {
   const { trackEvent, trackConversion } = usePrivacyAnalytics()
-  
+
   const handleButtonClick = () => {
     trackEvent('button_click', {
       buttonText: 'Sign Up',
-      location: 'hero'
+      location: 'hero',
     })
   }
-  
+
   const handleFormSubmit = () => {
     trackConversion('beta_signup', 1)
   }
-  
-  return (
-    <button onClick={handleButtonClick}>
-      Sign Up
-    </button>
-  )
+
+  return <button onClick={handleButtonClick}>Sign Up</button>
 }
 ```
 
 ### 3. Add Performance Monitoring
+
 ```tsx
 import { usePerformanceMonitoring } from '@/lib/services/performance-monitoring'
 
 function MyPage() {
   usePerformanceMonitoring() // Automatically tracks Core Web Vitals
-  
+
   return <div>Your page content</div>
 }
 ```
 
 ### 4. Add Analytics Dashboard to Admin
+
 ```tsx
 import { PrivacyAnalyticsDashboard } from '@/components/admin'
 
@@ -186,13 +198,15 @@ function AdminDashboard() {
 ## 📊 Available Metrics
 
 ### Visitor Metrics
+
 - Unique visitors (anonymous fingerprints)
 - Total sessions
 - Page views
 - Bounce rate
 - Average session duration
 
-### Performance Metrics  
+### Performance Metrics
+
 - Core Web Vitals (LCP, FID, CLS)
 - First Contentful Paint (FCP)
 - Time to First Byte (TTFB)
@@ -200,6 +214,7 @@ function AdminDashboard() {
 - Memory usage
 
 ### Traffic Analysis
+
 - Top performing pages
 - Referrer breakdown
 - UTM campaign performance
@@ -207,6 +222,7 @@ function AdminDashboard() {
 - Geographic timezone distribution
 
 ### API Performance
+
 - Response times by endpoint
 - Error rates and status codes
 - Slowest performing APIs
@@ -246,12 +262,14 @@ The system can be configured via the analytics provider:
 ## 🛠️ Maintenance
 
 ### Regular Tasks
+
 1. **Monitor Performance Alerts**: Check for degraded Core Web Vitals
 2. **Review API Performance**: Monitor slow endpoints
 3. **Aggregate Data**: Run periodic aggregation for historical analysis
 4. **Clean Old Data**: Implement data retention policies
 
 ### Troubleshooting
+
 - Check browser console for tracking errors
 - Verify API endpoints are responding correctly
 - Monitor database performance for analytics tables

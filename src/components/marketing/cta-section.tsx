@@ -12,13 +12,14 @@ export function CTASection() {
             Stop compromising between power and privacy
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">
-            Join developers who refuse to send their proprietary code and documentation to the cloud. 
-            Get enterprise-grade writing assistance that works completely offline.
+            Join developers who refuse to send their proprietary code and
+            documentation to the cloud. Get enterprise-grade writing assistance
+            that works completely offline.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link href="/beta">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="secondary"
                 className="bg-parchment-white text-quill-blue hover:bg-gray-50 border-0"
               >
@@ -26,14 +27,19 @@ export function CTASection() {
                 <ArrowRightIcon className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/about" className="text-ui-label font-medium text-blue-100 hover:text-parchment-white transition-colors">
+            <Link
+              href="/about"
+              className="text-ui-label font-medium text-blue-100 hover:text-parchment-white transition-colors"
+            >
               Learn more about our mission <span aria-hidden="true">→</span>
             </Link>
           </div>
-          
+
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
             <div className="text-center">
-              <div className="text-2xl font-bold text-parchment-white">100%</div>
+              <div className="text-2xl font-bold text-parchment-white">
+                100%
+              </div>
               <div className="text-blue-100">Local Processing</div>
             </div>
             <div className="text-center">

@@ -9,10 +9,22 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = 'text', label, error, helperText, success, id, ...props }, ref) => {
+  (
+    {
+      className,
+      type = 'text',
+      label,
+      error,
+      helperText,
+      success,
+      id,
+      ...props
+    },
+    ref
+  ) => {
     const generatedId = useId()
     const inputId = id || generatedId
-    
+
     return (
       <div className="space-y-1">
         {label && (

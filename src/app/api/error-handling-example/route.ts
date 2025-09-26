@@ -1,26 +1,25 @@
 /**
  * Example API Route with Error Handling
  * Phase 6: Performance Monitoring - Server Error Handling Example
- * 
+ *
  * Demonstrates how to implement comprehensive error handling in API routes
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { withErrorHandler, logApiError, logDatabaseError } from '@/lib/server-error-logger'
+import {
+  withErrorHandler,
+  logApiError,
+  logDatabaseError,
+} from '@/lib/server-error-logger'
 import { supabaseAdmin } from '@/lib/supabase'
 
 async function handler(request: NextRequest) {
   // Example endpoint that demonstrates error handling patterns
-  
+
   if (request.method !== 'GET') {
     // Log validation error
-    await logApiError(
-      'Method not allowed',
-      request.url,
-      request.method,
-      405
-    )
-    
+    await logApiError('Method not allowed', request.url, request.method, 405)
+
     return NextResponse.json(
       { success: false, error: 'Method not allowed' },
       { status: 405 }
@@ -44,7 +43,7 @@ async function handler(request: NextRequest) {
       await logDatabaseError(error.message, {
         operation: 'count_errors',
         table: 'page_analytics',
-        filter: 'event_type = error'
+        filter: 'event_type = error',
       })
       throw new Error(`Database query failed: ${error.message}`)
     }
@@ -54,10 +53,9 @@ async function handler(request: NextRequest) {
       success: true,
       data: {
         errorCount: data?.count || 0,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     })
-
   } catch (error) {
     // This will be caught by withErrorHandler and logged automatically
     throw error
@@ -73,16 +71,11 @@ export const GET = withErrorHandler(handler)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validate request body
     if (!body || typeof body !== 'object') {
-      await logApiError(
-        'Invalid request body',
-        request.url,
-        'POST',
-        400
-      )
-      
+      await logApiError('Invalid request body', request.url, 'POST', 400)
+
       return NextResponse.json(
         { success: false, error: 'Invalid request body' },
         { status: 400 }
@@ -96,10 +89,10 @@ export async function POST(request: NextRequest) {
         case 'database':
           await logDatabaseError('Simulated database connection error', {
             test: true,
-            errorType: body.errorType
+            errorType: body.errorType,
           })
           throw new Error('Database connection failed')
-          
+
         case 'validation':
           await logApiError(
             'Required field missing: email',
@@ -111,19 +104,14 @@ export async function POST(request: NextRequest) {
             { success: false, error: 'Required field missing: email' },
             { status: 400 }
           )
-          
+
         case 'external_service':
-          await logApiError(
-            'External API timeout',
-            request.url,
-            'POST',
-            502
-          )
+          await logApiError('External API timeout', request.url, 'POST', 502)
           return NextResponse.json(
             { success: false, error: 'External service unavailable' },
             { status: 502 }
           )
-          
+
         default:
           throw new Error('Simulated server error')
       }
@@ -133,9 +121,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Request processed successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
     // Manual error logging with additional context
     await logApiError(
@@ -149,9 +136,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: process.env.NODE_ENV === 'production' 
-          ? 'Internal server error' 
-          : error instanceof Error ? error.message : String(error)
+        error:
+          process.env.NODE_ENV === 'production'
+            ? 'Internal server error'
+            : error instanceof Error
+              ? error.message
+              : String(error),
       },
       { status: 500 }
     )

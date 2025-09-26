@@ -1,5 +1,10 @@
 import { cn } from '@/lib/utils'
-import { ExclamationTriangleIcon, XCircleIcon, CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
+import {
+  ExclamationTriangleIcon,
+  XCircleIcon,
+  CheckCircleIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline'
 
 interface ErrorMessageProps {
   message: string
@@ -8,11 +13,11 @@ interface ErrorMessageProps {
   showIcon?: boolean
 }
 
-export function ErrorMessage({ 
-  message, 
-  type = 'error', 
-  className, 
-  showIcon = true 
+export function ErrorMessage({
+  message,
+  type = 'error',
+  className,
+  showIcon = true,
 }: ErrorMessageProps) {
   const icons = {
     error: XCircleIcon,
@@ -20,9 +25,9 @@ export function ErrorMessage({
     success: CheckCircleIcon,
     info: InformationCircleIcon,
   }
-  
+
   const Icon = icons[type]
-  
+
   return (
     <div
       className={cn(
@@ -30,7 +35,8 @@ export function ErrorMessage({
         {
           'bg-red-50 border-error-crimson text-red-800': type === 'error',
           'bg-amber-50 border-warning-amber text-amber-800': type === 'warning',
-          'bg-green-50 border-suggestion-green text-green-800': type === 'success',
+          'bg-green-50 border-suggestion-green text-green-800':
+            type === 'success',
           'bg-blue-50 border-quill-blue text-blue-800': type === 'info',
         },
         className
@@ -48,13 +54,17 @@ interface ErrorBoundaryFallbackProps {
   resetError: () => void
 }
 
-export function ErrorBoundaryFallback({ error, resetError }: ErrorBoundaryFallbackProps) {
+export function ErrorBoundaryFallback({
+  error,
+  resetError,
+}: ErrorBoundaryFallbackProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-6">
       <XCircleIcon className="h-12 w-12 text-error-crimson mb-4" />
       <h2 className="text-h2 text-ink-black mb-2">Something went wrong</h2>
       <p className="text-body text-muted-gray mb-4 text-center max-w-md">
-        We apologize for the inconvenience. An unexpected error occurred while loading this page.
+        We apologize for the inconvenience. An unexpected error occurred while
+        loading this page.
       </p>
       <details className="mb-4">
         <summary className="cursor-pointer text-ui-label text-quill-blue hover:underline">

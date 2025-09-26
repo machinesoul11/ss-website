@@ -26,20 +26,31 @@ const defaultNavigation: NavigationItem[] = [
   { name: 'Contact', href: '/contact' },
 ]
 
-export function Header({ navigation = defaultNavigation, className }: HeaderProps) {
+export function Header({
+  navigation = defaultNavigation,
+  className,
+}: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className={cn('bg-parchment-white border-b border-border-gray', className)}>
-      <nav className="mx-auto max-w-7xl px-6 lg:px-8" aria-label="Main navigation">
+    <header
+      className={cn(
+        'bg-parchment-white border-b border-border-gray',
+        className
+      )}
+    >
+      <nav
+        className="mx-auto max-w-7xl px-6 lg:px-8"
+        aria-label="Main navigation"
+      >
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex lg:flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
               <span className="sr-only">Silent Scribe</span>
               <div className="flex items-center space-x-3">
-                <Image 
-                  src="/silent-scribe-logo.svg" 
+                <Image
+                  src="/silent-scribe-logo.svg"
                   alt="Silent Scribe Logo"
                   width={80}
                   height={80}
@@ -70,13 +81,10 @@ export function Header({ navigation = defaultNavigation, className }: HeaderProp
               <Link
                 key={item.name}
                 href={item.href}
-                className={cn(
-                  'text-ui-label font-medium transition-colors',
-                  {
-                    'text-quill-blue': item.current,
-                    'text-text-gray hover:text-quill-blue': !item.current,
-                  }
-                )}
+                className={cn('text-ui-label font-medium transition-colors', {
+                  'text-quill-blue': item.current,
+                  'text-text-gray hover:text-quill-blue': !item.current,
+                })}
               >
                 {item.name}
               </Link>
@@ -91,24 +99,31 @@ export function Header({ navigation = defaultNavigation, className }: HeaderProp
               </Button>
             </Link>
             <Link href="/beta">
-              <Button size="sm">
-                Get Started
-              </Button>
+              <Button size="sm">Get Started</Button>
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Mobile menu */}
-      <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
+      <Dialog
+        as="div"
+        className="lg:hidden"
+        open={mobileMenuOpen}
+        onClose={setMobileMenuOpen}
+      >
         <div className="fixed inset-0 z-50" />
         <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-parchment-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border-gray">
           <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/"
+              className="-m-1.5 p-1.5"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               <span className="sr-only">Silent Scribe</span>
               <div className="flex items-center space-x-3">
-                <Image 
-                  src="/silent-scribe-logo.svg" 
+                <Image
+                  src="/silent-scribe-logo.svg"
                   alt="Silent Scribe Logo"
                   width={80}
                   height={80}

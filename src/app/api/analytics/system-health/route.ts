@@ -1,7 +1,7 @@
 /**
  * System Health Monitoring API
  * Phase 6: Performance Monitoring - Real-time Health Checks
- * 
+ *
  * Provides real-time system health status and alerts
  */
 
@@ -41,15 +41,14 @@ interface SystemHealthStatus {
 export async function GET(_request: NextRequest) {
   try {
     const healthStatus = await getSystemHealth()
-    
+
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
       status: healthStatus,
       uptime: process.uptime(),
-      version: process.env.npm_package_version || '1.0.0'
+      version: process.env.npm_package_version || '1.0.0',
     })
-
   } catch (error) {
     console.error('System health check error:', error)
     return NextResponse.json(
@@ -57,7 +56,7 @@ export async function GET(_request: NextRequest) {
         success: false,
         error: 'Health check failed',
         details: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     )
@@ -74,16 +73,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Health metric recorded'
+      message: 'Health metric recorded',
     })
-
   } catch (error) {
     console.error('Health metric recording error:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to record health metric',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -94,23 +92,19 @@ export async function POST(request: NextRequest) {
  * Get comprehensive system health status
  */
 async function getSystemHealth(): Promise<SystemHealthStatus> {
-  const [
-    databaseHealth,
-    apiHealth,
-    performanceHealth,
-    errorHealth
-  ] = await Promise.all([
-    checkDatabaseHealth(),
-    checkApiHealth(),
-    checkPerformanceHealth(),
-    checkErrorHealth()
-  ])
+  const [databaseHealth, apiHealth, performanceHealth, errorHealth] =
+    await Promise.all([
+      checkDatabaseHealth(),
+      checkApiHealth(),
+      checkPerformanceHealth(),
+      checkErrorHealth(),
+    ])
 
   return {
     database: databaseHealth,
     api: apiHealth,
     performance: performanceHealth,
-    errors: errorHealth
+    errors: errorHealth,
   }
 }
 
@@ -119,7 +113,7 @@ async function getSystemHealth(): Promise<SystemHealthStatus> {
  */
 async function checkDatabaseHealth() {
   const startTime = performance.now()
-  
+
   try {
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not available')
@@ -137,7 +131,7 @@ async function checkDatabaseHealth() {
       return {
         status: 'error' as const,
         latency,
-        uptime: '0%'
+        uptime: '0%',
       }
     }
 
@@ -145,20 +139,22 @@ async function checkDatabaseHealth() {
     const { count } = await supabaseAdmin
       .from('page_analytics')
       .select('*', { count: 'exact', head: true })
-      .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .gte(
+        'timestamp',
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      )
 
     return {
-      status: latency < 100 ? 'healthy' as const : 'warning' as const,
+      status: latency < 100 ? ('healthy' as const) : ('warning' as const),
       latency,
       uptime: '99.9%', // Would be calculated from historical data
-      connections: count || 0
+      connections: count || 0,
     }
-
   } catch {
     return {
       status: 'error' as const,
       latency: Math.round(performance.now() - startTime),
-      uptime: '0%'
+      uptime: '0%',
     }
   }
 }
@@ -172,7 +168,7 @@ async function checkApiHealth() {
       status: 'down' as const,
       averageResponseTime: 0,
       errorRate: 100,
-      throughput: 0
+      throughput: 0,
     }
   }
 
@@ -191,18 +187,19 @@ async function checkApiHealth() {
         status: 'healthy' as const,
         averageResponseTime: 50,
         errorRate: 0,
-        throughput: 0
+        throughput: 0,
       }
     }
 
     // Calculate metrics
     const responseTimes = apiMetrics
-      .map(m => (m as any).metadata?.performance?.ttfb)
-      .filter(t => t !== undefined) as number[]
+      .map((m) => (m as any).metadata?.performance?.ttfb)
+      .filter((t) => t !== undefined) as number[]
 
-    const averageResponseTime = responseTimes.length > 0 
-      ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length 
-      : 50
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+        : 50
 
     const errorRate = 0 // Would calculate from error tracking data
     const throughput = apiMetrics.length // Requests per hour
@@ -217,15 +214,14 @@ async function checkApiHealth() {
       status,
       averageResponseTime: Math.round(averageResponseTime),
       errorRate,
-      throughput
+      throughput,
     }
-
   } catch {
     return {
       status: 'down' as const,
       averageResponseTime: 0,
       errorRate: 100,
-      throughput: 0
+      throughput: 0,
     }
   }
 }
@@ -241,8 +237,8 @@ async function checkPerformanceHealth() {
       coreWebVitals: {
         lcp: { status: 'poor', value: 0 },
         fid: { status: 'poor', value: 0 },
-        cls: { status: 'poor', value: 0 }
-      }
+        cls: { status: 'poor', value: 0 },
+      },
     }
   }
 
@@ -252,7 +248,10 @@ async function checkPerformanceHealth() {
       .from('page_analytics')
       .select('metadata')
       .eq('event_type', 'performance_metrics')
-      .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .gte(
+        'timestamp',
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      )
       .order('timestamp', { ascending: false })
       .limit(50)
 
@@ -263,26 +262,44 @@ async function checkPerformanceHealth() {
         coreWebVitals: {
           lcp: { status: 'good', value: 1500 },
           fid: { status: 'good', value: 50 },
-          cls: { status: 'good', value: 0.05 }
-        }
+          cls: { status: 'good', value: 0.05 },
+        },
       }
     }
 
     // Calculate averages
-    const scores = perfMetrics.map(m => (m as any).metadata?.score || 0)
+    const scores = perfMetrics.map((m) => (m as any).metadata?.score || 0)
     const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length
 
-    const lcpValues = perfMetrics.map(m => (m as any).metadata?.performance?.lcp).filter(Boolean) as number[]
-    const fidValues = perfMetrics.map(m => (m as any).metadata?.performance?.fid).filter(Boolean) as number[]
-    const clsValues = perfMetrics.map(m => (m as any).metadata?.performance?.cls).filter(Boolean) as number[]
+    const lcpValues = perfMetrics
+      .map((m) => (m as any).metadata?.performance?.lcp)
+      .filter(Boolean) as number[]
+    const fidValues = perfMetrics
+      .map((m) => (m as any).metadata?.performance?.fid)
+      .filter(Boolean) as number[]
+    const clsValues = perfMetrics
+      .map((m) => (m as any).metadata?.performance?.cls)
+      .filter(Boolean) as number[]
 
-    const avgLcp = lcpValues.length > 0 ? lcpValues.reduce((a, b) => a + b, 0) / lcpValues.length : 1500
-    const avgFid = fidValues.length > 0 ? fidValues.reduce((a, b) => a + b, 0) / fidValues.length : 50
-    const avgCls = clsValues.length > 0 ? clsValues.reduce((a, b) => a + b, 0) / clsValues.length : 0.05
+    const avgLcp =
+      lcpValues.length > 0
+        ? lcpValues.reduce((a, b) => a + b, 0) / lcpValues.length
+        : 1500
+    const avgFid =
+      fidValues.length > 0
+        ? fidValues.reduce((a, b) => a + b, 0) / fidValues.length
+        : 50
+    const avgCls =
+      clsValues.length > 0
+        ? clsValues.reduce((a, b) => a + b, 0) / clsValues.length
+        : 0.05
 
-    const getLcpStatus = (lcp: number) => lcp <= 2500 ? 'good' : lcp <= 4000 ? 'needs_improvement' : 'poor'
-    const getFidStatus = (fid: number) => fid <= 100 ? 'good' : fid <= 300 ? 'needs_improvement' : 'poor'
-    const getClsStatus = (cls: number) => cls <= 0.1 ? 'good' : cls <= 0.25 ? 'needs_improvement' : 'poor'
+    const getLcpStatus = (lcp: number) =>
+      lcp <= 2500 ? 'good' : lcp <= 4000 ? 'needs_improvement' : 'poor'
+    const getFidStatus = (fid: number) =>
+      fid <= 100 ? 'good' : fid <= 300 ? 'needs_improvement' : 'poor'
+    const getClsStatus = (cls: number) =>
+      cls <= 0.1 ? 'good' : cls <= 0.25 ? 'needs_improvement' : 'poor'
 
     let overallStatus: 'good' | 'needs_improvement' | 'poor'
     if (averageScore >= 90) overallStatus = 'good'
@@ -295,10 +312,12 @@ async function checkPerformanceHealth() {
       coreWebVitals: {
         lcp: { status: getLcpStatus(avgLcp), value: Math.round(avgLcp) },
         fid: { status: getFidStatus(avgFid), value: Math.round(avgFid) },
-        cls: { status: getClsStatus(avgCls), value: Math.round(avgCls * 1000) / 1000 }
-      }
+        cls: {
+          status: getClsStatus(avgCls),
+          value: Math.round(avgCls * 1000) / 1000,
+        },
+      },
     }
-
   } catch {
     return {
       status: 'poor' as const,
@@ -306,8 +325,8 @@ async function checkPerformanceHealth() {
       coreWebVitals: {
         lcp: { status: 'poor', value: 0 },
         fid: { status: 'poor', value: 0 },
-        cls: { status: 'poor', value: 0 }
-      }
+        cls: { status: 'poor', value: 0 },
+      },
     }
   }
 }
@@ -321,7 +340,7 @@ async function checkErrorHealth() {
       critical: 0,
       high: 0,
       total: 0,
-      recentTrend: 'stable' as const
+      recentTrend: 'stable' as const,
     }
   }
 
@@ -349,13 +368,22 @@ async function checkErrorHealth() {
     const previousCount = previousErrors?.length || 0
 
     // Count by severity
-    const critical = recentErrors?.filter(e => (e as any).metadata?.error?.severity === 'critical').length || 0
-    const high = recentErrors?.filter(e => (e as any).metadata?.error?.severity === 'high').length || 0
+    const critical =
+      recentErrors?.filter(
+        (e) => (e as any).metadata?.error?.severity === 'critical'
+      ).length || 0
+    const high =
+      recentErrors?.filter(
+        (e) => (e as any).metadata?.error?.severity === 'high'
+      ).length || 0
 
     // Calculate trend
     let recentTrend: 'increasing' | 'decreasing' | 'stable'
-    const changePercent = previousCount > 0 ? ((recentCount - previousCount) / previousCount) * 100 : 0
-    
+    const changePercent =
+      previousCount > 0
+        ? ((recentCount - previousCount) / previousCount) * 100
+        : 0
+
     if (Math.abs(changePercent) < 10) recentTrend = 'stable'
     else if (changePercent > 0) recentTrend = 'increasing'
     else recentTrend = 'decreasing'
@@ -364,15 +392,14 @@ async function checkErrorHealth() {
       critical,
       high,
       total: recentCount,
-      recentTrend
+      recentTrend,
     }
-
   } catch {
     return {
       critical: 0,
       high: 0,
       total: 0,
-      recentTrend: 'stable' as const
+      recentTrend: 'stable' as const,
     }
   }
 }

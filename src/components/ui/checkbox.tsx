@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils'
 import { forwardRef, InputHTMLAttributes, useId } from 'react'
 
-export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string
   description?: string
 }
@@ -10,7 +11,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ({ className, label, description, id, ...props }, ref) => {
     const generatedId = useId()
     const checkboxId = id || generatedId
-    
+
     return (
       <div className="flex items-start space-x-3">
         <div className="flex items-center h-5">
@@ -36,9 +37,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               </label>
             )}
             {description && (
-              <p className="text-caption text-muted-gray">
-                {description}
-              </p>
+              <p className="text-caption text-muted-gray">{description}</p>
             )}
           </div>
         )}

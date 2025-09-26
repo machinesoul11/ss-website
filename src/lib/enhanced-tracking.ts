@@ -96,13 +96,15 @@ export function useEnhancedTracking() {
           time_spent: data.timeSpent || 0,
           step_number: data.stepNumber || 1,
           total_steps: data.totalSteps || 1,
-          completion_rate: data.stepNumber && data.totalSteps ? 
-            (data.stepNumber / data.totalSteps) * 100 : 0,
+          completion_rate:
+            data.stepNumber && data.totalSteps
+              ? (data.stepNumber / data.totalSteps) * 100
+              : 0,
           has_errors: (data.errors?.length || 0) > 0,
           error_count: data.errors?.length || 0,
           page: typeof window !== 'undefined' ? window.location.pathname : '',
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       })
 
       // Track to Plausible with key metrics
@@ -111,9 +113,11 @@ export function useEnhancedTracking() {
           form_id: data.formId,
           action: data.action,
           step: data.stepNumber || 1,
-          completion_rate: data.stepNumber && data.totalSteps ? 
-            Math.round((data.stepNumber / data.totalSteps) * 100) : 0
-        }
+          completion_rate:
+            data.stepNumber && data.totalSteps
+              ? Math.round((data.stepNumber / data.totalSteps) * 100)
+              : 0,
+        },
       })
 
       // Track abandonment specifically
@@ -123,16 +127,18 @@ export function useEnhancedTracking() {
           properties: {
             form_id: data.formId,
             abandoned_at_step: data.stepNumber,
-            abandonment_rate: data.stepNumber && data.totalSteps ? 
-              ((data.totalSteps - data.stepNumber) / data.totalSteps) * 100 : 100
-          }
+            abandonment_rate:
+              data.stepNumber && data.totalSteps
+                ? ((data.totalSteps - data.stepNumber) / data.totalSteps) * 100
+                : 100,
+          },
         })
-        
+
         trackPlausibleGoal('Form Abandonment', {
-          props: { 
+          props: {
             form_id: data.formId,
-            step: data.stepNumber || 1
-          }
+            step: data.stepNumber || 1,
+          },
         })
       }
 
@@ -141,10 +147,9 @@ export function useEnhancedTracking() {
         await analytics.trackConversion('form_completion', 1, {
           form_id: data.formId,
           completion_time: data.timeSpent || 0,
-          total_steps: data.totalSteps
+          total_steps: data.totalSteps,
         })
       }
-
     } catch (error) {
       console.error('Error tracking form interaction:', error)
     }
@@ -166,9 +171,10 @@ export function useEnhancedTracking() {
           destination: data.destination || '',
           user_flow: data.userFlow || 'direct',
           viewport_width: typeof window !== 'undefined' ? window.innerWidth : 0,
-          viewport_height: typeof window !== 'undefined' ? window.innerHeight : 0,
-          scroll_position: typeof window !== 'undefined' ? window.scrollY : 0
-        }
+          viewport_height:
+            typeof window !== 'undefined' ? window.innerHeight : 0,
+          scroll_position: typeof window !== 'undefined' ? window.scrollY : 0,
+        },
       })
 
       // Track click rate by position
@@ -176,8 +182,8 @@ export function useEnhancedTracking() {
         props: {
           position: data.ctaPosition,
           type: data.ctaType,
-          text: data.ctaText.substring(0, 50) // Limit length
-        }
+          text: data.ctaText.substring(0, 50), // Limit length
+        },
       })
 
       // Track user flow analysis
@@ -188,11 +194,10 @@ export function useEnhancedTracking() {
             flow_name: data.userFlow,
             step_type: 'cta_click',
             step_value: data.ctaText,
-            page: data.page
-          }
+            page: data.page,
+          },
         })
       }
-
     } catch (error) {
       console.error('Error tracking CTA click:', error)
     }
@@ -211,8 +216,8 @@ export function useEnhancedTracking() {
           time_to_reach: data.timeToReach,
           max_depth_reached: data.maxDepthReached,
           bounced: data.bounced,
-          engagement_score: calculateEngagementScore(data)
-        }
+          engagement_score: calculateEngagementScore(data),
+        },
       })
 
       // Only track milestones to Plausible to avoid spam
@@ -221,11 +226,10 @@ export function useEnhancedTracking() {
           props: {
             depth: data.percentage,
             time_to_reach: Math.round(data.timeToReach / 1000), // Convert to seconds
-            page_section: getPageSection(data.percentage)
-          }
+            page_section: getPageSection(data.percentage),
+          },
         })
       }
-
     } catch (error) {
       console.error('Error tracking scroll depth:', error)
     }
@@ -247,14 +251,14 @@ export function useEnhancedTracking() {
           cta_clicks: data.ctaClicks,
           form_interactions: data.formInteractions,
           engagement_rate: calculateEngagementRate(data),
-          bounce_probability: calculateBounceScore(data)
-        }
+          bounce_probability: calculateBounceScore(data),
+        },
       })
 
       // Track engagement milestones to Plausible
       const milestones = [15, 30, 60, 120, 300] // 15s, 30s, 1m, 2m, 5m
-      const milestone = milestones.find(m => 
-        Math.abs(data.activeTime - m * 1000) < 2000 // Within 2 seconds
+      const milestone = milestones.find(
+        (m) => Math.abs(data.activeTime - m * 1000) < 2000 // Within 2 seconds
       )
 
       if (milestone) {
@@ -262,11 +266,10 @@ export function useEnhancedTracking() {
           props: {
             duration: milestone,
             interactions: data.interactions,
-            scroll_depth: data.scrollDepth
-          }
+            scroll_depth: data.scrollDepth,
+          },
         })
       }
-
     } catch (error) {
       console.error('Error tracking engagement time:', error)
     }
@@ -291,8 +294,8 @@ export function useEnhancedTracking() {
           utm_campaign: data.utm_campaign || '',
           utm_term: data.utm_term || '',
           utm_content: data.utm_content || '',
-          session_start: Date.now()
-        }
+          session_start: Date.now(),
+        },
       })
 
       // Track campaign performance to Plausible
@@ -301,11 +304,10 @@ export function useEnhancedTracking() {
           props: {
             campaign: data.campaign || data.utm_campaign || 'unknown',
             source: data.source || data.utm_source || 'unknown',
-            medium: data.medium || data.utm_medium || 'unknown'
-          }
+            medium: data.medium || data.utm_medium || 'unknown',
+          },
         })
       }
-
     } catch (error) {
       console.error('Error tracking referrer attribution:', error)
     }
@@ -329,9 +331,10 @@ export function useEnhancedTracking() {
           abandoned: data.abandoned || false,
           completed: data.completed || false,
           conversion_rate: data.stepNumber / data.totalSteps,
-          drop_off_rate: data.abandoned ? 
-            ((data.totalSteps - data.stepNumber) / data.totalSteps) * 100 : 0
-        }
+          drop_off_rate: data.abandoned
+            ? ((data.totalSteps - data.stepNumber) / data.totalSteps) * 100
+            : 0,
+        },
       })
 
       // Track funnel performance to Plausible
@@ -340,25 +343,28 @@ export function useEnhancedTracking() {
           funnel: data.funnelName,
           step: data.stepNumber,
           total_steps: data.totalSteps,
-          status: data.completed ? 'completed' : data.abandoned ? 'abandoned' : 'in_progress'
-        }
+          status: data.completed
+            ? 'completed'
+            : data.abandoned
+              ? 'abandoned'
+              : 'in_progress',
+        },
       })
 
       // Track conversion if completed
       if (data.completed) {
         await analytics.trackConversion(`${data.funnelName}_completion`, 1, {
           funnel_time: data.timeInFunnel,
-          steps_completed: data.totalSteps
+          steps_completed: data.totalSteps,
         })
-        
+
         trackPlausibleGoal('Funnel Conversion', {
           props: {
             funnel: data.funnelName,
-            duration: Math.round(data.timeInFunnel / 1000)
-          }
+            duration: Math.round(data.timeInFunnel / 1000),
+          },
         })
       }
-
     } catch (error) {
       console.error('Error tracking conversion funnel:', error)
     }
@@ -370,7 +376,7 @@ export function useEnhancedTracking() {
     trackScrollDepth,
     trackEngagementTime,
     trackReferrerAttribution,
-    trackConversionFunnel
+    trackConversionFunnel,
   }
 }
 
@@ -395,7 +401,7 @@ function calculateBounceScore(data: EngagementTimeData): number {
   if (data.activeTime < 5000) return 90 // Less than 5 seconds is likely bounce
   if (data.interactions === 0 && data.scrollDepth < 25) return 80
   if (data.scrollDepth < 50 && data.activeTime < 15000) return 60
-  return Math.max(0, 50 - (data.interactions * 5) - (data.scrollDepth / 2))
+  return Math.max(0, 50 - data.interactions * 5 - data.scrollDepth / 2)
 }
 
 function getPageSection(scrollPercentage: number): string {
@@ -409,7 +415,9 @@ function getPageSection(scrollPercentage: number): string {
 /**
  * Utility to extract UTM parameters from URL
  */
-export function extractUTMParameters(url: string = typeof window !== 'undefined' ? window.location.href : ''): Partial<ReferrerAttributionData> {
+export function extractUTMParameters(
+  url: string = typeof window !== 'undefined' ? window.location.href : ''
+): Partial<ReferrerAttributionData> {
   try {
     const urlObj = new URL(url)
     return {
@@ -428,14 +436,19 @@ export function extractUTMParameters(url: string = typeof window !== 'undefined'
 /**
  * Utility to determine traffic source
  */
-export function determineTrafficSource(referrer: string = typeof document !== 'undefined' ? document.referrer : ''): { source: string; medium: string } {
+export function determineTrafficSource(
+  referrer: string = typeof document !== 'undefined' ? document.referrer : ''
+): { source: string; medium: string } {
   if (!referrer) return { source: 'direct', medium: 'none' }
 
   try {
     const referrerDomain = new URL(referrer).hostname.toLowerCase()
-    
+
     // Social media sources
-    if (referrerDomain.includes('twitter.com') || referrerDomain.includes('t.co')) {
+    if (
+      referrerDomain.includes('twitter.com') ||
+      referrerDomain.includes('t.co')
+    ) {
       return { source: 'twitter', medium: 'social' }
     }
     if (referrerDomain.includes('linkedin.com')) {
@@ -447,7 +460,7 @@ export function determineTrafficSource(referrer: string = typeof document !== 'u
     if (referrerDomain.includes('reddit.com')) {
       return { source: 'reddit', medium: 'social' }
     }
-    
+
     // Search engines
     if (referrerDomain.includes('google')) {
       return { source: 'google', medium: 'organic' }
@@ -466,13 +479,15 @@ export function determineTrafficSource(referrer: string = typeof document !== 'u
     if (referrerDomain.includes('stackoverflow.com')) {
       return { source: 'stackoverflow', medium: 'referral' }
     }
-    if (referrerDomain.includes('hackernews') || referrerDomain.includes('news.ycombinator.com')) {
+    if (
+      referrerDomain.includes('hackernews') ||
+      referrerDomain.includes('news.ycombinator.com')
+    ) {
       return { source: 'hackernews', medium: 'referral' }
     }
 
     // Default for other referrers
     return { source: referrerDomain, medium: 'referral' }
-    
   } catch (error) {
     console.error('Error determining traffic source:', error)
     return { source: 'unknown', medium: 'referral' }

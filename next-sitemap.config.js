@@ -12,9 +12,7 @@ module.exports = {
         disallow: ['/api/', '/admin/'],
       },
     ],
-    additionalSitemaps: [
-      'https://silentscribe.dev/sitemap.xml',
-    ],
+    additionalSitemaps: ['https://silentscribe.dev/sitemap.xml'],
   },
   transform: async (config, path) => {
     // Custom priority for different page types

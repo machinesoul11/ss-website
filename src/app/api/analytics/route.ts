@@ -9,12 +9,12 @@ import crypto from 'crypto'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      eventType, 
-      properties = {}, 
-      visitorId, 
+    const {
+      eventType,
+      properties = {},
+      visitorId,
       sessionId,
-      anonymousId 
+      anonymousId,
     } = body
 
     // Validate required fields
@@ -30,14 +30,16 @@ export async function POST(request: NextRequest) {
     const userAgentHash = hashUserAgent(userAgent)
     const clientIp = getClientIP(request)
     const ipHash = hashIP(clientIp)
-    
+
     // Generate or use provided anonymous visitor ID
-    const finalVisitorId = visitorId || anonymousId || generateAnonymousId(ipHash, userAgentHash)
-    
+    const finalVisitorId =
+      visitorId || anonymousId || generateAnonymousId(ipHash, userAgentHash)
+
     // Get page path and referrer
     const pagePath = properties.page || properties.path || '/'
-    const referrer = request.headers.get('referer') || properties.referrer || null
-    
+    const referrer =
+      request.headers.get('referer') || properties.referrer || null
+
     // Enhanced metadata with privacy-safe information
     const enhancedMetadata = {
       ...properties,
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
       click_target: properties.clickTarget || null,
       form_field: properties.formField || null,
       cta_position: properties.ctaPosition || null,
-      ab_test_variant: properties.abTestVariant || null
+      ab_test_variant: properties.abTestVariant || null,
     }
 
     // Log the analytics event
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
         event_type: eventType,
         referrer: referrer,
         user_agent_hash: userAgentHash,
-        metadata: enhancedMetadata
+        metadata: enhancedMetadata,
       })
 
     if (insertError) {
@@ -82,12 +84,11 @@ export async function POST(request: NextRequest) {
       await updateEngagementScore(finalVisitorId, eventType, enhancedMetadata)
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       visitorId: finalVisitorId,
-      sessionId: sessionId || generateSessionId()
+      sessionId: sessionId || generateSessionId(),
     })
-
   } catch (error) {
     console.error('Analytics logging error:', error)
     return NextResponse.json(
@@ -110,7 +111,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '30')
-    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+    const startDate = new Date(
+      Date.now() - days * 24 * 60 * 60 * 1000
+    ).toISOString()
 
     // Beta signup metrics
     const { data: signupStats } = await supabaseAdmin
@@ -136,28 +139,32 @@ export async function GET(request: NextRequest) {
         total: signupStats?.length || 0,
         byDay: aggregateByDay(signupStats || [], 'created_at'),
         byTeamSize: aggregateByField(signupStats || [], 'team_size'),
-        averageEngagement: calculateAverage(signupStats || [], 'engagement_score'),
-        marketingOptInRate: calculateOptInRate(signupStats || [])
+        averageEngagement: calculateAverage(
+          signupStats || [],
+          'engagement_score'
+        ),
+        marketingOptInRate: calculateOptInRate(signupStats || []),
       },
       traffic: {
         totalPageViews: pageViews?.length || 0,
         uniqueVisitors: countUniqueVisitors(pageViews || []),
         topPages: aggregateByField(pageViews || [], 'page_path'),
-        conversionEvents: pageViews?.filter(p => p.event_type === 'beta_signup').length || 0
+        conversionEvents:
+          pageViews?.filter((p) => p.event_type === 'beta_signup').length || 0,
       },
       email: {
-        totalSent: emailEvents?.filter(e => e.event_type === 'sent').length || 0,
+        totalSent:
+          emailEvents?.filter((e) => e.event_type === 'sent').length || 0,
         openRate: calculateEmailRate(emailEvents || [], 'opened', 'sent'),
         clickRate: calculateEmailRate(emailEvents || [], 'clicked', 'sent'),
-        byTemplate: aggregateByField(emailEvents || [], 'template_id')
-      }
+        byTemplate: aggregateByField(emailEvents || [], 'template_id'),
+      },
     }
 
     return NextResponse.json({
       success: true,
-      data: analytics
+      data: analytics,
     })
-
   } catch (error) {
     console.error('Analytics fetch error:', error)
     return NextResponse.json(
@@ -170,13 +177,17 @@ export async function GET(request: NextRequest) {
 // Helper functions
 
 function hashUserAgent(userAgent: string): string {
-  return crypto.createHash('sha256').update(userAgent).digest('hex').substring(0, 16)
+  return crypto
+    .createHash('sha256')
+    .update(userAgent)
+    .digest('hex')
+    .substring(0, 16)
 }
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const real = request.headers.get('x-real-ip')
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim()
   }
@@ -192,41 +203,53 @@ function hashIP(ip: string): string {
 
 function generateAnonymousId(ipHash: string, userAgentHash: string): string {
   const combined = `${ipHash}-${userAgentHash}-${Date.now()}`
-  return crypto.createHash('sha256').update(combined).digest('hex').substring(0, 32)
+  return crypto
+    .createHash('sha256')
+    .update(combined)
+    .digest('hex')
+    .substring(0, 32)
 }
 
 function generateSessionId(): string {
   return crypto.randomUUID()
 }
 
-async function trackConversion(visitorId: string, sessionId: string | null, properties: any) {
+async function trackConversion(
+  visitorId: string,
+  sessionId: string | null,
+  properties: any
+) {
   try {
     // Log conversion event with additional metadata
-    await supabaseAdmin
-      .from('page_analytics')
-      .insert({
-        page_path: '/conversion',
-        visitor_id: visitorId,
-        session_id: sessionId,
-        event_type: 'conversion_tracked',
-        metadata: {
-          conversion_type: 'beta_signup',
-          conversion_value: 1,
-          signup_source: properties.signupSource || 'direct',
-          referrer_code: properties.referrerCode || null,
-          team_size: properties.teamSize || null,
-          timestamp: new Date().toISOString()
-        }
-      })
+    await supabaseAdmin.from('page_analytics').insert({
+      page_path: '/conversion',
+      visitor_id: visitorId,
+      session_id: sessionId,
+      event_type: 'conversion_tracked',
+      metadata: {
+        conversion_type: 'beta_signup',
+        conversion_value: 1,
+        signup_source: properties.signupSource || 'direct',
+        referrer_code: properties.referrerCode || null,
+        team_size: properties.teamSize || null,
+        timestamp: new Date().toISOString(),
+      },
+    })
 
     // Update engagement score for converters
-    await updateEngagementScore(visitorId, 'conversion', { conversion_value: 10 })
+    await updateEngagementScore(visitorId, 'conversion', {
+      conversion_value: 10,
+    })
   } catch (error) {
     console.error('Conversion tracking error:', error)
   }
 }
 
-async function updateEngagementScore(visitorId: string, eventType: string, metadata: any) {
+async function updateEngagementScore(
+  visitorId: string,
+  eventType: string,
+  metadata: any
+) {
   try {
     // Calculate engagement points based on event type
     let points = 0
@@ -255,62 +278,63 @@ async function updateEngagementScore(visitorId: string, eventType: string, metad
 
     // Note: In a real implementation, you'd want to maintain visitor engagement scores
     // in a separate table. For now, we'll just log the engagement event
-    await supabaseAdmin
-      .from('page_analytics')
-      .insert({
-        page_path: '/engagement',
-        visitor_id: visitorId,
-        event_type: 'engagement_score_update',
-        metadata: {
-          event_type: eventType,
-          points_awarded: points,
-          timestamp: new Date().toISOString()
-        }
-      })
+    await supabaseAdmin.from('page_analytics').insert({
+      page_path: '/engagement',
+      visitor_id: visitorId,
+      event_type: 'engagement_score_update',
+      metadata: {
+        event_type: eventType,
+        points_awarded: points,
+        timestamp: new Date().toISOString(),
+      },
+    })
   } catch (error) {
     console.error('Engagement score update error:', error)
   }
 }
 
-function aggregateByDay(data: any[], dateField: string): Record<string, number> {
+function aggregateByDay(
+  data: any[],
+  dateField: string
+): Record<string, number> {
   const aggregated: Record<string, number> = {}
-  
-  data.forEach(item => {
+
+  data.forEach((item) => {
     const date = new Date(item[dateField]).toISOString().split('T')[0]
     aggregated[date] = (aggregated[date] || 0) + 1
   })
-  
+
   return aggregated
 }
 
 function aggregateByField(data: any[], field: string): Record<string, number> {
   const aggregated: Record<string, number> = {}
-  
-  data.forEach(item => {
+
+  data.forEach((item) => {
     const value = item[field] || 'unknown'
     aggregated[value] = (aggregated[value] || 0) + 1
   })
-  
+
   return aggregated
 }
 
 function calculateAverage(data: any[], field: string): number {
   if (data.length === 0) return 0
-  
+
   const sum = data.reduce((acc, item) => acc + (item[field] || 0), 0)
   return Math.round((sum / data.length) * 100) / 100
 }
 
 function calculateOptInRate(signups: any[]): number {
   if (signups.length === 0) return 0
-  
-  const optedIn = signups.filter(s => s.opted_in_marketing).length
+
+  const optedIn = signups.filter((s) => s.opted_in_marketing).length
   return Math.round((optedIn / signups.length) * 100)
 }
 
 function countUniqueVisitors(pageViews: any[]): number {
   const uniqueVisitors = new Set()
-  pageViews.forEach(view => {
+  pageViews.forEach((view) => {
     if (view.metadata?.visitor_id) {
       uniqueVisitors.add(view.metadata.visitor_id)
     }
@@ -318,10 +342,14 @@ function countUniqueVisitors(pageViews: any[]): number {
   return uniqueVisitors.size
 }
 
-function calculateEmailRate(events: any[], eventType: string, baseType: string): number {
-  const baseEvents = events.filter(e => e.event_type === baseType).length
-  const targetEvents = events.filter(e => e.event_type === eventType).length
-  
+function calculateEmailRate(
+  events: any[],
+  eventType: string,
+  baseType: string
+): number {
+  const baseEvents = events.filter((e) => e.event_type === baseType).length
+  const targetEvents = events.filter((e) => e.event_type === eventType).length
+
   if (baseEvents === 0) return 0
   return Math.round((targetEvents / baseEvents) * 100)
 }

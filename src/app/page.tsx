@@ -1,4 +1,4 @@
-import { 
+import {
   HeroSection,
   PrivacyFirstSection,
   DeveloperFocusedSection,
@@ -6,7 +6,7 @@ import {
   FeatureHighlightsSection,
   ComparisonSection,
   SocialProofSection,
-  CTASection
+  CTASection,
 } from '@/components/marketing'
 
 export default function Home() {

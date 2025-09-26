@@ -24,12 +24,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Use our new comprehensive service
-    const healthMetrics = await SendGridWebhookService.getDeliverabilityMetrics(days)
+    const healthMetrics =
+      await SendGridWebhookService.getDeliverabilityMetrics(days)
 
     return NextResponse.json({
       success: true,
       period: `${days} days`,
-      ...healthMetrics
+      ...healthMetrics,
     })
   } catch (error) {
     console.error('Email health API error:', error)

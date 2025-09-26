@@ -16,26 +16,31 @@ export async function GET(request: NextRequest) {
 
     // Get live statistics
     const liveStats = await RealtimeService.getLiveStats()
-    
+
     if (liveStats.error) {
-      return NextResponse.json({ 
-        success: false, 
-        error: liveStats.error 
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: liveStats.error,
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       success: true,
       data: liveStats.data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
     console.error('Live analytics error:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch live analytics'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch live analytics',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -54,30 +59,42 @@ export async function POST(request: NextRequest) {
     const { type, message, data } = body
 
     if (!type || !message) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: type, message' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'Missing required fields: type, message',
+        },
+        { status: 400 }
+      )
     }
 
-    const result = await RealtimeService.broadcastNotification(type, message, data)
-    
+    const result = await RealtimeService.broadcastNotification(
+      type,
+      message,
+      data
+    )
+
     if (!result.success) {
-      return NextResponse.json({ 
-        success: false, 
-        error: result.error 
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Notification broadcasted successfully'
+      message: 'Notification broadcasted successfully',
     })
-
   } catch (error) {
     console.error('Broadcast notification error:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to broadcast notification'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to broadcast notification',
+      },
+      { status: 500 }
+    )
   }
 }

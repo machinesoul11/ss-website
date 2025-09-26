@@ -8,11 +8,11 @@ interface PageLayoutProps {
   padding?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-export function PageLayout({ 
-  children, 
-  className, 
+export function PageLayout({
+  children,
+  className,
   maxWidth = 'xl',
-  padding = 'lg'
+  padding = 'lg',
 }: PageLayoutProps) {
   return (
     <div
@@ -20,7 +20,7 @@ export function PageLayout({
         'mx-auto w-full',
         {
           'max-w-sm': maxWidth === 'sm',
-          'max-w-md': maxWidth === 'md', 
+          'max-w-md': maxWidth === 'md',
           'max-w-4xl': maxWidth === 'lg',
           'max-w-7xl': maxWidth === 'xl',
           'max-w-none': maxWidth === '2xl',
@@ -47,11 +47,11 @@ interface SectionProps {
   spacing?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-export function Section({ 
-  children, 
+export function Section({
+  children,
   className,
   background = 'white',
-  spacing = 'lg'
+  spacing = 'lg',
 }: SectionProps) {
   return (
     <section
@@ -82,11 +82,11 @@ interface ContainerProps {
   center?: boolean
 }
 
-export function Container({ 
-  children, 
+export function Container({
+  children,
   className,
   size = 'xl',
-  center = true
+  center = true,
 }: ContainerProps) {
   return (
     <div
@@ -116,10 +116,10 @@ interface ContentWrapperProps {
   prose?: boolean
 }
 
-export function ContentWrapper({ 
-  children, 
+export function ContentWrapper({
+  children,
   className,
-  prose = false
+  prose = false,
 }: ContentWrapperProps) {
   return (
     <div
@@ -144,12 +144,12 @@ interface GridProps {
   responsive?: boolean
 }
 
-export function Grid({ 
-  children, 
+export function Grid({
+  children,
   className,
   cols = 3,
   gap = 'lg',
-  responsive = true
+  responsive = true,
 }: GridProps) {
   return (
     <div
@@ -163,9 +163,11 @@ export function Grid({
           'grid-cols-3': cols === 3 && !responsive,
           'grid-cols-1 md:grid-cols-2 lg:grid-cols-4': cols === 4 && responsive,
           'grid-cols-4': cols === 4 && !responsive,
-          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6': cols === 6 && responsive,
+          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6':
+            cols === 6 && responsive,
           'grid-cols-6': cols === 6 && !responsive,
-          'grid-cols-1 md:grid-cols-6 lg:grid-cols-12': cols === 12 && responsive,
+          'grid-cols-1 md:grid-cols-6 lg:grid-cols-12':
+            cols === 12 && responsive,
           'grid-cols-12': cols === 12 && !responsive,
         },
         {
@@ -192,14 +194,14 @@ interface FlexProps {
   wrap?: boolean
 }
 
-export function Flex({ 
-  children, 
+export function Flex({
+  children,
   className,
   direction = 'row',
   align = 'start',
   justify = 'start',
   gap = 'md',
-  wrap = false
+  wrap = false,
 }: FlexProps) {
   return (
     <div

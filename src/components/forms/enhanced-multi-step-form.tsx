@@ -8,7 +8,11 @@
 import { ReactNode, useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { CheckIcon } from '@heroicons/react/24/outline'
-import { EnhancedForm, EnhancedInput, ConversionFunnelStep } from '@/components/analytics'
+import {
+  EnhancedForm,
+  EnhancedInput,
+  ConversionFunnelStep,
+} from '@/components/analytics'
 import { useEnhancedAnalyticsContext } from '@/components/analytics'
 
 interface Step {
@@ -30,20 +34,27 @@ interface EnhancedMultiStepFormProps {
   funnelName?: string
 }
 
-export function EnhancedMultiStepForm({ 
-  children, 
+export function EnhancedMultiStepForm({
+  children,
   className,
   formName,
   steps,
   currentStep,
   onStepChange,
   enableTracking = true,
-  funnelName = 'multi_step_form'
+  funnelName = 'multi_step_form',
 }: EnhancedMultiStepFormProps) {
-  const [internalCurrentStep, setInternalCurrentStep] = useState(currentStep || 0)
-  const { startFormTracking, startFunnelTracking } = useEnhancedAnalyticsContext()
-  const formTracker = useRef(enableTracking ? startFormTracking(formName, steps.length) : null)
-  const funnelTracker = useRef(enableTracking ? startFunnelTracking(funnelName, steps.length) : null)
+  const [internalCurrentStep, setInternalCurrentStep] = useState(
+    currentStep || 0
+  )
+  const { startFormTracking, startFunnelTracking } =
+    useEnhancedAnalyticsContext()
+  const formTracker = useRef(
+    enableTracking ? startFormTracking(formName, steps.length) : null
+  )
+  const funnelTracker = useRef(
+    enableTracking ? startFunnelTracking(funnelName, steps.length) : null
+  )
   const stepStartTime = useRef(Date.now())
   const stepInteractions = useRef(0)
 
@@ -53,15 +64,18 @@ export function EnhancedMultiStepForm({
   useEffect(() => {
     if (enableTracking && activeStep > 0) {
       // const stepTime = Date.now() - stepStartTime.current
-      
+
       // Track the current step
-      funnelTracker.current?.trackStep(steps[activeStep - 1]?.id || `step_${activeStep}`, activeStep)
-      
+      funnelTracker.current?.trackStep(
+        steps[activeStep - 1]?.id || `step_${activeStep}`,
+        activeStep
+      )
+
       // If moving to next step, track completion of previous step
       if (activeStep > 1) {
         formTracker.current?.trackStepCompletion(activeStep - 1)
       }
-      
+
       // Reset step tracking
       stepStartTime.current = Date.now()
       stepInteractions.current = 0
@@ -89,13 +103,13 @@ export function EnhancedMultiStepForm({
 
   return (
     <div className={cn('space-y-6', className)}>
-      <StepIndicator 
-        steps={steps} 
-        currentStep={activeStep} 
+      <StepIndicator
+        steps={steps}
+        currentStep={activeStep}
         formName={formName}
         enableTracking={enableTracking}
       />
-      
+
       <ConversionFunnelStep
         stepName={steps[activeStep - 1]?.id || `step_${activeStep}`}
         stepNumber={activeStep}
@@ -128,12 +142,12 @@ interface EnhancedStepIndicatorProps {
   enableTracking?: boolean
 }
 
-export function StepIndicator({ 
-  steps, 
-  currentStep, 
+export function StepIndicator({
+  steps,
+  currentStep,
   className,
   formName,
-  enableTracking = true
+  enableTracking = true,
 }: EnhancedStepIndicatorProps) {
   const { trackFormInteraction } = useEnhancedAnalyticsContext()
 
@@ -145,7 +159,7 @@ export function StepIndicator({
         action: 'change',
         value: `step_${stepIndex + 1}`,
         stepNumber: currentStep,
-        totalSteps: steps.length
+        totalSteps: steps.length,
       })
     }
   }
@@ -156,11 +170,14 @@ export function StepIndicator({
         {steps.map((step, stepIdx) => {
           const isCompleted = stepIdx < currentStep - 1
           const isActive = stepIdx === currentStep - 1
-          
+
           return (
-            <li key={step.id} className={cn('flex items-center', {
-              'flex-1': stepIdx < steps.length - 1,
-            })}>
+            <li
+              key={step.id}
+              className={cn('flex items-center', {
+                'flex-1': stepIdx < steps.length - 1,
+              })}
+            >
               <button
                 type="button"
                 onClick={() => handleStepClick(stepIdx)}
@@ -172,9 +189,11 @@ export function StepIndicator({
                   className={cn(
                     'flex h-8 w-8 items-center justify-center rounded-full border-2',
                     {
-                      'bg-suggestion-green border-suggestion-green': isCompleted,
+                      'bg-suggestion-green border-suggestion-green':
+                        isCompleted,
                       'border-quill-blue bg-quill-blue': isActive,
-                      'border-border-gray bg-parchment-white': !isCompleted && !isActive,
+                      'border-border-gray bg-parchment-white':
+                        !isCompleted && !isActive,
                     }
                   )}
                 >
@@ -210,13 +229,10 @@ export function StepIndicator({
               </button>
               {stepIdx < steps.length - 1 && (
                 <div
-                  className={cn(
-                    'ml-6 flex-1 h-0.5',
-                    {
-                      'bg-suggestion-green': isCompleted,
-                      'bg-border-gray': !isCompleted,
-                    }
-                  )}
+                  className={cn('ml-6 flex-1 h-0.5', {
+                    'bg-suggestion-green': isCompleted,
+                    'bg-border-gray': !isCompleted,
+                  })}
                 />
               )}
             </li>
@@ -261,7 +277,7 @@ export function TrackedFormField({
   value,
   onChange,
   validation,
-  className
+  className,
 }: TrackedFormFieldProps) {
   const [fieldValue, setFieldValue] = useState(value || '')
   // const [hasInteracted, setHasInteracted] = useState(false)
@@ -278,11 +294,17 @@ export function TrackedFormField({
     }
 
     if (validation.minLength && val.length < validation.minLength) {
-      return validation.message || `${label} must be at least ${validation.minLength} characters`
+      return (
+        validation.message ||
+        `${label} must be at least ${validation.minLength} characters`
+      )
     }
 
     if (validation.maxLength && val.length > validation.maxLength) {
-      return validation.message || `${label} must be no more than ${validation.maxLength} characters`
+      return (
+        validation.message ||
+        `${label} must be no more than ${validation.maxLength} characters`
+      )
     }
 
     if (validation.pattern && !validation.pattern.test(val)) {
@@ -299,7 +321,7 @@ export function TrackedFormField({
     await trackFormInteraction({
       formId: formName,
       fieldName: name,
-      action: 'focus'
+      action: 'focus',
     })
   }
 
@@ -311,7 +333,7 @@ export function TrackedFormField({
       fieldName: name,
       action: 'blur',
       value: fieldValue,
-      timeSpent
+      timeSpent,
     })
 
     // Validate on blur
@@ -323,7 +345,7 @@ export function TrackedFormField({
         formId: formName,
         fieldName: name,
         action: 'error',
-        errors: [error]
+        errors: [error],
       })
     }
   }
@@ -332,7 +354,7 @@ export function TrackedFormField({
     const newValue = e.target.value
     setFieldValue(newValue)
     interactionCountRef.current++
-    
+
     if (onChange) {
       onChange(newValue)
     }
@@ -343,26 +365,30 @@ export function TrackedFormField({
     }
 
     // Track every 5th character or significant changes
-    if (interactionCountRef.current % 5 === 0 || newValue.length === 0 || newValue.length === 1) {
+    if (
+      interactionCountRef.current % 5 === 0 ||
+      newValue.length === 0 ||
+      newValue.length === 1
+    ) {
       await trackFormInteraction({
         formId: formName,
         fieldName: name,
         action: 'change',
-        value: newValue
+        value: newValue,
       })
     }
   }
 
   return (
     <div className={cn('space-y-2', className)}>
-      <label 
+      <label
         htmlFor={name}
         className="block text-ui-label font-medium text-text-gray"
       >
         {label}
         {required && <span className="text-error-red ml-1">*</span>}
       </label>
-      
+
       <EnhancedInput
         id={name}
         name={name}
@@ -386,13 +412,13 @@ export function TrackedFormField({
         aria-describedby={description ? `${name}-description` : undefined}
         aria-invalid={!!validationError}
       />
-      
+
       {description && (
         <p id={`${name}-description`} className="text-caption text-muted-gray">
           {description}
         </p>
       )}
-      
+
       {validationError && (
         <p className="text-caption text-error-red" role="alert">
           {validationError}

@@ -1,26 +1,24 @@
 // Database Services - Centralized Export
-export { 
+export {
   BetaSignupService,
   EmailEventService,
   FeedbackService,
   AnalyticsService,
-  UserPreferencesService
+  UserPreferencesService,
 } from './database'
 
 export {
   EngagementService,
   SegmentationService,
-  type UserSegment
+  type UserSegment,
 } from './engagement'
 
-export {
-  DatabaseMaintenanceService
-} from './maintenance'
+export { DatabaseMaintenanceService } from './maintenance'
 
 export {
   RealtimeService,
   type RealtimeSubscription,
-  type RealtimeEventType
+  type RealtimeEventType,
 } from './realtime'
 
 export {
@@ -30,12 +28,10 @@ export {
   type DevelopmentUpdateData,
   type FeedbackRequestData,
   type EmailTemplateData,
-  type EmailCampaign
+  type EmailCampaign,
 } from './email-campaigns'
 
-export {
-  SendGridWebhookService
-} from './sendgrid-webhook'
+export { SendGridWebhookService } from './sendgrid-webhook'
 
 // Re-export types for convenience
 export type {
@@ -45,5 +41,5 @@ export type {
   PageAnalytics,
   UserPreferences,
   BetaSignupFormData,
-  ApiResponse
+  ApiResponse,
 } from '../../types'

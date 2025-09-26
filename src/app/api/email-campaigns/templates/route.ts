@@ -23,21 +23,21 @@ const templateSchema = z.object({
   template_type: z.enum([
     'welcome_immediate',
     'welcome_day_3',
-    'welcome_week_1', 
+    'welcome_week_1',
     'development_update',
     'monthly_newsletter',
     'feedback_request',
     'early_access',
     're_engagement',
     'beta_feature_announcement',
-    'community_highlights'
+    'community_highlights',
   ]),
   variables: z.array(z.string()).optional().default([]),
-  generation_id: z.string().optional() // SendGrid versioning
+  generation_id: z.string().optional(), // SendGrid versioning
 })
 
 const templateUpdateSchema = templateSchema.partial().extend({
-  template_id: z.string().min(1, 'Template ID is required')
+  template_id: z.string().min(1, 'Template ID is required'),
 })
 
 // Template variable definitions for different types
@@ -50,25 +50,25 @@ const TEMPLATE_VARIABLES = {
     'unsubscribe_url',
     'community_links.discord',
     'community_links.github',
-    'community_links.twitter'
+    'community_links.twitter',
   ],
   welcome_day_3: [
     'first_name',
-    'github_username', 
+    'github_username',
     'user_email',
     'unsubscribe_url',
     'beta_signup_date',
     'community_links.discord',
-    'community_links.github'
+    'community_links.github',
   ],
   welcome_week_1: [
     'first_name',
     'github_username',
-    'user_email', 
+    'user_email',
     'unsubscribe_url',
     'beta_signup_date',
     'community_links.discord',
-    'community_links.github'
+    'community_links.github',
   ],
   development_update: [
     'first_name',
@@ -79,13 +79,13 @@ const TEMPLATE_VARIABLES = {
     'roadmap_items',
     'feedback_link',
     'unsubscribe_url',
-    'update_date'
+    'update_date',
   ],
   monthly_newsletter: [
     'first_name',
     'user_email',
     'update_title',
-    'update_content', 
+    'update_content',
     'features_highlights',
     'roadmap_items',
     'community_stats.beta_users',
@@ -93,7 +93,7 @@ const TEMPLATE_VARIABLES = {
     'community_stats.discord_members',
     'feedback_link',
     'unsubscribe_url',
-    'update_date'
+    'update_date',
   ],
   feedback_request: [
     'first_name',
@@ -103,7 +103,7 @@ const TEMPLATE_VARIABLES = {
     'estimated_time',
     'incentive_message',
     'unsubscribe_url',
-    'request_date'
+    'request_date',
   ],
   early_access: [
     'first_name',
@@ -113,16 +113,16 @@ const TEMPLATE_VARIABLES = {
     'instructions_link',
     'exclusive_features',
     'unsubscribe_url',
-    'invitation_date'
+    'invitation_date',
   ],
   re_engagement: [
     'first_name',
-    'user_email', 
+    'user_email',
     'inactivity_days',
     'recent_updates',
     'feedback_link',
     'unsubscribe_url',
-    'campaign_date'
+    'campaign_date',
   ],
   beta_feature_announcement: [
     'first_name',
@@ -131,7 +131,7 @@ const TEMPLATE_VARIABLES = {
     'feature_description',
     'beta_link',
     'feedback_link',
-    'unsubscribe_url'
+    'unsubscribe_url',
   ],
   community_highlights: [
     'first_name',
@@ -140,8 +140,8 @@ const TEMPLATE_VARIABLES = {
     'community_achievements',
     'user_spotlights',
     'upcoming_events',
-    'unsubscribe_url'
-  ]
+    'unsubscribe_url',
+  ],
 } as const
 
 /**
@@ -160,19 +160,20 @@ export async function POST(request: NextRequest) {
     const validatedData = templateSchema.parse(body)
 
     // Get template variables for the type
-    const templateVariables = TEMPLATE_VARIABLES[validatedData.template_type] || []
+    const templateVariables =
+      TEMPLATE_VARIABLES[validatedData.template_type] || []
 
     // Create SendGrid template
     const templateData = {
       name: validatedData.name,
-      generation: 'dynamic' // Use dynamic templates
+      generation: 'dynamic', // Use dynamic templates
     }
 
     // Create the template
     const templateResponse = await sgClient.request({
       url: '/v3/templates',
       method: 'POST',
-      body: templateData
+      body: templateData,
     })
 
     const templateId = templateResponse[1].id
@@ -183,16 +184,18 @@ export async function POST(request: NextRequest) {
       active: 1,
       name: `${validatedData.name} v1`,
       html_content: validatedData.html_content,
-      plain_content: validatedData.plain_content || generatePlainText(validatedData.html_content),
+      plain_content:
+        validatedData.plain_content ||
+        generatePlainText(validatedData.html_content),
       subject: validatedData.subject,
       editor: 'code', // Use code editor for better control
-      test_data: generateTestData(validatedData.template_type)
+      test_data: generateTestData(validatedData.template_type),
     }
 
     const versionResponse = await sgClient.request({
       url: `/v3/templates/${templateId}/versions`,
       method: 'POST',
-      body: versionData
+      body: versionData,
     })
 
     // Store template metadata in our database for easier management
@@ -203,7 +206,7 @@ export async function POST(request: NextRequest) {
         template_type: validatedData.template_type,
         name: validatedData.name,
         variables: templateVariables,
-        version_id: versionResponse[1].id
+        version_id: versionResponse[1].id,
       })
     } catch (dbError) {
       console.warn('Failed to store template metadata:', dbError)
@@ -220,35 +223,43 @@ export async function POST(request: NextRequest) {
         subject: validatedData.subject,
         version_id: versionResponse[1].id,
         variables: templateVariables,
-        sendgrid_url: `https://mc.sendgrid.com/dynamic-templates/${templateId}`
-      }
+        sendgrid_url: `https://mc.sendgrid.com/dynamic-templates/${templateId}`,
+      },
     })
-
   } catch (error) {
     console.error('Template creation error:', error)
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid template data',
-        details: error.issues
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid template data',
+          details: error.issues,
+        },
+        { status: 400 }
+      )
     }
 
     // Handle SendGrid API errors
     if (error && typeof error === 'object' && 'response' in error) {
       const sendGridError = error as any
-      return NextResponse.json({
-        success: false,
-        error: 'SendGrid API error',
-        details: sendGridError.response?.body || sendGridError.message
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'SendGrid API error',
+          details: sendGridError.response?.body || sendGridError.message,
+        },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to create template'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to create template',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -272,7 +283,7 @@ export async function GET(request: NextRequest) {
       // Get specific template
       const templateResponse = await sgClient.request({
         url: `/v3/templates/${templateId}`,
-        method: 'GET'
+        method: 'GET',
       })
 
       const template = templateResponse[1]
@@ -280,7 +291,7 @@ export async function GET(request: NextRequest) {
       // Get template versions
       const versionsResponse = await sgClient.request({
         url: `/v3/templates/${templateId}/versions`,
-        method: 'GET'
+        method: 'GET',
       })
 
       return NextResponse.json({
@@ -291,8 +302,8 @@ export async function GET(request: NextRequest) {
           generation: template.generation,
           versions: versionsResponse[1].versions,
           created_at: template.created_at,
-          updated_at: template.updated_at
-        }
+          updated_at: template.updated_at,
+        },
       })
     } else {
       // List all templates
@@ -301,8 +312,8 @@ export async function GET(request: NextRequest) {
         method: 'GET',
         qs: {
           generations: 'dynamic', // Only get dynamic templates
-          page_size: 200
-        }
+          page_size: 200,
+        },
       })
 
       const templates = templatesResponse[1].templates || []
@@ -322,32 +333,39 @@ export async function GET(request: NextRequest) {
         updated_at: template.updated_at,
         // Try to infer type from name
         inferred_type: inferTemplateType(template.name),
-        variables: getVariablesForInferredType(inferTemplateType(template.name))
+        variables: getVariablesForInferredType(
+          inferTemplateType(template.name)
+        ),
       }))
 
       return NextResponse.json({
         success: true,
         templates: enhancedTemplates,
-        total: templates.length
+        total: templates.length,
       })
     }
-
   } catch (error) {
     console.error('Template retrieval error:', error)
-    
+
     if (error && typeof error === 'object' && 'response' in error) {
       const sendGridError = error as any
-      return NextResponse.json({
-        success: false,
-        error: 'SendGrid API error',
-        details: sendGridError.response?.body || sendGridError.message
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'SendGrid API error',
+          details: sendGridError.response?.body || sendGridError.message,
+        },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to retrieve templates'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to retrieve templates',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -372,20 +390,22 @@ export async function PUT(request: NextRequest) {
         url: `/v3/templates/${validatedData.template_id}`,
         method: 'PATCH',
         body: {
-          name: validatedData.name
-        }
+          name: validatedData.name,
+        },
       })
     }
 
     // If content is provided, create new version
     if (validatedData.html_content || validatedData.subject) {
       const versionData: any = {}
-      
+
       if (validatedData.html_content) {
         versionData.html_content = validatedData.html_content
-        versionData.plain_content = validatedData.plain_content || generatePlainText(validatedData.html_content)
+        versionData.plain_content =
+          validatedData.plain_content ||
+          generatePlainText(validatedData.html_content)
       }
-      
+
       if (validatedData.subject) {
         versionData.subject = validatedData.subject
       }
@@ -396,7 +416,7 @@ export async function PUT(request: NextRequest) {
       const versionResponse = await sgClient.request({
         url: `/v3/templates/${validatedData.template_id}/versions`,
         method: 'POST',
-        body: versionData
+        body: versionData,
       })
 
       return NextResponse.json({
@@ -405,40 +425,48 @@ export async function PUT(request: NextRequest) {
         version: {
           id: versionResponse[1].id,
           template_id: validatedData.template_id,
-          name: versionData.name
-        }
+          name: versionData.name,
+        },
       })
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Template metadata updated successfully'
+      message: 'Template metadata updated successfully',
     })
-
   } catch (error) {
     console.error('Template update error:', error)
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid update data',
-        details: error.issues
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid update data',
+          details: error.issues,
+        },
+        { status: 400 }
+      )
     }
 
     if (error && typeof error === 'object' && 'response' in error) {
       const sendGridError = error as any
-      return NextResponse.json({
-        success: false,
-        error: 'SendGrid API error', 
-        details: sendGridError.response?.body || sendGridError.message
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'SendGrid API error',
+          details: sendGridError.response?.body || sendGridError.message,
+        },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to update template'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to update template',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -458,37 +486,45 @@ export async function DELETE(request: NextRequest) {
     const templateId = url.searchParams.get('id')
 
     if (!templateId) {
-      return NextResponse.json({ 
-        error: 'Template ID is required' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'Template ID is required',
+        },
+        { status: 400 }
+      )
     }
 
     await sgClient.request({
       url: `/v3/templates/${templateId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     })
 
     return NextResponse.json({
       success: true,
-      message: 'Template deleted successfully'
+      message: 'Template deleted successfully',
     })
-
   } catch (error) {
     console.error('Template deletion error:', error)
-    
+
     if (error && typeof error === 'object' && 'response' in error) {
       const sendGridError = error as any
-      return NextResponse.json({
-        success: false,
-        error: 'SendGrid API error',
-        details: sendGridError.response?.body || sendGridError.message
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'SendGrid API error',
+          details: sendGridError.response?.body || sendGridError.message,
+        },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to delete template'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to delete template',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -505,11 +541,14 @@ function generatePlainText(html: string): string {
     .trim()
 }
 
-function generateTestData(templateType: keyof typeof TEMPLATE_VARIABLES): Record<string, unknown> {
+function generateTestData(
+  templateType: keyof typeof TEMPLATE_VARIABLES
+): Record<string, unknown> {
   const baseTestData = {
     first_name: 'Developer',
     user_email: 'test@example.com',
-    unsubscribe_url: 'https://silentscribe.dev/unsubscribe?email=test@example.com'
+    unsubscribe_url:
+      'https://silentscribe.dev/unsubscribe?email=test@example.com',
   }
 
   switch (templateType) {
@@ -523,8 +562,8 @@ function generateTestData(templateType: keyof typeof TEMPLATE_VARIABLES): Record
         community_links: {
           discord: 'https://discord.gg/silentscribe',
           github: 'https://github.com/silentscribe',
-          twitter: 'https://twitter.com/silentscribe'
-        }
+          twitter: 'https://twitter.com/silentscribe',
+        },
       }
 
     case 'development_update':
@@ -532,16 +571,25 @@ function generateTestData(templateType: keyof typeof TEMPLATE_VARIABLES): Record
       return {
         ...baseTestData,
         update_title: 'Silent Scribe Development Update - January 2025',
-        update_content: 'This month we focused on improving the privacy-first architecture...',
-        features_highlights: ['Local processing engine', 'VS Code integration', 'Custom rule support'],
-        roadmap_items: ['Beta release', 'Multi-editor support', 'Team features'],
+        update_content:
+          'This month we focused on improving the privacy-first architecture...',
+        features_highlights: [
+          'Local processing engine',
+          'VS Code integration',
+          'Custom rule support',
+        ],
+        roadmap_items: [
+          'Beta release',
+          'Multi-editor support',
+          'Team features',
+        ],
         feedback_link: 'https://silentscribe.dev/feedback',
         update_date: 'January 31, 2025',
         community_stats: {
           beta_users: 1250,
           github_stars: 89,
-          discord_members: 245
-        }
+          discord_members: 245,
+        },
       }
 
     case 'feedback_request':
@@ -551,7 +599,7 @@ function generateTestData(templateType: keyof typeof TEMPLATE_VARIABLES): Record
         survey_link: 'https://silentscribe.dev/survey/12345',
         estimated_time: '3 minutes',
         incentive_message: 'Early access to new features!',
-        request_date: 'January 25, 2025'
+        request_date: 'January 25, 2025',
       }
 
     case 'early_access':
@@ -560,17 +608,25 @@ function generateTestData(templateType: keyof typeof TEMPLATE_VARIABLES): Record
         access_level: 'beta',
         download_link: 'https://silentscribe.dev/download/beta',
         instructions_link: 'https://silentscribe.dev/beta-guide',
-        exclusive_features: ['Local processing', 'Custom rules', 'VS Code integration'],
-        invitation_date: 'January 20, 2025'
+        exclusive_features: [
+          'Local processing',
+          'Custom rules',
+          'VS Code integration',
+        ],
+        invitation_date: 'January 20, 2025',
       }
 
     case 're_engagement':
       return {
         ...baseTestData,
         inactivity_days: 30,
-        recent_updates: ['Privacy improvements', 'Performance boost', 'New rule engine'],
+        recent_updates: [
+          'Privacy improvements',
+          'Performance boost',
+          'New rule engine',
+        ],
         feedback_link: 'https://silentscribe.dev/feedback',
-        campaign_date: 'January 28, 2025'
+        campaign_date: 'January 28, 2025',
       }
 
     default:
@@ -578,24 +634,33 @@ function generateTestData(templateType: keyof typeof TEMPLATE_VARIABLES): Record
   }
 }
 
-function inferTemplateType(templateName: string): keyof typeof TEMPLATE_VARIABLES | 'unknown' {
+function inferTemplateType(
+  templateName: string
+): keyof typeof TEMPLATE_VARIABLES | 'unknown' {
   const name = templateName.toLowerCase()
-  
-  if (name.includes('welcome') && name.includes('immediate')) return 'welcome_immediate'
+
+  if (name.includes('welcome') && name.includes('immediate'))
+    return 'welcome_immediate'
   if (name.includes('welcome') && name.includes('day')) return 'welcome_day_3'
   if (name.includes('welcome') && name.includes('week')) return 'welcome_week_1'
-  if (name.includes('development') && name.includes('update')) return 'development_update'
-  if (name.includes('monthly') && name.includes('newsletter')) return 'monthly_newsletter'
+  if (name.includes('development') && name.includes('update'))
+    return 'development_update'
+  if (name.includes('monthly') && name.includes('newsletter'))
+    return 'monthly_newsletter'
   if (name.includes('feedback')) return 'feedback_request'
   if (name.includes('early') && name.includes('access')) return 'early_access'
   if (name.includes('re') && name.includes('engagement')) return 're_engagement'
-  if (name.includes('beta') && name.includes('feature')) return 'beta_feature_announcement'
-  if (name.includes('community') && name.includes('highlights')) return 'community_highlights'
-  
+  if (name.includes('beta') && name.includes('feature'))
+    return 'beta_feature_announcement'
+  if (name.includes('community') && name.includes('highlights'))
+    return 'community_highlights'
+
   return 'unknown'
 }
 
-function getVariablesForInferredType(type: keyof typeof TEMPLATE_VARIABLES | 'unknown'): string[] {
+function getVariablesForInferredType(
+  type: keyof typeof TEMPLATE_VARIABLES | 'unknown'
+): string[] {
   if (type === 'unknown') return []
   return [...(TEMPLATE_VARIABLES[type] || [])]
 }

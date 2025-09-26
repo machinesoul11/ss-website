@@ -9,15 +9,8 @@ import crypto from 'crypto'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const {
-      path,
-      title,
-      referrer,
-      visitorId,
-      sessionId,
-      viewport,
-      timestamp
-    } = body
+    const { path, title, referrer, visitorId, sessionId, viewport, timestamp } =
+      body
 
     if (!path) {
       return NextResponse.json(
@@ -28,32 +21,40 @@ export async function POST(request: NextRequest) {
 
     // Privacy-compliant tracking
     const userAgent = request.headers.get('user-agent') || ''
-    const userAgentHash = crypto.createHash('sha256').update(userAgent).digest('hex').substring(0, 16)
-    
+    const userAgentHash = crypto
+      .createHash('sha256')
+      .update(userAgent)
+      .digest('hex')
+      .substring(0, 16)
+
     const clientIp = getClientIP(request)
-    const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').substring(0, 16)
-    
+    const ipHash = crypto
+      .createHash('sha256')
+      .update(clientIp)
+      .digest('hex')
+      .substring(0, 16)
+
     const finalVisitorId = visitorId || generateVisitorId(ipHash, userAgentHash)
     const finalSessionId = sessionId || crypto.randomUUID()
 
     // Log page view
-    const { error } = await supabaseAdmin
-      .from('page_analytics')
-      .insert({
-        page_path: path,
-        visitor_id: finalVisitorId,
-        session_id: finalSessionId,
-        event_type: 'page_view',
-        referrer: referrer || request.headers.get('referer'),
-        user_agent_hash: userAgentHash,
-        metadata: {
-          title: title || null,
-          viewport: viewport || null,
-          load_time: timestamp ? Date.now() - new Date(timestamp).getTime() : null,
-          is_bounce: false, // Will be updated by subsequent events
-          timestamp: new Date().toISOString()
-        }
-      })
+    const { error } = await supabaseAdmin.from('page_analytics').insert({
+      page_path: path,
+      visitor_id: finalVisitorId,
+      session_id: finalSessionId,
+      event_type: 'page_view',
+      referrer: referrer || request.headers.get('referer'),
+      user_agent_hash: userAgentHash,
+      metadata: {
+        title: title || null,
+        viewport: viewport || null,
+        load_time: timestamp
+          ? Date.now() - new Date(timestamp).getTime()
+          : null,
+        is_bounce: false, // Will be updated by subsequent events
+        timestamp: new Date().toISOString(),
+      },
+    })
 
     if (error) {
       console.error('Page view tracking error:', error)
@@ -66,9 +67,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       visitorId: finalVisitorId,
-      sessionId: finalSessionId
+      sessionId: finalSessionId,
     })
-
   } catch (error) {
     console.error('Page view API error:', error)
     return NextResponse.json(
@@ -91,12 +91,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '7')
     const page = searchParams.get('page')
-    
-    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+
+    const startDate = new Date(
+      Date.now() - days * 24 * 60 * 60 * 1000
+    ).toISOString()
 
     let query = supabaseAdmin
       .from('page_analytics')
-      .select('page_path, visitor_id, session_id, timestamp, referrer, metadata')
+      .select(
+        'page_path, visitor_id, session_id, timestamp, referrer, metadata'
+      )
       .eq('event_type', 'page_view')
       .gte('timestamp', startDate)
       .order('timestamp', { ascending: false })
@@ -114,19 +118,18 @@ export async function GET(request: NextRequest) {
     // Calculate statistics
     const stats = {
       totalViews: pageViews?.length || 0,
-      uniqueVisitors: new Set(pageViews?.map(pv => pv.visitor_id)).size,
-      uniqueSessions: new Set(pageViews?.map(pv => pv.session_id)).size,
+      uniqueVisitors: new Set(pageViews?.map((pv) => pv.visitor_id)).size,
+      uniqueSessions: new Set(pageViews?.map((pv) => pv.session_id)).size,
       topPages: getTopPages(pageViews || []),
       topReferrers: getTopReferrers(pageViews || []),
       viewsByDay: getViewsByDay(pageViews || []),
-      avgViewsPerSession: calculateAvgViewsPerSession(pageViews || [])
+      avgViewsPerSession: calculateAvgViewsPerSession(pageViews || []),
     }
 
     return NextResponse.json({
       success: true,
-      data: stats
+      data: stats,
     })
-
   } catch (error) {
     console.error('Page view stats error:', error)
     return NextResponse.json(
@@ -140,7 +143,7 @@ export async function GET(request: NextRequest) {
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const real = request.headers.get('x-real-ip')
-  
+
   if (forwarded) return forwarded.split(',')[0].trim()
   if (real) return real.trim()
   return 'unknown'
@@ -148,13 +151,17 @@ function getClientIP(request: NextRequest): string {
 
 function generateVisitorId(ipHash: string, userAgentHash: string): string {
   const combined = `${ipHash}-${userAgentHash}`
-  return crypto.createHash('sha256').update(combined).digest('hex').substring(0, 32)
+  return crypto
+    .createHash('sha256')
+    .update(combined)
+    .digest('hex')
+    .substring(0, 32)
 }
 
 function getTopPages(pageViews: any[]): Array<{ page: string; views: number }> {
   const pageCounts: Record<string, number> = {}
-  
-  pageViews.forEach(pv => {
+
+  pageViews.forEach((pv) => {
     pageCounts[pv.page_path] = (pageCounts[pv.page_path] || 0) + 1
   })
 
@@ -164,10 +171,12 @@ function getTopPages(pageViews: any[]): Array<{ page: string; views: number }> {
     .slice(0, 10)
 }
 
-function getTopReferrers(pageViews: any[]): Array<{ referrer: string; views: number }> {
+function getTopReferrers(
+  pageViews: any[]
+): Array<{ referrer: string; views: number }> {
   const referrerCounts: Record<string, number> = {}
-  
-  pageViews.forEach(pv => {
+
+  pageViews.forEach((pv) => {
     const referrer = pv.referrer || 'Direct'
     referrerCounts[referrer] = (referrerCounts[referrer] || 0) + 1
   })
@@ -180,8 +189,8 @@ function getTopReferrers(pageViews: any[]): Array<{ referrer: string; views: num
 
 function getViewsByDay(pageViews: any[]): Record<string, number> {
   const viewsByDay: Record<string, number> = {}
-  
-  pageViews.forEach(pv => {
+
+  pageViews.forEach((pv) => {
     const date = new Date(pv.timestamp).toISOString().split('T')[0]
     viewsByDay[date] = (viewsByDay[date] || 0) + 1
   })
@@ -191,14 +200,17 @@ function getViewsByDay(pageViews: any[]): Record<string, number> {
 
 function calculateAvgViewsPerSession(pageViews: any[]): number {
   const sessionCounts: Record<string, number> = {}
-  
-  pageViews.forEach(pv => {
+
+  pageViews.forEach((pv) => {
     sessionCounts[pv.session_id] = (sessionCounts[pv.session_id] || 0) + 1
   })
 
   const totalSessions = Object.keys(sessionCounts).length
   if (totalSessions === 0) return 0
 
-  const totalViews = Object.values(sessionCounts).reduce((sum, count) => sum + count, 0)
+  const totalViews = Object.values(sessionCounts).reduce(
+    (sum, count) => sum + count,
+    0
+  )
   return Math.round((totalViews / totalSessions) * 100) / 100
 }

@@ -29,9 +29,5 @@ export function ClientOnly({ children, fallback = null }: ClientOnlyProps) {
  * Dynamic year component that's hydration-safe
  */
 export function DynamicYear() {
-  return (
-    <ClientOnly fallback="2025">
-      {new Date().getFullYear()}
-    </ClientOnly>
-  )
+  return <ClientOnly fallback="2025">{new Date().getFullYear()}</ClientOnly>
 }

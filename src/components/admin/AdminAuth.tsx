@@ -32,7 +32,7 @@ export function AdminAuth({ children }: AdminAuthProps) {
     try {
       const authToken = localStorage.getItem('admin_auth_token')
       const authExpiry = localStorage.getItem('admin_auth_expiry')
-      
+
       if (authToken && authExpiry) {
         const expiryTime = parseInt(authExpiry)
         if (Date.now() < expiryTime) {
@@ -44,7 +44,7 @@ export function AdminAuth({ children }: AdminAuthProps) {
           localStorage.removeItem('admin_auth_expiry')
         }
       }
-      
+
       setIsAuthenticated(false)
     } catch (error) {
       console.error('Error checking auth status:', error)
@@ -70,7 +70,7 @@ export function AdminAuth({ children }: AdminAuthProps) {
 
       if (response.ok && data.success) {
         // Store auth token with 24-hour expiry
-        const expiryTime = Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+        const expiryTime = Date.now() + 24 * 60 * 60 * 1000 // 24 hours
         localStorage.setItem('admin_auth_token', data.token)
         localStorage.setItem('admin_auth_expiry', expiryTime.toString())
         setIsAuthenticated(true)
@@ -100,7 +100,9 @@ export function AdminAuth({ children }: AdminAuthProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600" suppressHydrationWarning>Loading...</p>
+          <p className="text-gray-600" suppressHydrationWarning>
+            Loading...
+          </p>
         </div>
       </div>
     )
@@ -119,7 +121,7 @@ export function AdminAuth({ children }: AdminAuthProps) {
               Enter the admin password to access the dashboard
             </p>
           </div>
-          
+
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             <div className="rounded-md shadow-sm -space-y-px">
               <div>

@@ -1,7 +1,7 @@
 /**
  * API Performance Tracking Endpoint
  * Phase 6: Custom Analytics System
- * 
+ *
  * Tracks API response times, error rates, and performance metrics
  */
 
@@ -40,16 +40,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'API performance metrics recorded'
+      message: 'API performance metrics recorded',
     })
-
   } catch (error) {
     console.error('API performance tracking error:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to record API performance metrics',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -65,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     // Get API performance data
     const performanceData = await getAPIPerformanceData(endpoint, method, days)
-    
+
     // Calculate API performance summary
     const summary = calculateAPIPerformanceSummary(performanceData)
 
@@ -73,17 +72,16 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         metrics: performanceData,
-        summary
-      }
+        summary,
+      },
     })
-
   } catch (error) {
     console.error('Get API performance data error:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to get API performance data',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -117,21 +115,20 @@ async function storeAPIPerformanceMetrics(
           duration: metrics.duration,
           status: metrics.status,
           success: metrics.success,
-          size: metrics.size
+          size: metrics.size,
         },
         performance: {
           responseTime: metrics.duration,
           errorRate: metrics.success ? 0 : 1,
-          throughput: metrics.size ? (metrics.size / metrics.duration) * 1000 : 0 // bytes per second
+          throughput: metrics.size
+            ? (metrics.size / metrics.duration) * 1000
+            : 0, // bytes per second
         },
-        recordedAt: new Date().toISOString()
-      }
+        recordedAt: new Date().toISOString(),
+      },
     }
 
-    await supabaseAdmin
-      .from('page_analytics')
-      .insert([record])
-
+    await supabaseAdmin.from('page_analytics').insert([record])
   } catch (error) {
     console.error('Error storing API performance metrics:', error)
     throw error
@@ -168,10 +165,10 @@ async function getAPIPerformanceData(
 
     // Filter and process records
     return records
-      .map(record => {
+      .map((record) => {
         const metadata = record.metadata as any
         const api = metadata?.api || {}
-        
+
         return {
           endpoint: api.endpoint,
           method: api.method,
@@ -180,16 +177,15 @@ async function getAPIPerformanceData(
           success: api.success,
           size: api.size,
           timestamp: record.timestamp,
-          page: record.page_path
+          page: record.page_path,
         }
       })
-      .filter(record => {
+      .filter((record) => {
         let match = true
         if (endpoint && !record.endpoint.includes(endpoint)) match = false
         if (method && record.method !== method.toUpperCase()) match = false
         return match
       })
-
   } catch (error) {
     console.error('Error getting API performance data:', error)
     throw error
@@ -207,21 +203,25 @@ function calculateAPIPerformanceSummary(data: any[]) {
       errorRate: 0,
       slowestEndpoints: [],
       errorsByStatus: {},
-      requestsByMethod: {}
+      requestsByMethod: {},
     }
   }
 
   const totalRequests = data.length
-  const averageResponseTime = data.reduce((sum, record) => sum + record.duration, 0) / totalRequests
-  const errorCount = data.filter(record => !record.success).length
+  const averageResponseTime =
+    data.reduce((sum, record) => sum + record.duration, 0) / totalRequests
+  const errorCount = data.filter((record) => !record.success).length
   const errorRate = (errorCount / totalRequests) * 100
 
   // Group by endpoint for slowest analysis
-  const endpointPerformance = new Map<string, { durations: number[], errors: number }>()
+  const endpointPerformance = new Map<
+    string,
+    { durations: number[]; errors: number }
+  >()
   const statusCounts = new Map<number, number>()
   const methodCounts = new Map<string, number>()
 
-  data.forEach(record => {
+  data.forEach((record) => {
     // Endpoint performance
     if (!endpointPerformance.has(record.endpoint)) {
       endpointPerformance.set(record.endpoint, { durations: [], errors: 0 })
@@ -241,9 +241,10 @@ function calculateAPIPerformanceSummary(data: any[]) {
   const slowestEndpoints = Array.from(endpointPerformance.entries())
     .map(([endpoint, data]) => ({
       endpoint,
-      averageResponseTime: data.durations.reduce((a, b) => a + b, 0) / data.durations.length,
+      averageResponseTime:
+        data.durations.reduce((a, b) => a + b, 0) / data.durations.length,
       errorCount: data.errors,
-      requestCount: data.durations.length
+      requestCount: data.durations.length,
     }))
     .sort((a, b) => b.averageResponseTime - a.averageResponseTime)
     .slice(0, 10)
@@ -254,7 +255,7 @@ function calculateAPIPerformanceSummary(data: any[]) {
     errorRate: Math.round(errorRate * 100) / 100,
     slowestEndpoints,
     errorsByStatus: Object.fromEntries(statusCounts),
-    requestsByMethod: Object.fromEntries(methodCounts)
+    requestsByMethod: Object.fromEntries(methodCounts),
   }
 }
 
@@ -295,21 +296,18 @@ async function createAPIPerformanceAlert(metrics: APIPerformanceMetrics) {
           method: metrics.method,
           duration: metrics.duration,
           status: metrics.status,
-          success: metrics.success
+          success: metrics.success,
         },
         threshold: {
           slowResponse: metrics.duration > 5000,
           verySlowResponse: metrics.duration > 10000,
-          error: !metrics.success
+          error: !metrics.success,
         },
-        createdAt: new Date().toISOString()
-      }
+        createdAt: new Date().toISOString(),
+      },
     }
 
-    await supabaseAdmin
-      .from('page_analytics')
-      .insert([alert])
-
+    await supabaseAdmin.from('page_analytics').insert([alert])
   } catch (error) {
     console.error('Error creating API performance alert:', error)
   }
@@ -319,7 +317,7 @@ function hashString(input: string): string {
   let hash = 0
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
+    hash = (hash << 5) - hash + char
     hash = hash & hash // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(16)

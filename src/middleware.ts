@@ -1,7 +1,7 @@
 /**
  * Performance Monitoring Middleware
  * Phase 6: Performance Monitoring - API Response Time Tracking
- * 
+ *
  * Automatically tracks API performance metrics for all requests
  */
 
@@ -55,22 +55,26 @@ export async function trackApiPerformance(
   response: NextResponse,
   additionalMetrics?: Record<string, any>
 ) {
-  const startTime = parseFloat(response.headers.get('x-performance-start') || '0')
+  const startTime = parseFloat(
+    response.headers.get('x-performance-start') || '0'
+  )
   const endpoint = response.headers.get('x-performance-endpoint') || 'unknown'
   const method = response.headers.get('x-performance-method') || 'GET'
-  
+
   if (startTime > 0) {
     const endTime = performance.now()
     const duration = Math.round(endTime - startTime)
-    
+
     const metrics = {
       endpoint,
       method,
       duration,
       status: response.status,
       timestamp: Date.now(),
-      size: parseInt(response.headers.get('content-length') || '0', 10) || undefined,
-      ...additionalMetrics
+      size:
+        parseInt(response.headers.get('content-length') || '0', 10) ||
+        undefined,
+      ...additionalMetrics,
     }
 
     // Store metrics (in production, send to database)
@@ -87,7 +91,7 @@ export async function trackApiPerformance(
         await fetch('/api/analytics/api-performance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(metrics)
+          body: JSON.stringify(metrics),
         })
       } catch (error) {
         console.warn('Failed to send API performance metrics:', error)
@@ -112,20 +116,28 @@ export function getPerformanceStats() {
   }
 
   const recentMetrics = performanceMetrics.slice(-100) // Last 100 requests
-  
-  const durations = recentMetrics.map(m => m.duration)
-  const averageDuration = durations.reduce((a, b) => a + b, 0) / durations.length
-  
-  const errorRate = (recentMetrics.filter(m => m.status >= 400).length / recentMetrics.length) * 100
-  const slowRequests = recentMetrics.filter(m => m.duration > 3000).length
-  
+
+  const durations = recentMetrics.map((m) => m.duration)
+  const averageDuration =
+    durations.reduce((a, b) => a + b, 0) / durations.length
+
+  const errorRate =
+    (recentMetrics.filter((m) => m.status >= 400).length /
+      recentMetrics.length) *
+    100
+  const slowRequests = recentMetrics.filter((m) => m.duration > 3000).length
+
   return {
     totalRequests: recentMetrics.length,
     averageResponseTime: Math.round(averageDuration),
     errorRate: parseFloat(errorRate.toFixed(2)),
     slowRequests,
-    p95Duration: Math.round(durations.sort((a, b) => a - b)[Math.floor(durations.length * 0.95)] || 0),
-    p99Duration: Math.round(durations.sort((a, b) => a - b)[Math.floor(durations.length * 0.99)] || 0)
+    p95Duration: Math.round(
+      durations.sort((a, b) => a - b)[Math.floor(durations.length * 0.95)] || 0
+    ),
+    p99Duration: Math.round(
+      durations.sort((a, b) => a - b)[Math.floor(durations.length * 0.99)] || 0
+    ),
   }
 }
 

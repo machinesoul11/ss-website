@@ -45,13 +45,17 @@ export function CheckboxGroup({
       }
     } else {
       // Remove from selection
-      onChange(value.filter(v => v !== optionValue))
+      onChange(value.filter((v) => v !== optionValue))
     }
   }
 
   const isDisabled = (optionValue: string) => {
     const isSelected = value.includes(optionValue)
-    return !isSelected && Boolean(maxSelections) && value.length >= (maxSelections || 0)
+    return (
+      !isSelected &&
+      Boolean(maxSelections) &&
+      value.length >= (maxSelections || 0)
+    )
   }
 
   return (
@@ -62,7 +66,7 @@ export function CheckboxGroup({
           {required && <span className="text-error-crimson ml-1">*</span>}
         </legend>
       )}
-      
+
       {description && (
         <p className="text-body text-muted-gray">{description}</p>
       )}
@@ -86,15 +90,13 @@ export function CheckboxGroup({
           {maxSelections && minSelections
             ? `Select ${minSelections}-${maxSelections} options`
             : maxSelections
-            ? `Select up to ${maxSelections} options`
-            : `Select at least ${minSelections} options`}
+              ? `Select up to ${maxSelections} options`
+              : `Select at least ${minSelections} options`}
           {maxSelections && ` (${value.length}/${maxSelections} selected)`}
         </p>
       )}
 
-      {error && (
-        <p className="text-caption text-error-crimson">{error}</p>
-      )}
+      {error && <p className="text-caption text-error-crimson">{error}</p>}
     </fieldset>
   )
 }
@@ -132,19 +134,22 @@ export function MultiSelect({
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredOptions = searchable
-    ? options.filter(option =>
-        option.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (option.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? options.filter(
+        (option) =>
+          option.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          option.description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : options
 
-  const selectedOptions = options.filter(option => value.includes(option.value))
+  const selectedOptions = options.filter((option) =>
+    value.includes(option.value)
+  )
 
   const handleToggleOption = (optionValue: string) => {
     const isSelected = value.includes(optionValue)
-    
+
     if (isSelected) {
-      onChange(value.filter(v => v !== optionValue))
+      onChange(value.filter((v) => v !== optionValue))
     } else {
       if (!maxSelections || value.length < maxSelections) {
         onChange([...value, optionValue])
@@ -153,7 +158,7 @@ export function MultiSelect({
   }
 
   const handleRemoveOption = (optionValue: string) => {
-    onChange(value.filter(v => v !== optionValue))
+    onChange(value.filter((v) => v !== optionValue))
   }
 
   return (
@@ -217,7 +222,7 @@ export function MultiSelect({
                 />
               </div>
             )}
-            
+
             <div className="py-1">
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-2 text-body text-muted-gray">
@@ -229,11 +234,17 @@ export function MultiSelect({
                     key={option.value}
                     type="button"
                     onClick={() => handleToggleOption(option.value)}
-                    disabled={!value.includes(option.value) && Boolean(maxSelections) && value.length >= (maxSelections || 0)}
+                    disabled={
+                      !value.includes(option.value) &&
+                      Boolean(maxSelections) &&
+                      value.length >= (maxSelections || 0)
+                    }
                     className={cn(
                       'w-full text-left px-3 py-2 hover:bg-document-gray disabled:opacity-50 disabled:cursor-not-allowed',
                       {
-                        'bg-quill-blue text-parchment-white': value.includes(option.value),
+                        'bg-quill-blue text-parchment-white': value.includes(
+                          option.value
+                        ),
                       }
                     )}
                   >
@@ -270,10 +281,7 @@ export function MultiSelect({
 
       {/* Close dropdown when clicking outside */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 z-0" onClick={() => setIsOpen(false)} />
       )}
     </div>
   )

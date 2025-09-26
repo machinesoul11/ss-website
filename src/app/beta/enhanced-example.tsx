@@ -7,12 +7,12 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  EnhancedMultiStepForm, 
+import {
+  EnhancedMultiStepForm,
   TrackedFormField,
   EnhancedButton,
   ScrollDepthTracker,
-  ConversionFunnelStep
+  ConversionFunnelStep,
   // useEnhancedAnalyticsContext
 } from '@/components/analytics'
 import { Container } from '@/components/layout/containers'
@@ -40,7 +40,7 @@ const formSteps = [
     id: 'confirmation',
     title: 'Confirmation',
     description: 'Review and submit',
-  }
+  },
 ]
 
 interface FormData {
@@ -60,7 +60,7 @@ export default function EnhancedBetaPage() {
   const [formData, setFormData] = useState<Partial<FormData>>({
     currentTools: [],
     documentationPlatforms: [],
-    painPoints: []
+    painPoints: [],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -69,9 +69,9 @@ export default function EnhancedBetaPage() {
   // const { startFunnelTracking } = useEnhancedAnalyticsContext()
 
   const handleFieldChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }))
   }
 
@@ -95,7 +95,7 @@ export default function EnhancedBetaPage() {
       const response = await fetch('/api/beta-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       })
 
       if (!response.ok) {
@@ -104,7 +104,9 @@ export default function EnhancedBetaPage() {
 
       setIsSubmitted(true)
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'An error occurred')
+      setSubmitError(
+        error instanceof Error ? error.message : 'An error occurred'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -127,18 +129,31 @@ export default function EnhancedBetaPage() {
                   className="bg-white rounded-lg shadow-lg p-8"
                 >
                   <div className="w-16 h-16 bg-suggestion-green rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   </div>
                   <h1 className="text-3xl font-bold text-ink-black mb-4">
                     Welcome to Silent Scribe Beta!
                   </h1>
                   <p className="text-lg text-text-gray mb-6">
-                    Thank you for joining our beta program. You'll receive an email with next steps shortly.
+                    Thank you for joining our beta program. You'll receive an
+                    email with next steps shortly.
                   </p>
                   <div className="space-y-4 text-left bg-parchment-white rounded-lg p-6">
-                    <h3 className="font-semibold text-ink-black">What happens next?</h3>
+                    <h3 className="font-semibold text-ink-black">
+                      What happens next?
+                    </h3>
                     <ul className="space-y-2 text-text-gray">
                       <li className="flex items-start">
                         <span className="text-quill-blue mr-2">1.</span>
@@ -183,7 +198,7 @@ export default function EnhancedBetaPage() {
                   Join the Silent Scribe Beta
                 </h1>
                 <p className="text-lg text-text-gray max-w-2xl mx-auto">
-                  Help us build the future of privacy-first writing assistance. 
+                  Help us build the future of privacy-first writing assistance.
                   Get early access and shape the product with your feedback.
                 </p>
               </motion.div>
@@ -220,7 +235,7 @@ export default function EnhancedBetaPage() {
                       <h2 className="text-2xl font-semibold text-ink-black">
                         Let's get started
                       </h2>
-                      
+
                       <TrackedFormField
                         label="Email Address"
                         name="email"
@@ -234,7 +249,7 @@ export default function EnhancedBetaPage() {
                         validation={{
                           required: true,
                           pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: 'Please enter a valid email address'
+                          message: 'Please enter a valid email address',
                         }}
                       />
 
@@ -246,7 +261,9 @@ export default function EnhancedBetaPage() {
                         description="Optional: helps us understand your development background"
                         formName="beta_signup_form"
                         value={formData.githubUsername}
-                        onChange={(value) => handleFieldChange('githubUsername', value)}
+                        onChange={(value) =>
+                          handleFieldChange('githubUsername', value)
+                        }
                       />
 
                       <div className="flex justify-end">
@@ -295,10 +312,12 @@ export default function EnhancedBetaPage() {
                             { value: 'textlint', label: 'textlint' },
                             { value: 'markdownlint', label: 'markdownlint' },
                             { value: 'none', label: 'No automated tools' },
-                            { value: 'other', label: 'Other tools' }
+                            { value: 'other', label: 'Other tools' },
                           ]}
                           selectedValues={formData.currentTools || []}
-                          onChange={(values) => handleFieldChange('currentTools', values)}
+                          onChange={(values) =>
+                            handleFieldChange('currentTools', values)
+                          }
                         />
                       </div>
 
@@ -308,16 +327,21 @@ export default function EnhancedBetaPage() {
                         </label>
                         <CheckboxGroup
                           options={[
-                            { value: 'github', label: 'GitHub/GitLab (Markdown)' },
+                            {
+                              value: 'github',
+                              label: 'GitHub/GitLab (Markdown)',
+                            },
                             { value: 'confluence', label: 'Confluence' },
                             { value: 'notion', label: 'Notion' },
                             { value: 'gitbook', label: 'GitBook' },
                             { value: 'docusaurus', label: 'Docusaurus' },
                             { value: 'mkdocs', label: 'MkDocs' },
-                            { value: 'other', label: 'Other platforms' }
+                            { value: 'other', label: 'Other platforms' },
                           ]}
                           selectedValues={formData.documentationPlatforms || []}
-                          onChange={(values) => handleFieldChange('documentationPlatforms', values)}
+                          onChange={(values) =>
+                            handleFieldChange('documentationPlatforms', values)
+                          }
                         />
                       </div>
 
@@ -333,10 +357,13 @@ export default function EnhancedBetaPage() {
                         >
                           Back
                         </EnhancedButton>
-                        
+
                         <EnhancedButton
                           onClick={handleNext}
-                          disabled={!formData.currentTools?.length || !formData.documentationPlatforms?.length}
+                          disabled={
+                            !formData.currentTools?.length ||
+                            !formData.documentationPlatforms?.length
+                          }
                           ctaText="Continue"
                           ctaPosition="content"
                           ctaType="primary"
@@ -370,20 +397,44 @@ export default function EnhancedBetaPage() {
 
                       <div>
                         <label className="block text-ui-label font-medium text-text-gray mb-3">
-                          What are your biggest pain points with current tools? *
+                          What are your biggest pain points with current tools?
+                          *
                         </label>
                         <CheckboxGroup
                           options={[
-                            { value: 'privacy_concerns', label: 'Privacy concerns with cloud-based tools' },
-                            { value: 'slow_performance', label: 'Slow performance or reliability issues' },
-                            { value: 'poor_tech_context', label: 'Poor understanding of technical context' },
-                            { value: 'complex_setup', label: 'Complex setup and configuration' },
-                            { value: 'limited_customization', label: 'Limited customization options' },
-                            { value: 'expensive_pricing', label: 'Expensive pricing for teams' },
-                            { value: 'integration_issues', label: 'Poor IDE/workflow integration' }
+                            {
+                              value: 'privacy_concerns',
+                              label: 'Privacy concerns with cloud-based tools',
+                            },
+                            {
+                              value: 'slow_performance',
+                              label: 'Slow performance or reliability issues',
+                            },
+                            {
+                              value: 'poor_tech_context',
+                              label: 'Poor understanding of technical context',
+                            },
+                            {
+                              value: 'complex_setup',
+                              label: 'Complex setup and configuration',
+                            },
+                            {
+                              value: 'limited_customization',
+                              label: 'Limited customization options',
+                            },
+                            {
+                              value: 'expensive_pricing',
+                              label: 'Expensive pricing for teams',
+                            },
+                            {
+                              value: 'integration_issues',
+                              label: 'Poor IDE/workflow integration',
+                            },
                           ]}
                           selectedValues={formData.painPoints || []}
-                          onChange={(values) => handleFieldChange('painPoints', values)}
+                          onChange={(values) =>
+                            handleFieldChange('painPoints', values)
+                          }
                         />
                       </div>
 
@@ -395,18 +446,25 @@ export default function EnhancedBetaPage() {
                         description="Help us understand your team context"
                         formName="beta_signup_form"
                         value={formData.teamSize}
-                        onChange={(value) => handleFieldChange('teamSize', value)}
+                        onChange={(value) =>
+                          handleFieldChange('teamSize', value)
+                        }
                       />
 
                       <div>
-                        <label htmlFor="useCase" className="block text-ui-label font-medium text-text-gray mb-2">
+                        <label
+                          htmlFor="useCase"
+                          className="block text-ui-label font-medium text-text-gray mb-2"
+                        >
                           Describe your use case *
                         </label>
                         <Textarea
                           id="useCase"
                           placeholder="Tell us about the type of documentation you write, your workflow, and what you hope Silent Scribe can help you with..."
                           value={formData.useCase || ''}
-                          onChange={(e) => handleFieldChange('useCase', e.target.value)}
+                          onChange={(e) =>
+                            handleFieldChange('useCase', e.target.value)
+                          }
                           className="w-full min-h-[100px]"
                           required
                         />
@@ -427,10 +485,14 @@ export default function EnhancedBetaPage() {
                         >
                           Back
                         </EnhancedButton>
-                        
+
                         <EnhancedButton
                           onClick={handleNext}
-                          disabled={!formData.painPoints?.length || !formData.useCase || formData.useCase.length < 10}
+                          disabled={
+                            !formData.painPoints?.length ||
+                            !formData.useCase ||
+                            formData.useCase.length < 10
+                          }
                           ctaText="Continue"
                           ctaPosition="content"
                           ctaType="primary"
@@ -463,12 +525,25 @@ export default function EnhancedBetaPage() {
                       </h2>
 
                       <div className="bg-parchment-white rounded-lg p-6 space-y-4">
-                        <h3 className="font-semibold text-ink-black">Review your information:</h3>
+                        <h3 className="font-semibold text-ink-black">
+                          Review your information:
+                        </h3>
                         <div className="text-caption text-text-gray space-y-2">
-                          <p><strong>Email:</strong> {formData.email}</p>
-                          <p><strong>Current Tools:</strong> {formData.currentTools?.join(', ')}</p>
-                          <p><strong>Platforms:</strong> {formData.documentationPlatforms?.join(', ')}</p>
-                          <p><strong>Main Pain Points:</strong> {formData.painPoints?.join(', ')}</p>
+                          <p>
+                            <strong>Email:</strong> {formData.email}
+                          </p>
+                          <p>
+                            <strong>Current Tools:</strong>{' '}
+                            {formData.currentTools?.join(', ')}
+                          </p>
+                          <p>
+                            <strong>Platforms:</strong>{' '}
+                            {formData.documentationPlatforms?.join(', ')}
+                          </p>
+                          <p>
+                            <strong>Main Pain Points:</strong>{' '}
+                            {formData.painPoints?.join(', ')}
+                          </p>
                         </div>
                       </div>
 
@@ -477,13 +552,25 @@ export default function EnhancedBetaPage() {
                           <input
                             type="checkbox"
                             checked={formData.privacyConsent || false}
-                            onChange={(e) => handleFieldChange('privacyConsent', e.target.checked)}
+                            onChange={(e) =>
+                              handleFieldChange(
+                                'privacyConsent',
+                                e.target.checked
+                              )
+                            }
                             className="mt-1"
                             required
                           />
                           <span className="text-caption text-text-gray">
-                            I agree to the <a href="/privacy" className="text-quill-blue hover:underline">Privacy Policy</a> and 
-                            understand that my data will be processed for the beta program. *
+                            I agree to the{' '}
+                            <a
+                              href="/privacy"
+                              className="text-quill-blue hover:underline"
+                            >
+                              Privacy Policy
+                            </a>{' '}
+                            and understand that my data will be processed for
+                            the beta program. *
                           </span>
                         </label>
 
@@ -491,18 +578,26 @@ export default function EnhancedBetaPage() {
                           <input
                             type="checkbox"
                             checked={formData.marketingOptIn || false}
-                            onChange={(e) => handleFieldChange('marketingOptIn', e.target.checked)}
+                            onChange={(e) =>
+                              handleFieldChange(
+                                'marketingOptIn',
+                                e.target.checked
+                              )
+                            }
                             className="mt-1"
                           />
                           <span className="text-caption text-text-gray">
-                            I'd like to receive product updates and development news via email.
+                            I'd like to receive product updates and development
+                            news via email.
                           </span>
                         </label>
                       </div>
 
                       {submitError && (
                         <div className="bg-error-red/10 border border-error-red/20 rounded-lg p-4">
-                          <p className="text-error-red text-caption">{submitError}</p>
+                          <p className="text-error-red text-caption">
+                            {submitError}
+                          </p>
                         </div>
                       )}
 
@@ -518,7 +613,7 @@ export default function EnhancedBetaPage() {
                         >
                           Back
                         </EnhancedButton>
-                        
+
                         <EnhancedButton
                           onClick={handleSubmit}
                           disabled={!formData.privacyConsent || isSubmitting}

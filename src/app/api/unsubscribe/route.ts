@@ -4,14 +4,17 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 const unsubscribeSchema = z.object({
   email: z.string().email('Invalid email address'),
-  unsubscribeType: z.enum(['marketing', 'research', 'all']).optional().default('marketing')
+  unsubscribeType: z
+    .enum(['marketing', 'research', 'all'])
+    .optional()
+    .default('marketing'),
 })
 
 const preferenceUpdateSchema = z.object({
   email: z.string().email('Invalid email address'),
   opted_in_marketing: z.boolean().optional(),
   opted_in_research: z.boolean().optional(),
-  communication_frequency: z.enum(['daily', 'weekly', 'monthly']).optional()
+  communication_frequency: z.enum(['daily', 'weekly', 'monthly']).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -20,8 +23,10 @@ export async function POST(request: NextRequest) {
     const { email, unsubscribeType } = unsubscribeSchema.parse(body)
 
     // Determine what to update based on unsubscribe type
-    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
-    
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+
     switch (unsubscribeType) {
       case 'marketing':
         updateData.opted_in_marketing = false
@@ -29,7 +34,7 @@ export async function POST(request: NextRequest) {
         break
       case 'research':
         updateData.opted_in_research = false
-        break  
+        break
       case 'all':
         updateData.opted_in_marketing = false
         updateData.opted_in_research = false
@@ -60,35 +65,34 @@ export async function POST(request: NextRequest) {
 
     if (user) {
       // Log the unsubscribe event
-      await supabaseAdmin
-        .from('email_events')
-        .insert({
-          user_id: user.id,
-          email_type: 'update',
-          event_type: 'unsubscribe',
-          email_subject: 'User Unsubscribe',
-          metadata: {
-            source: 'unsubscribe_page',
-            unsubscribe_type: unsubscribeType,
-            user_agent_hash: hashUserAgent(request.headers.get('user-agent') || ''),
-          }
-        })
+      await supabaseAdmin.from('email_events').insert({
+        user_id: user.id,
+        email_type: 'update',
+        event_type: 'unsubscribe',
+        email_subject: 'User Unsubscribe',
+        metadata: {
+          source: 'unsubscribe_page',
+          unsubscribe_type: unsubscribeType,
+          user_agent_hash: hashUserAgent(
+            request.headers.get('user-agent') || ''
+          ),
+        },
+      })
     }
 
     const messages = {
       marketing: 'Successfully unsubscribed from marketing communications',
-      research: 'Successfully unsubscribed from research communications', 
-      all: 'Successfully unsubscribed from all communications'
+      research: 'Successfully unsubscribed from research communications',
+      all: 'Successfully unsubscribed from all communications',
     }
 
     return NextResponse.json({
       success: true,
-      message: messages[unsubscribeType]
+      message: messages[unsubscribeType],
     })
-
   } catch (error) {
     console.error('Unsubscribe error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: 'Invalid email address' },
@@ -107,7 +111,7 @@ function hashUserAgent(userAgent: string): string {
   let hash = 0
   for (let i = 0; i < userAgent.length; i++) {
     const char = userAgent.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
+    hash = (hash << 5) - hash + char
     hash = hash & hash
   }
   return hash.toString()
@@ -122,8 +126,10 @@ export async function PUT(request: NextRequest) {
     const validatedData = preferenceUpdateSchema.parse(body)
 
     // Build update object with only provided fields
-    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
-    
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+
     if (validatedData.opted_in_marketing !== undefined) {
       updateData.opted_in_marketing = validatedData.opted_in_marketing
     }
@@ -154,27 +160,28 @@ export async function PUT(request: NextRequest) {
         .single()
 
       if (user) {
-        await supabaseAdmin
-          .from('user_preferences')
-          .upsert({
-            user_id: user.id,
-            communication_frequency: validatedData.communication_frequency,
-            updated_at: new Date().toISOString()
-          })
+        await supabaseAdmin.from('user_preferences').upsert({
+          user_id: user.id,
+          communication_frequency: validatedData.communication_frequency,
+          updated_at: new Date().toISOString(),
+        })
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Preferences updated successfully'
+      message: 'Preferences updated successfully',
     })
-
   } catch (error) {
     console.error('Preference update error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Invalid preference data', details: error.issues },
+        {
+          success: false,
+          error: 'Invalid preference data',
+          details: error.issues,
+        },
         { status: 400 }
       )
     }
@@ -221,10 +228,9 @@ export async function GET(request: NextRequest) {
         email,
         opted_in_marketing: user.opted_in_marketing,
         opted_in_research: user.opted_in_research,
-        email_status: user.email_status
-      }
+        email_status: user.email_status,
+      },
     })
-
   } catch (error) {
     console.error('Subscription status fetch error:', error)
     return NextResponse.json(

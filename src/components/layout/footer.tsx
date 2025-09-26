@@ -95,14 +95,16 @@ const socialLinks = [
 
 export function Footer({ className }: FooterProps) {
   return (
-    <footer className={cn('bg-document-gray border-t border-border-gray', className)}>
+    <footer
+      className={cn('bg-document-gray border-t border-border-gray', className)}
+    >
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-3">
-              <Image 
-                src="/silent-scribe-logo.svg" 
+              <Image
+                src="/silent-scribe-logo.svg"
                 alt="Silent Scribe Logo"
                 width={80}
                 height={80}
@@ -114,8 +116,9 @@ export function Footer({ className }: FooterProps) {
             </Link>
             <ClientOnly>
               <p className="text-body text-muted-gray max-w-md">
-                Privacy-first writing assistance for developers and technical writers. 
-                Powerful suggestions that work locally, keeping your content completely private.
+                Privacy-first writing assistance for developers and technical
+                writers. Powerful suggestions that work locally, keeping your
+                content completely private.
               </p>
             </ClientOnly>
             <div className="flex space-x-4">
@@ -148,7 +151,9 @@ export function Footer({ className }: FooterProps) {
                         <Link
                           href={link.href}
                           target={link.external ? '_blank' : undefined}
-                          rel={link.external ? 'noopener noreferrer' : undefined}
+                          rel={
+                            link.external ? 'noopener noreferrer' : undefined
+                          }
                           className="text-body text-muted-gray hover:text-quill-blue transition-colors"
                         >
                           {link.name}
@@ -171,7 +176,9 @@ export function Footer({ className }: FooterProps) {
                         <Link
                           href={link.href}
                           target={link.external ? '_blank' : undefined}
-                          rel={link.external ? 'noopener noreferrer' : undefined}
+                          rel={
+                            link.external ? 'noopener noreferrer' : undefined
+                          }
                           className="text-body text-muted-gray hover:text-quill-blue transition-colors"
                         >
                           {link.name}

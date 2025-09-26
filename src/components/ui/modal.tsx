@@ -68,7 +68,10 @@ export function Modal({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {title && (
-                      <Dialog.Title as="h3" className="text-h3 font-medium text-ink-black">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-h3 font-medium text-ink-black"
+                      >
                         {title}
                       </Dialog.Title>
                     )}
@@ -136,11 +139,7 @@ export function ConfirmModal({
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <p className="text-body text-text-gray mb-6">{message}</p>
       <div className="flex justify-end space-x-3">
-        <Button
-          variant="ghost"
-          onClick={onClose}
-          disabled={loading}
-        >
+        <Button variant="ghost" onClick={onClose} disabled={loading}>
           {cancelText}
         </Button>
         <Button

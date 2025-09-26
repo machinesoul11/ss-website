@@ -1,7 +1,7 @@
 /**
  * Error Tracking & Monitoring Service
  * Phase 6: Performance Monitoring - Error Handling System
- * 
+ *
  * Provides comprehensive error tracking, logging, and alerting
  */
 
@@ -23,7 +23,12 @@ interface ErrorDetails {
 }
 
 interface PerformanceIssue {
-  type: 'slow-api' | 'memory-leak' | 'large-bundle' | 'poor-vitals' | 'failed-request'
+  type:
+    | 'slow-api'
+    | 'memory-leak'
+    | 'large-bundle'
+    | 'poor-vitals'
+    | 'failed-request'
   severity: 'low' | 'medium' | 'high' | 'critical'
   message: string
   page: string
@@ -65,8 +70,8 @@ class ErrorTrackingService {
         metadata: {
           filename: event.filename,
           lineno: event.lineno,
-          colno: event.colno
-        }
+          colno: event.colno,
+        },
       })
     })
 
@@ -81,8 +86,8 @@ class ErrorTrackingService {
         severity: 'high',
         category: 'javascript',
         metadata: {
-          reason: event.reason
-        }
+          reason: event.reason,
+        },
       })
     })
 
@@ -95,10 +100,10 @@ class ErrorTrackingService {
    */
   private interceptFetch() {
     const originalFetch = window.fetch
-    
+
     window.fetch = async (...args) => {
       const startTime = performance.now()
-      
+
       try {
         const response = await originalFetch(...args)
         const endTime = performance.now()
@@ -113,7 +118,7 @@ class ErrorTrackingService {
             page: window.location.pathname,
             metrics: { duration, status: response.status },
             timestamp: Date.now(),
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
           })
         }
 
@@ -130,8 +135,8 @@ class ErrorTrackingService {
               url: args[0],
               status: response.status,
               statusText: response.statusText,
-              duration
-            }
+              duration,
+            },
           })
         }
 
@@ -150,8 +155,8 @@ class ErrorTrackingService {
           category: 'network',
           metadata: {
             url: args[0],
-            duration
-          }
+            duration,
+          },
         })
 
         throw error
@@ -164,12 +169,12 @@ class ErrorTrackingService {
    */
   private monitorNetworkStatus() {
     this.isOnline = navigator.onLine
-    
+
     window.addEventListener('online', () => {
       this.isOnline = true
       this.flushQueues()
     })
-    
+
     window.addEventListener('offline', () => {
       this.isOnline = false
     })
@@ -180,7 +185,10 @@ class ErrorTrackingService {
    */
   private startBatchProcessor() {
     setInterval(() => {
-      if (this.isOnline && (this.errorQueue.length > 0 || this.performanceQueue.length > 0)) {
+      if (
+        this.isOnline &&
+        (this.errorQueue.length > 0 || this.performanceQueue.length > 0)
+      ) {
         this.flushQueues()
       }
     }, this.flushInterval)
@@ -200,7 +208,7 @@ class ErrorTrackingService {
       timestamp: error.timestamp || Date.now(),
       severity: error.severity || 'medium',
       category: error.category || 'javascript',
-      metadata: error.metadata
+      metadata: error.metadata,
     }
 
     this.errorQueue.push(errorDetails)
@@ -211,8 +219,14 @@ class ErrorTrackingService {
     }
 
     // Log to console in development (only for non-test errors)
-    if (process.env.NODE_ENV === 'development' && !errorDetails.message.includes('Test') && !errorDetails.message.includes('ErrorTestingWidget')) {
-      console.warn(`[Error Tracker] ${errorDetails.severity}: ${errorDetails.message}`)
+    if (
+      process.env.NODE_ENV === 'development' &&
+      !errorDetails.message.includes('Test') &&
+      !errorDetails.message.includes('ErrorTestingWidget')
+    ) {
+      console.warn(
+        `[Error Tracker] ${errorDetails.severity}: ${errorDetails.message}`
+      )
     }
   }
 
@@ -231,26 +245,33 @@ class ErrorTrackingService {
   /**
    * React Error Boundary integration
    */
-  public captureComponentError(error: Error, errorInfo: { componentStack: string }) {
+  public captureComponentError(
+    error: Error,
+    errorInfo: { componentStack: string }
+  ) {
     this.captureError({
       message: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
       errorBoundary: true,
       severity: 'high',
-      category: 'render'
+      category: 'render',
     })
   }
 
   /**
    * Manual error reporting
    */
-  public reportError(message: string, metadata?: Record<string, any>, severity: ErrorDetails['severity'] = 'medium') {
+  public reportError(
+    message: string,
+    metadata?: Record<string, any>,
+    severity: ErrorDetails['severity'] = 'medium'
+  ) {
     this.captureError({
       message,
       severity,
       category: 'user',
-      metadata
+      metadata,
     })
   }
 
@@ -270,14 +291,14 @@ class ErrorTrackingService {
         body: JSON.stringify({
           errors,
           performanceIssues,
-          timestamp: Date.now()
-        })
+          timestamp: Date.now(),
+        }),
       })
     } catch (error) {
       // Re-add items to queue if sending failed
       this.errorQueue.unshift(...errors)
       this.performanceQueue.unshift(...performanceIssues)
-      
+
       console.warn('Failed to send error reports:', error)
     }
   }
@@ -289,7 +310,7 @@ class ErrorTrackingService {
     return {
       queuedErrors: this.errorQueue.length,
       queuedPerformanceIssues: this.performanceQueue.length,
-      isOnline: this.isOnline
+      isOnline: this.isOnline,
     }
   }
 
@@ -309,23 +330,29 @@ export const errorTracker = new ErrorTrackingService()
  * React Hook for error tracking
  */
 export function useErrorTracking() {
-  const reportError = (message: string, metadata?: Record<string, any>, severity?: ErrorDetails['severity']) => {
+  const reportError = (
+    message: string,
+    metadata?: Record<string, any>,
+    severity?: ErrorDetails['severity']
+  ) => {
     errorTracker.reportError(message, metadata, severity)
   }
 
-  const reportPerformanceIssue = (issue: Omit<PerformanceIssue, 'page' | 'timestamp' | 'userAgent'>) => {
+  const reportPerformanceIssue = (
+    issue: Omit<PerformanceIssue, 'page' | 'timestamp' | 'userAgent'>
+  ) => {
     errorTracker.capturePerformanceIssue({
       ...issue,
       page: window.location.pathname,
       timestamp: Date.now(),
-      userAgent: navigator.userAgent
+      userAgent: navigator.userAgent,
     })
   }
 
   return {
     reportError,
     reportPerformanceIssue,
-    getStats: () => errorTracker.getErrorStats()
+    getStats: () => errorTracker.getErrorStats(),
   }
 }
 
@@ -333,7 +360,6 @@ export function useErrorTracking() {
  * Performance monitoring utilities
  */
 export const PerformanceMonitor = {
-  
   /**
    * Monitor Core Web Vitals and report issues
    */
@@ -344,8 +370,9 @@ export const PerformanceMonitor = {
     new PerformanceObserver((list) => {
       const entries = list.getEntries()
       const lastEntry = entries[entries.length - 1] as any
-      
-      if (lastEntry && lastEntry.startTime > 4000) { // LCP > 4s is poor
+
+      if (lastEntry && lastEntry.startTime > 4000) {
+        // LCP > 4s is poor
         errorTracker.capturePerformanceIssue({
           type: 'poor-vitals',
           severity: lastEntry.startTime > 6000 ? 'critical' : 'high',
@@ -353,7 +380,7 @@ export const PerformanceMonitor = {
           page: window.location.pathname,
           metrics: { lcp: lastEntry.startTime },
           timestamp: Date.now(),
-          userAgent: navigator.userAgent
+          userAgent: navigator.userAgent,
         })
       }
     }).observe({ type: 'largest-contentful-paint', buffered: true })
@@ -364,8 +391,9 @@ export const PerformanceMonitor = {
       for (const entry of list.getEntries() as any[]) {
         if (!entry.hadRecentInput) {
           clsValue += entry.value
-          
-          if (clsValue > 0.25) { // CLS > 0.25 is poor
+
+          if (clsValue > 0.25) {
+            // CLS > 0.25 is poor
             errorTracker.capturePerformanceIssue({
               type: 'poor-vitals',
               severity: clsValue > 0.5 ? 'critical' : 'high',
@@ -373,7 +401,7 @@ export const PerformanceMonitor = {
               page: window.location.pathname,
               metrics: { cls: clsValue },
               timestamp: Date.now(),
-              userAgent: navigator.userAgent
+              userAgent: navigator.userAgent,
             })
           }
         }
@@ -400,13 +428,13 @@ export const PerformanceMonitor = {
           severity: usage > 95 ? 'critical' : 'high',
           message: `High memory usage: ${usage.toFixed(1)}%`,
           page: window.location.pathname,
-          metrics: { 
-            usedMB: Math.round(usedMB), 
-            totalMB: Math.round(totalMB), 
-            usage: Math.round(usage) 
+          metrics: {
+            usedMB: Math.round(usedMB),
+            totalMB: Math.round(totalMB),
+            usage: Math.round(usage),
           },
           timestamp: Date.now(),
-          userAgent: navigator.userAgent
+          userAgent: navigator.userAgent,
         })
       }
     }, 30000) // Check every 30 seconds
@@ -421,21 +449,22 @@ export const PerformanceMonitor = {
     // Monitor resource loading
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries() as PerformanceResourceTiming[]) {
-        if (entry.initiatorType === 'script' && entry.transferSize > 1000000) { // > 1MB
+        if (entry.initiatorType === 'script' && entry.transferSize > 1000000) {
+          // > 1MB
           errorTracker.capturePerformanceIssue({
             type: 'large-bundle',
             severity: 'medium',
             message: `Large bundle loaded: ${entry.name} (${Math.round(entry.transferSize / 1024)}KB)`,
             page: window.location.pathname,
-            metrics: { 
-              size: entry.transferSize, 
-              duration: entry.duration
+            metrics: {
+              size: entry.transferSize,
+              duration: entry.duration,
             },
             timestamp: Date.now(),
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
           })
         }
       }
     }).observe({ entryTypes: ['resource'] })
-  }
+  },
 }

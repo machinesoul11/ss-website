@@ -1,7 +1,7 @@
 /**
  * Custom Analytics API - Anonymous Visitor Identification
  * Phase 6: Privacy-Compliant Analytics System
- * 
+ *
  * Handles anonymous visitor identification and session-based tracking
  * without cookies or personal data collection
  */
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       visitorData,
       sessionId,
       pagePath = '/',
-      eventType = 'visitor_identification'
+      eventType = 'visitor_identification',
     }: {
       visitorData: VisitorData
       sessionId?: string
@@ -36,10 +36,13 @@ export async function POST(request: NextRequest) {
 
     // Generate anonymous visitor fingerprint
     const visitorFingerprint = generateVisitorFingerprint(visitorData)
-    
+
     // Get or create visitor record using page_analytics table
-    const { visitor, isNewVisitor } = await getOrCreateVisitor(visitorFingerprint, visitorData)
-    
+    const { visitor, isNewVisitor } = await getOrCreateVisitor(
+      visitorFingerprint,
+      visitorData
+    )
+
     // Track the visitor identification event
     await trackVisitorEvent(visitor.id, sessionId, eventType, pagePath, {
       isNewVisitor,
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
       screenResolution: visitorData.screenResolution,
       language: visitorData.language,
       referrer: visitorData.referrer,
-      utmParams: visitorData.utmParams
+      utmParams: visitorData.utmParams,
     })
 
     return NextResponse.json({
@@ -57,17 +60,16 @@ export async function POST(request: NextRequest) {
         visitorId: visitor.id,
         sessionId: sessionId || generateSessionId(),
         isNewVisitor,
-        fingerprint: visitorFingerprint
-      }
+        fingerprint: visitorFingerprint,
+      },
     })
-
   } catch (error) {
     console.error('Anonymous visitor identification error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to identify anonymous visitor',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -89,8 +91,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Get visitor session history
-    const sessionHistory = await getVisitorSessionHistory(visitorId, sessionId, days)
-    
+    const sessionHistory = await getVisitorSessionHistory(
+      visitorId,
+      sessionId,
+      days
+    )
+
     // Get visitor analytics summary
     const analyticsSummary = await getVisitorAnalyticsSummary(visitorId, days)
 
@@ -99,17 +105,16 @@ export async function GET(request: NextRequest) {
       data: {
         visitorId,
         sessionHistory,
-        analyticsSummary
-      }
+        analyticsSummary,
+      },
     })
-
   } catch (error) {
     console.error('Get visitor analytics error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to get visitor analytics',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     )
@@ -124,9 +129,9 @@ function generateVisitorFingerprint(data: VisitorData): string {
     hashString(data.userAgent || 'unknown', 8),
     (data.timezone || 0).toString(),
     data.screenResolution || 'unknown',
-    data.language?.split(',')[0] || 'unknown'
+    data.language?.split(',')[0] || 'unknown',
   ]
-  
+
   const fingerprint = components.join('|')
   return hashString(fingerprint, 12)
 }
@@ -146,12 +151,15 @@ async function getOrCreateVisitor(fingerprint: string, data: VisitorData) {
       .select('*')
       .eq('event_type', 'visitor_session')
       .eq('visitor_id', fingerprint)
-      .gte('timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
+      .gte(
+        'timestamp',
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      ) // Last 30 days
       .order('timestamp', { ascending: false })
       .limit(1)
 
     const isNewVisitor = !existingRecords || existingRecords.length === 0
-    
+
     // Create a visitor session record
     const visitorRecord = {
       id: crypto.randomUUID(),
@@ -168,8 +176,8 @@ async function getOrCreateVisitor(fingerprint: string, data: VisitorData) {
         language: data.language,
         utmParams: data.utmParams,
         isNewVisitor,
-        fingerprint
-      }
+        fingerprint,
+      },
     }
 
     const { data: createdRecord, error } = await supabaseAdmin
@@ -185,9 +193,8 @@ async function getOrCreateVisitor(fingerprint: string, data: VisitorData) {
 
     return {
       visitor: createdRecord || visitorRecord,
-      isNewVisitor
+      isNewVisitor,
     }
-
   } catch (error) {
     console.error('Error managing visitor:', error)
     throw error
@@ -219,14 +226,11 @@ async function trackVisitorEvent(
       user_agent_hash: properties.userAgentHash || null,
       metadata: {
         ...properties,
-        tracked_at: new Date().toISOString()
-      }
+        tracked_at: new Date().toISOString(),
+      },
     }
 
-    await supabaseAdmin
-      .from('page_analytics')
-      .insert([eventRecord])
-
+    await supabaseAdmin.from('page_analytics').insert([eventRecord])
   } catch (error) {
     console.error('Error tracking visitor event:', error)
     throw error
@@ -257,10 +261,10 @@ async function getVisitorSessionHistory(
 
     // Group by session_id to create session summaries
     const sessionMap = new Map()
-    
-    sessions?.forEach(record => {
+
+    sessions?.forEach((record) => {
       const sessionId = record.session_id || 'unknown'
-      
+
       if (!sessionMap.has(sessionId)) {
         sessionMap.set(sessionId, {
           sessionId,
@@ -270,19 +274,19 @@ async function getVisitorSessionHistory(
           events: [],
           totalTimeOnSite: 0,
           entryPage: record.page_path,
-          exitPage: record.page_path
+          exitPage: record.page_path,
         })
       }
-      
+
       const session = sessionMap.get(sessionId)
       session.pageViews++
       session.events.push({
         eventType: record.event_type,
         pagePath: record.page_path,
         timestamp: record.timestamp,
-        metadata: record.metadata
+        metadata: record.metadata,
       })
-      
+
       // Update session times
       if (record.timestamp < session.startTime) {
         session.startTime = record.timestamp
@@ -295,17 +299,18 @@ async function getVisitorSessionHistory(
     })
 
     // Calculate session durations
-    const sessionSummaries = Array.from(sessionMap.values()).map(session => {
-      const duration = new Date(session.endTime).getTime() - new Date(session.startTime).getTime()
+    const sessionSummaries = Array.from(sessionMap.values()).map((session) => {
+      const duration =
+        new Date(session.endTime).getTime() -
+        new Date(session.startTime).getTime()
       return {
         ...session,
         duration: Math.max(duration, 0),
-        isCurrentSession: session.sessionId === currentSessionId
+        isCurrentSession: session.sessionId === currentSessionId,
       }
     })
 
     return sessionSummaries
-
   } catch (error) {
     console.error('Error getting visitor session history:', error)
     throw error
@@ -336,20 +341,20 @@ async function getVisitorAnalyticsSummary(visitorId: string, days: number = 7) {
         totalTimeOnSite: 0,
         averageSessionDuration: 0,
         mostVisitedPages: [],
-        eventTypeCounts: {}
+        eventTypeCounts: {},
       }
     }
 
     // Calculate metrics
-    const sessions = new Set(records.map(r => r.session_id))
+    const sessions = new Set(records.map((r) => r.session_id))
     const pages = new Map<string, number>()
     const eventTypes = new Map<string, number>()
 
-    records.forEach(record => {
+    records.forEach((record) => {
       // Count pages
       const pageCount = pages.get(record.page_path) || 0
       pages.set(record.page_path, pageCount + 1)
-      
+
       // Count event types
       const eventCount = eventTypes.get(record.event_type) || 0
       eventTypes.set(record.event_type, eventCount + 1)
@@ -370,9 +375,8 @@ async function getVisitorAnalyticsSummary(visitorId: string, days: number = 7) {
       mostVisitedPages,
       eventTypeCounts,
       firstVisit: records[records.length - 1]?.timestamp,
-      lastVisit: records[0]?.timestamp
+      lastVisit: records[0]?.timestamp,
     }
-
   } catch (error) {
     console.error('Error getting visitor analytics summary:', error)
     throw error

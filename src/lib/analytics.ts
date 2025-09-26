@@ -38,7 +38,7 @@ class AnalyticsTracker {
       trackTimeOnPage: true,
       trackClicks: true,
       respectDoNotTrack: true,
-      ...config
+      ...config,
     }
 
     // Only initialize if we're in the browser
@@ -65,7 +65,10 @@ class AnalyticsTracker {
   /**
    * Track a custom event
    */
-  async track(eventType: string, properties: Record<string, any> = {}): Promise<void> {
+  async track(
+    eventType: string,
+    properties: Record<string, any> = {}
+  ): Promise<void> {
     if (!this.isTracking || typeof window === 'undefined') return
 
     try {
@@ -74,8 +77,8 @@ class AnalyticsTracker {
         properties: {
           ...properties,
           page: window.location.pathname,
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       }
 
       await this.sendEvent(event)
@@ -96,10 +99,10 @@ class AnalyticsTracker {
       referrer: document.referrer,
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       },
       url: window.location.href,
-      search: window.location.search
+      search: window.location.search,
     }
 
     await this.track('page_view', properties)
@@ -108,7 +111,11 @@ class AnalyticsTracker {
   /**
    * Track conversion events (beta signups, purchases, etc.)
    */
-  async trackConversion(conversionType: string, value: number = 1, metadata: Record<string, any> = {}): Promise<void> {
+  async trackConversion(
+    conversionType: string,
+    value: number = 1,
+    metadata: Record<string, any> = {}
+  ): Promise<void> {
     if (!this.isTracking || typeof window === 'undefined') return
 
     try {
@@ -123,9 +130,9 @@ class AnalyticsTracker {
           metadata: {
             ...metadata,
             page: window.location.pathname,
-            timestamp: Date.now()
-          }
-        })
+            timestamp: Date.now(),
+          },
+        }),
       })
 
       if (!response.ok) {
@@ -139,7 +146,10 @@ class AnalyticsTracker {
   /**
    * Track engagement events
    */
-  async trackEngagement(eventType: string, data: Record<string, any> = {}): Promise<void> {
+  async trackEngagement(
+    eventType: string,
+    data: Record<string, any> = {}
+  ): Promise<void> {
     if (!this.isTracking || typeof window === 'undefined') return
 
     try {
@@ -154,9 +164,9 @@ class AnalyticsTracker {
           ...data,
           metadata: {
             ...data,
-            timestamp: Date.now()
-          }
-        })
+            timestamp: Date.now(),
+          },
+        }),
       })
 
       if (!response.ok) {
@@ -170,33 +180,41 @@ class AnalyticsTracker {
   /**
    * Track CTA clicks
    */
-  async trackCTAClick(ctaText: string, position: string, destination?: string): Promise<void> {
+  async trackCTAClick(
+    ctaText: string,
+    position: string,
+    destination?: string
+  ): Promise<void> {
     await this.track('cta_click', {
       cta_text: ctaText,
       cta_position: position,
       destination,
-      click_target: ctaText
+      click_target: ctaText,
     })
 
     await this.trackEngagement('cta_click', {
       ctaPosition: position,
-      clickTarget: ctaText
+      clickTarget: ctaText,
     })
   }
 
   /**
    * Track form interactions
    */
-  async trackFormInteraction(formId: string, field: string, action: string): Promise<void> {
+  async trackFormInteraction(
+    formId: string,
+    field: string,
+    action: string
+  ): Promise<void> {
     await this.track('form_interaction', {
       form_id: formId,
       field_name: field,
       action, // 'focus', 'blur', 'submit', 'error'
-      form_field: field
+      form_field: field,
     })
 
     await this.trackEngagement('form_interaction', {
-      formField: field
+      formField: field,
     })
   }
 
@@ -204,25 +222,34 @@ class AnalyticsTracker {
    * Track scroll depth
    */
   private trackScrollDepth(): void {
-    if (!this.config.trackScrollDepth || !this.isTracking || typeof window === 'undefined') return
+    if (
+      !this.config.trackScrollDepth ||
+      !this.isTracking ||
+      typeof window === 'undefined'
+    )
+      return
 
     const scrollPercentage = Math.round(
-      (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
+      (window.scrollY /
+        (document.documentElement.scrollHeight - window.innerHeight)) *
+        100
     )
 
     // Track every 25% milestone
     const milestones = [25, 50, 75, 100]
-    const milestone = milestones.find(m => scrollPercentage >= m && !this.scrollDepthTracked.has(m))
+    const milestone = milestones.find(
+      (m) => scrollPercentage >= m && !this.scrollDepthTracked.has(m)
+    )
 
     if (milestone) {
       this.scrollDepthTracked.add(milestone)
       this.track('scroll_depth', {
         scroll_percentage: milestone,
-        scroll_depth: milestone
+        scroll_depth: milestone,
       })
 
       this.trackEngagement('scroll_depth', {
-        scrollDepth: milestone
+        scrollDepth: milestone,
       })
     }
   }
@@ -238,16 +265,16 @@ class AnalyticsTracker {
     // Track time milestones
     const milestones = [15000, 30000, 60000, 120000, 300000] // 15s, 30s, 1m, 2m, 5m
 
-    milestones.forEach(milestone => {
+    milestones.forEach((milestone) => {
       if (timeOnPage >= milestone && !this.hasTrackedTimeMilestone(milestone)) {
         this.track('time_on_page', {
           time_milestone: milestone,
           total_time: timeOnPage,
-          time_on_page: timeOnPage
+          time_on_page: timeOnPage,
         })
 
         this.trackEngagement('time_on_page', {
-          timeOnPage: timeOnPage
+          timeOnPage: timeOnPage,
         })
 
         this.setTimeMilestoneTracked(milestone)
@@ -267,10 +294,14 @@ class AnalyticsTracker {
     // Track scroll depth
     if (this.config.trackScrollDepth) {
       let scrollTimeout: NodeJS.Timeout
-      window.addEventListener('scroll', () => {
-        clearTimeout(scrollTimeout)
-        scrollTimeout = setTimeout(() => this.trackScrollDepth(), 100)
-      }, { passive: true })
+      window.addEventListener(
+        'scroll',
+        () => {
+          clearTimeout(scrollTimeout)
+          scrollTimeout = setTimeout(() => this.trackScrollDepth(), 100)
+        },
+        { passive: true }
+      )
     }
 
     // Track time on page
@@ -306,7 +337,10 @@ class AnalyticsTracker {
   /**
    * Track click events
    */
-  private async trackClick(target: HTMLElement, event: MouseEvent): Promise<void> {
+  private async trackClick(
+    target: HTMLElement,
+    event: MouseEvent
+  ): Promise<void> {
     const tagName = target.tagName.toLowerCase()
     const text = target.textContent?.trim() || ''
     const href = target.getAttribute('href')
@@ -329,7 +363,7 @@ class AnalyticsTracker {
       href,
       x: event.clientX,
       y: event.clientY,
-      click_target: `${tagName}${id ? '#' + id : ''}${className ? '.' + className.split(' ').join('.') : ''}`
+      click_target: `${tagName}${id ? '#' + id : ''}${className ? '.' + className.split(' ').join('.') : ''}`,
     })
   }
 
@@ -337,12 +371,30 @@ class AnalyticsTracker {
    * Check if element is a CTA
    */
   private isCTAElement(element: HTMLElement): boolean {
-    const ctaKeywords = ['cta', 'button', 'signup', 'register', 'download', 'get-started', 'try-now']
-    const elementString = (element.className + ' ' + element.id + ' ' + element.textContent).toLowerCase()
-    
-    return ctaKeywords.some(keyword => elementString.includes(keyword)) ||
-           element.tagName.toLowerCase() === 'button' ||
-           (element.tagName.toLowerCase() === 'a' && element.textContent !== null && element.textContent.length < 50)
+    const ctaKeywords = [
+      'cta',
+      'button',
+      'signup',
+      'register',
+      'download',
+      'get-started',
+      'try-now',
+    ]
+    const elementString = (
+      element.className +
+      ' ' +
+      element.id +
+      ' ' +
+      element.textContent
+    ).toLowerCase()
+
+    return (
+      ctaKeywords.some((keyword) => elementString.includes(keyword)) ||
+      element.tagName.toLowerCase() === 'button' ||
+      (element.tagName.toLowerCase() === 'a' &&
+        element.textContent !== null &&
+        element.textContent.length < 50)
+    )
   }
 
   /**
@@ -369,8 +421,8 @@ class AnalyticsTracker {
           eventType: event.eventType,
           properties: event.properties,
           visitorId: this.visitorId,
-          sessionId: this.sessionId
-        })
+          sessionId: this.sessionId,
+        }),
       })
 
       if (!response.ok) {
@@ -387,14 +439,15 @@ class AnalyticsTracker {
    */
   private generateVisitorId(): string {
     if (typeof window === 'undefined') return 'ssr_visitor'
-    
+
     let visitorId = localStorage.getItem('analytics_visitor_id')
-    
+
     if (!visitorId) {
-      visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+      visitorId =
+        'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
       localStorage.setItem('analytics_visitor_id', visitorId)
     }
-    
+
     return visitorId
   }
 
@@ -403,14 +456,15 @@ class AnalyticsTracker {
    */
   private generateSessionId(): string {
     if (typeof window === 'undefined') return 'ssr_session'
-    
+
     let sessionId = sessionStorage.getItem('analytics_session_id')
-    
+
     if (!sessionId) {
-      sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+      sessionId =
+        'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
       sessionStorage.setItem('analytics_session_id', sessionId)
     }
-    
+
     return sessionId
   }
 
@@ -421,10 +475,12 @@ class AnalyticsTracker {
     if (typeof window === 'undefined' || typeof navigator === 'undefined') {
       return false // Default to allowing tracking on server-side
     }
-    
-    return navigator.doNotTrack === '1' || 
-           (window as any).doNotTrack === '1' || 
-           (navigator as any).msDoNotTrack === '1'
+
+    return (
+      navigator.doNotTrack === '1' ||
+      (window as any).doNotTrack === '1' ||
+      (navigator as any).msDoNotTrack === '1'
+    )
   }
 
   /**
@@ -447,7 +503,7 @@ class AnalyticsTracker {
   public getIds(): { visitorId: string; sessionId: string } {
     return {
       visitorId: this.visitorId,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     }
   }
 
@@ -460,7 +516,10 @@ class AnalyticsTracker {
 }
 
 // Export singleton instance (only create in browser)
-export const analytics = typeof window !== 'undefined' ? new AnalyticsTracker() : {} as AnalyticsTracker
+export const analytics =
+  typeof window !== 'undefined'
+    ? new AnalyticsTracker()
+    : ({} as AnalyticsTracker)
 
 // Export class for custom instances
 export default AnalyticsTracker
@@ -474,7 +533,7 @@ export const useAnalytics = () => {
     trackEngagement: analytics.trackEngagement.bind(analytics),
     trackCTAClick: analytics.trackCTAClick.bind(analytics),
     trackFormInteraction: analytics.trackFormInteraction.bind(analytics),
-    getIds: analytics.getIds.bind(analytics)
+    getIds: analytics.getIds.bind(analytics),
   }
 }
 
@@ -489,10 +548,10 @@ export const useAnalyticsUtils = () => {
       trackEngagement: async () => {},
       trackCTAClick: async () => {},
       trackFormInteraction: async () => {},
-      getIds: () => ({ visitorId: '', sessionId: '' })
+      getIds: () => ({ visitorId: '', sessionId: '' }),
     }
   }
-  
+
   return {
     track: analytics.track.bind(analytics),
     trackPageView: analytics.trackPageView.bind(analytics),
@@ -500,7 +559,7 @@ export const useAnalyticsUtils = () => {
     trackEngagement: analytics.trackEngagement.bind(analytics),
     trackCTAClick: analytics.trackCTAClick.bind(analytics),
     trackFormInteraction: analytics.trackFormInteraction.bind(analytics),
-    getIds: analytics.getIds.bind(analytics)
+    getIds: analytics.getIds.bind(analytics),
   }
 }
 
@@ -510,16 +569,16 @@ export const useConversionTrackingUtils = () => {
     return {
       trackBetaSignup: async () => {},
       trackNewsletterSignup: async () => {},
-      trackDownload: async () => {}
+      trackDownload: async () => {},
     }
   }
-  
+
   return {
-    trackBetaSignup: (email: string, source?: string, teamSize?: string) => 
+    trackBetaSignup: (email: string, source?: string, teamSize?: string) =>
       analytics.trackConversion('beta_signup', 1, { email, source, teamSize }),
-    trackNewsletterSignup: (email: string) => 
+    trackNewsletterSignup: (email: string) =>
       analytics.trackConversion('newsletter_signup', 1, { email }),
-    trackDownload: (resource: string) => 
-      analytics.trackConversion('download', 1, { resource })
+    trackDownload: (resource: string) =>
+      analytics.trackConversion('download', 1, { resource }),
   }
 }

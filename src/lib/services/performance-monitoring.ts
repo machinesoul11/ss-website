@@ -1,7 +1,7 @@
 /**
  * Performance Monitoring Utilities
  * Phase 6: Custom Analytics System - Performance Tracking
- * 
+ *
  * Monitors Core Web Vitals, page load times, and API performance
  */
 
@@ -12,15 +12,15 @@ import { useEffect, useRef } from 'react'
 interface PerformanceMetrics {
   // Core Web Vitals
   lcp?: number // Largest Contentful Paint
-  fid?: number // First Input Delay  
+  fid?: number // First Input Delay
   cls?: number // Cumulative Layout Shift
   fcp?: number // First Contentful Paint
   ttfb?: number // Time to First Byte
-  
+
   // Page Performance
   domContentLoaded?: number
   loadComplete?: number
-  
+
   // Navigation
   navigationTiming?: {
     domainLookup: number
@@ -31,7 +31,7 @@ interface PerformanceMetrics {
     domContentLoaded: number
     loadComplete: number
   }
-  
+
   // Memory (if available)
   memoryUsage?: {
     usedJSHeapSize?: number
@@ -63,7 +63,7 @@ export function usePerformanceMonitoring() {
     // Initialize performance monitoring
     initializeWebVitalsMonitoring()
     initializeNavigationTiming()
-    
+
     // Send metrics after page load
     const timeout = setTimeout(() => {
       sendPerformanceMetrics()
@@ -97,7 +97,9 @@ export function usePerformanceMonitoring() {
         const entries = entryList.getEntries()
         entries.forEach((entry: any) => {
           if (entry.processingStart && entry.startTime) {
-            metricsRef.current.fid = Math.round(entry.processingStart - entry.startTime)
+            metricsRef.current.fid = Math.round(
+              entry.processingStart - entry.startTime
+            )
           }
         })
       })
@@ -116,7 +118,6 @@ export function usePerformanceMonitoring() {
       clsObserver.observe({ type: 'layout-shift', buffered: true })
 
       observerRef.current = lcpObserver // Store one observer for cleanup
-      
     } catch (error) {
       console.warn('Performance monitoring not supported:', error)
     }
@@ -127,32 +128,52 @@ export function usePerformanceMonitoring() {
    */
   const initializeNavigationTiming = () => {
     try {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
-      
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming
+
       if (navigation) {
         const timing = {
-          domainLookup: Math.round(navigation.domainLookupEnd - navigation.domainLookupStart),
-          connection: Math.round(navigation.connectEnd - navigation.connectStart),
+          domainLookup: Math.round(
+            navigation.domainLookupEnd - navigation.domainLookupStart
+          ),
+          connection: Math.round(
+            navigation.connectEnd - navigation.connectStart
+          ),
           request: Math.round(navigation.requestStart - navigation.connectEnd),
-          response: Math.round(navigation.responseEnd - navigation.requestStart),
-          domProcessing: Math.round(navigation.domContentLoadedEventStart - navigation.responseEnd),
-          domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart),
-          loadComplete: Math.round(navigation.loadEventEnd - navigation.loadEventStart)
+          response: Math.round(
+            navigation.responseEnd - navigation.requestStart
+          ),
+          domProcessing: Math.round(
+            navigation.domContentLoadedEventStart - navigation.responseEnd
+          ),
+          domContentLoaded: Math.round(
+            navigation.domContentLoadedEventEnd -
+              navigation.domContentLoadedEventStart
+          ),
+          loadComplete: Math.round(
+            navigation.loadEventEnd - navigation.loadEventStart
+          ),
         }
-        
+
         metricsRef.current.navigationTiming = timing
-        metricsRef.current.domContentLoaded = Math.round(navigation.domContentLoadedEventEnd)
+        metricsRef.current.domContentLoaded = Math.round(
+          navigation.domContentLoadedEventEnd
+        )
         metricsRef.current.loadComplete = Math.round(navigation.loadEventEnd)
-        metricsRef.current.ttfb = Math.round(navigation.responseStart - navigation.requestStart)
+        metricsRef.current.ttfb = Math.round(
+          navigation.responseStart - navigation.requestStart
+        )
       }
 
       // First Contentful Paint
       const paintEntries = performance.getEntriesByType('paint')
-      const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint')
+      const fcpEntry = paintEntries.find(
+        (entry) => entry.name === 'first-contentful-paint'
+      )
       if (fcpEntry) {
         metricsRef.current.fcp = Math.round(fcpEntry.startTime)
       }
-
     } catch (error) {
       console.warn('Navigation timing not available:', error)
     }
@@ -168,7 +189,7 @@ export function usePerformanceMonitoring() {
         return {
           usedJSHeapSize: memory.usedJSHeapSize,
           totalJSHeapSize: memory.totalJSHeapSize,
-          jsHeapSizeLimit: memory.jsHeapSizeLimit
+          jsHeapSizeLimit: memory.jsHeapSizeLimit,
         }
       }
     } catch {
@@ -184,7 +205,7 @@ export function usePerformanceMonitoring() {
     try {
       const metrics: PerformanceMetrics = {
         ...metricsRef.current,
-        memoryUsage: getMemoryUsage()
+        memoryUsage: getMemoryUsage(),
       }
 
       // Send to analytics API
@@ -195,10 +216,9 @@ export function usePerformanceMonitoring() {
           metrics,
           page: window.location.pathname,
           userAgent: navigator.userAgent,
-          timestamp: Date.now()
-        })
+          timestamp: Date.now(),
+        }),
       })
-
     } catch (error) {
       console.error('Failed to send performance metrics:', error)
     }
@@ -212,8 +232,8 @@ export function usePerformanceMonitoring() {
       fetch('/api/analytics/api-performance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(metrics)
-      }).catch(error => {
+        body: JSON.stringify(metrics),
+      }).catch((error) => {
         console.error('Failed to track API performance:', error)
       })
     } catch (error) {
@@ -227,41 +247,47 @@ export function usePerformanceMonitoring() {
   const getCurrentMetrics = (): PerformanceMetrics => {
     return {
       ...metricsRef.current,
-      memoryUsage: getMemoryUsage()
+      memoryUsage: getMemoryUsage(),
     }
   }
 
   return {
     getCurrentMetrics,
     trackAPIPerformance,
-    sendPerformanceMetrics
+    sendPerformanceMetrics,
   }
 }
 
 /**
  * Higher-order function to wrap fetch with performance tracking
  */
-export function createPerformanceTrackedFetch(trackAPIPerformance: (url: string, duration: number, success: boolean, status?: number) => void) {  
+export function createPerformanceTrackedFetch(
+  trackAPIPerformance: (
+    url: string,
+    duration: number,
+    success: boolean,
+    status?: number
+  ) => void
+) {
   return async (url: string, options?: RequestInit): Promise<Response> => {
     const startTime = performance.now()
-    
+
     try {
       const response = await fetch(url, options)
       const endTime = performance.now()
       const duration = Math.round(endTime - startTime)
-      
+
       // Track the API call performance
       trackAPIPerformance(url, duration, response.ok, response.status)
-      
+
       return response
-      
     } catch (error) {
       const endTime = performance.now()
       const duration = Math.round(endTime - startTime)
-      
+
       // Track failed API call
       trackAPIPerformance(url, duration, false, 0)
-      
+
       throw error
     }
   }
@@ -271,7 +297,6 @@ export function createPerformanceTrackedFetch(trackAPIPerformance: (url: string,
  * Performance utility functions
  */
 export const PerformanceUtils = {
-  
   /**
    * Check if Core Web Vitals are good
    */
@@ -282,14 +307,14 @@ export const PerformanceUtils = {
     overall: boolean
   } {
     const lcpGood = (metrics.lcp ?? 0) <= 2500 // 2.5 seconds
-    const fidGood = (metrics.fid ?? 0) <= 100   // 100 milliseconds
-    const clsGood = (metrics.cls ?? 0) <= 0.1   // 0.1 score
-    
+    const fidGood = (metrics.fid ?? 0) <= 100 // 100 milliseconds
+    const clsGood = (metrics.cls ?? 0) <= 0.1 // 0.1 score
+
     return {
       lcp: lcpGood,
       fid: fidGood,
       cls: clsGood,
-      overall: lcpGood && fidGood && clsGood
+      overall: lcpGood && fidGood && clsGood,
     }
   },
 
@@ -321,7 +346,7 @@ export const PerformanceUtils = {
       else if (metrics.cls <= 0.25) score += 15
     }
 
-    return factors > 0 ? Math.round(score / factors * 100) : 0
+    return factors > 0 ? Math.round((score / factors) * 100) : 0
   },
 
   /**
@@ -341,5 +366,5 @@ export const PerformanceUtils = {
     const sizes = ['B', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
-  }
+  },
 }

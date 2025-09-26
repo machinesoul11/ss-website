@@ -7,7 +7,11 @@ import { RecentActivityFeed } from '../../components/admin/RecentActivityFeed'
 import { NotificationCenter } from '../../components/admin/NotificationCenter'
 import { SystemHealthMonitor } from '../../components/admin/SystemHealthMonitor'
 import { RealTimeSignupCounter } from '../../components/admin/RealTimeSignupCounter'
-import { PrivacyAnalyticsDashboard, PerformanceMonitoringDashboard, ErrorMonitoringDashboard } from '../../components/admin'
+import {
+  PrivacyAnalyticsDashboard,
+  PerformanceMonitoringDashboard,
+  ErrorMonitoringDashboard,
+} from '../../components/admin'
 
 /**
  * Admin Dashboard with Real-Time Features
@@ -28,12 +32,14 @@ export default function AdminDashboard() {
   } | null>(null)
 
   const [realtimeSignups, setRealtimeSignups] = useState<BetaSignup[]>([])
-  const [notifications, setNotifications] = useState<Array<{
-    type: 'info' | 'warning' | 'error' | 'success'
-    message: string
-    timestamp: string
-    data: Record<string, unknown>
-  }>>([])
+  const [notifications, setNotifications] = useState<
+    Array<{
+      type: 'info' | 'warning' | 'error' | 'success'
+      message: string
+      timestamp: string
+      data: Record<string, unknown>
+    }>
+  >([])
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,10 +50,10 @@ export default function AdminDashboard() {
       try {
         setIsLoading(true)
         setError(null)
-        
+
         // Wait a bit to ensure client-side hydration is complete
-        await new Promise(resolve => setTimeout(resolve, 200))
-        
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
         // Only run on client side
         if (typeof window === 'undefined') {
           return
@@ -63,13 +69,13 @@ export default function AdminDashboard() {
 
         const response = await fetch('/api/live-analytics', {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         })
-        
+
         const result = await response.json()
-        
+
         if (response.ok && result.success) {
           setLiveStats(result.data)
           setError(null)
@@ -101,7 +107,7 @@ export default function AdminDashboard() {
     // Import Supabase client for real-time subscriptions (client-safe)
     const setupRealtimeSubscriptions = async () => {
       const { supabase } = await import('@/lib/supabase')
-      
+
       // Subscribe to new signups
       const signupChannel = supabase
         .channel('admin-beta-signups')
@@ -110,33 +116,48 @@ export default function AdminDashboard() {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'beta_signups'
+            table: 'beta_signups',
           },
           (payload) => {
             const signup = payload.new as BetaSignup
-            setRealtimeSignups(prev => [signup, ...prev].slice(0, 10))
-            
+            setRealtimeSignups((prev) => [signup, ...prev].slice(0, 10))
+
             // Update live stats
-            setLiveStats(prev => prev ? {
-              ...prev,
-              total_signups: prev.total_signups + 1,
-              signups_today: prev.signups_today + 1,
-              pending_signups: signup.beta_status === 'pending' ? prev.pending_signups + 1 : prev.pending_signups,
-              recent_activity: [{
-                type: 'signup' as const,
-                timestamp: signup.created_at,
-                user_email: signup.email,
-                details: 'New beta signup'
-              }, ...prev.recent_activity].slice(0, 20)
-            } : null)
+            setLiveStats((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    total_signups: prev.total_signups + 1,
+                    signups_today: prev.signups_today + 1,
+                    pending_signups:
+                      signup.beta_status === 'pending'
+                        ? prev.pending_signups + 1
+                        : prev.pending_signups,
+                    recent_activity: [
+                      {
+                        type: 'signup' as const,
+                        timestamp: signup.created_at,
+                        user_email: signup.email,
+                        details: 'New beta signup',
+                      },
+                      ...prev.recent_activity,
+                    ].slice(0, 20),
+                  }
+                : null
+            )
 
             // Show notification
-            setNotifications(prev => [{
-              type: 'success' as const,
-              message: `New beta signup: ${signup.email}`,
-              timestamp: new Date().toISOString(),
-              data: { signup }
-            }, ...prev].slice(0, 50))
+            setNotifications((prev) =>
+              [
+                {
+                  type: 'success' as const,
+                  message: `New beta signup: ${signup.email}`,
+                  timestamp: new Date().toISOString(),
+                  data: { signup },
+                },
+                ...prev,
+              ].slice(0, 50)
+            )
           }
         )
         .subscribe()
@@ -149,27 +170,42 @@ export default function AdminDashboard() {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'email_events'
+            table: 'email_events',
           },
           (payload) => {
             const event = payload.new as EmailEvent
-            setLiveStats(prev => prev ? {
-              ...prev,
-              recent_activity: [{
-                type: 'email_event' as const,
-                timestamp: event.timestamp,
-                details: `Email ${event.event_type}: ${event.email_type}`
-              }, ...prev.recent_activity].slice(0, 20)
-            } : null)
+            setLiveStats((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    recent_activity: [
+                      {
+                        type: 'email_event' as const,
+                        timestamp: event.timestamp,
+                        details: `Email ${event.event_type}: ${event.email_type}`,
+                      },
+                      ...prev.recent_activity,
+                    ].slice(0, 20),
+                  }
+                : null
+            )
 
             // Show notification for important email events
-            if (event.event_type === 'opened' || event.event_type === 'clicked') {
-              setNotifications(prev => [{
-                type: 'info' as const,
-                message: `Email ${event.event_type}: ${event.email_type}`,
-                timestamp: new Date().toISOString(),
-                data: { event }
-              }, ...prev].slice(0, 50))
+            if (
+              event.event_type === 'opened' ||
+              event.event_type === 'clicked'
+            ) {
+              setNotifications((prev) =>
+                [
+                  {
+                    type: 'info' as const,
+                    message: `Email ${event.event_type}: ${event.email_type}`,
+                    timestamp: new Date().toISOString(),
+                    data: { event },
+                  },
+                  ...prev,
+                ].slice(0, 50)
+              )
             }
           }
         )
@@ -183,25 +219,37 @@ export default function AdminDashboard() {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'feedback_submissions'
+            table: 'feedback_submissions',
           },
           (payload) => {
             const feedback = payload.new as FeedbackSubmission
-            setLiveStats(prev => prev ? {
-              ...prev,
-              recent_activity: [{
-                type: 'feedback' as const,
-                timestamp: feedback.submitted_at,
-                details: `${feedback.feedback_type} feedback submitted`
-              }, ...prev.recent_activity].slice(0, 20)
-            } : null)
+            setLiveStats((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    recent_activity: [
+                      {
+                        type: 'feedback' as const,
+                        timestamp: feedback.submitted_at,
+                        details: `${feedback.feedback_type} feedback submitted`,
+                      },
+                      ...prev.recent_activity,
+                    ].slice(0, 20),
+                  }
+                : null
+            )
 
-            setNotifications(prev => [{
-              type: 'info' as const,
-              message: `New ${feedback.feedback_type} feedback received`,
-              timestamp: new Date().toISOString(),
-              data: { feedback }
-            }, ...prev].slice(0, 50))
+            setNotifications((prev) =>
+              [
+                {
+                  type: 'info' as const,
+                  message: `New ${feedback.feedback_type} feedback received`,
+                  timestamp: new Date().toISOString(),
+                  data: { feedback },
+                },
+                ...prev,
+              ].slice(0, 50)
+            )
           }
         )
         .subscribe()
@@ -228,25 +276,28 @@ export default function AdminDashboard() {
 
   // Refresh stats every 5 minutes
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const token = localStorage.getItem('admin_auth_token')
-      if (token) {
-        try {
-          const response = await fetch('/api/live-analytics', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+    const interval = setInterval(
+      async () => {
+        const token = localStorage.getItem('admin_auth_token')
+        if (token) {
+          try {
+            const response = await fetch('/api/live-analytics', {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            })
+            const result = await response.json()
+            if (response.ok && result.success) {
+              setLiveStats(result.data)
             }
-          })
-          const result = await response.json()
-          if (response.ok && result.success) {
-            setLiveStats(result.data)
+          } catch (error) {
+            console.error('Error refreshing stats:', error)
           }
-        } catch (error) {
-          console.error('Error refreshing stats:', error)
         }
-      }
-    }, 5 * 60 * 1000) // 5 minutes
+      },
+      5 * 60 * 1000
+    ) // 5 minutes
 
     return () => clearInterval(interval)
   }, [])
@@ -268,7 +319,7 @@ export default function AdminDashboard() {
         <div className="text-center text-red-600">
           <h2 className="text-xl font-semibold mb-2">Dashboard Error</h2>
           <p>{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
@@ -285,10 +336,14 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Real-time monitoring and analytics for Silent Scribe</p>
+          <p className="text-gray-600 mt-2">
+            Real-time monitoring and analytics for Silent Scribe
+          </p>
           <div className="mt-2 flex items-center space-x-2">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-green-600 font-medium">Live Updates Active</span>
+            <span className="text-sm text-green-600 font-medium">
+              Live Updates Active
+            </span>
           </div>
         </div>
 
@@ -335,10 +390,10 @@ export default function AdminDashboard() {
 
           {/* Notification Center */}
           <div className="lg:col-span-1">
-            <NotificationCenter 
+            <NotificationCenter
               notifications={notifications}
               onDismiss={(index: number) => {
-                setNotifications(prev => prev.filter((_, i) => i !== index))
+                setNotifications((prev) => prev.filter((_, i) => i !== index))
               }}
             />
           </div>
@@ -351,7 +406,7 @@ export default function AdminDashboard() {
 
         {/* Recent Activity Feed */}
         <div className="mb-8">
-          <RecentActivityFeed 
+          <RecentActivityFeed
             activities={liveStats?.recent_activity || []}
             title="Live Activity Feed"
           />
@@ -375,9 +430,11 @@ export default function AdminDashboard() {
         {/* Additional Admin Tools */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Quick Actions
+            </h3>
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={async () => {
                   const token = localStorage.getItem('admin_auth_token')
                   if (token) {
@@ -385,14 +442,14 @@ export default function AdminDashboard() {
                       await fetch('/api/live-analytics', {
                         method: 'POST',
                         headers: {
-                          'Authorization': `Bearer ${token}`,
-                          'Content-Type': 'application/json'
+                          Authorization: `Bearer ${token}`,
+                          'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
                           type: 'info',
                           message: 'Manual system check initiated by admin',
-                          data: { timestamp: new Date().toISOString() }
-                        })
+                          data: { timestamp: new Date().toISOString() },
+                        }),
                       })
                     } catch (error) {
                       console.error('Error sending notification:', error)
@@ -413,7 +470,9 @@ export default function AdminDashboard() {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              System Status
+            </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Database</span>

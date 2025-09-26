@@ -19,12 +19,15 @@ interface AnalyticsProviderProps {
  * Analytics Provider Component
  * Wraps the app to provide analytics tracking throughout the application
  */
-export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderProps) {
+export function AnalyticsProvider({
+  children,
+  config = {},
+}: AnalyticsProviderProps) {
   const {
     enableAutoTracking = true,
     trackScrollDepth = true,
     trackTimeOnPage = true,
-    trackClicks = true
+    trackClicks = true,
   } = config
 
   const combinedAnalytics = useCombinedAnalytics()
@@ -58,12 +61,13 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
 
       const handleScroll = () => {
         const scrollTop = window.scrollY
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight
+        const docHeight =
+          document.documentElement.scrollHeight - window.innerHeight
         const scrollPercent = Math.round((scrollTop / docHeight) * 100)
-        
+
         if (scrollPercent > maxScrollDepth) {
           maxScrollDepth = scrollPercent
-          
+
           // Track at 25%, 50%, 75%, 90%, and 100%
           const milestones = [25, 50, 75, 90, 100]
           for (const milestone of milestones) {
@@ -77,7 +81,7 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
       }
 
       window.addEventListener('scroll', handleScroll, { passive: true })
-      
+
       return () => window.removeEventListener('scroll', handleScroll)
     }
 
@@ -87,7 +91,7 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
 
       const trackTimeInterval = setInterval(() => {
         const timeOnPage = Math.round((Date.now() - startTime) / 1000)
-        
+
         // Track at 30s, 60s, 120s, 300s milestones
         const milestones = [30, 60, 120, 300]
         for (const milestone of milestones) {
@@ -108,7 +112,11 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
         if (!target) return
 
         // Track CTA button clicks
-        if (target.matches('button[data-cta], a[data-cta], [role="button"][data-cta]')) {
+        if (
+          target.matches(
+            'button[data-cta], a[data-cta], [role="button"][data-cta]'
+          )
+        ) {
           const ctaText = target.textContent?.trim() || 'Unknown CTA'
           const position = target.getAttribute('data-cta-position') || 'unknown'
           combinedAnalytics.trackCTAClick(ctaText, position)
@@ -117,7 +125,10 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
         // Track navigation clicks
         if (target.matches('a[href]')) {
           const href = target.getAttribute('href')
-          if (href?.startsWith('http') && !href.includes(window.location.hostname)) {
+          if (
+            href?.startsWith('http') &&
+            !href.includes(window.location.hostname)
+          ) {
             // Outbound link - Plausible handles this automatically
             return
           }
@@ -125,25 +136,32 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
 
         // Track form interactions
         if (target.matches('input, select, textarea')) {
-          const formName = target.closest('form')?.getAttribute('data-form-name') || 'unknown'
+          const formName =
+            target.closest('form')?.getAttribute('data-form-name') || 'unknown'
           combinedAnalytics.trackEvent({
             name: 'form_interaction',
             properties: {
               form_name: formName,
               field_type: target.tagName.toLowerCase(),
-              field_name: target.getAttribute('name') || 'unknown'
-            }
+              field_name: target.getAttribute('name') || 'unknown',
+            },
           })
         }
       }
 
       document.addEventListener('click', handleClick, { passive: true })
-      
+
       return () => document.removeEventListener('click', handleClick)
     }
 
     await setupTracking()
-  }, [combinedAnalytics, enableAutoTracking, trackScrollDepth, trackTimeOnPage, trackClicks])
+  }, [
+    combinedAnalytics,
+    enableAutoTracking,
+    trackScrollDepth,
+    trackTimeOnPage,
+    trackClicks,
+  ])
 
   useEffect(() => {
     fetchAnalyticsData()
@@ -158,29 +176,51 @@ export function AnalyticsProvider({ children, config = {} }: AnalyticsProviderPr
 export function useAnalytics() {
   const analyticsUtils = useAnalyticsUtils()
 
-  const trackEvent = useCallback(async (eventType: string, properties: Record<string, any> = {}) => {
-    await analyticsUtils.track(eventType, properties)
-  }, [analyticsUtils])
+  const trackEvent = useCallback(
+    async (eventType: string, properties: Record<string, any> = {}) => {
+      await analyticsUtils.track(eventType, properties)
+    },
+    [analyticsUtils]
+  )
 
-  const trackPageView = useCallback(async (path?: string, title?: string) => {
-    await analyticsUtils.trackPageView(path, title)
-  }, [analyticsUtils])
+  const trackPageView = useCallback(
+    async (path?: string, title?: string) => {
+      await analyticsUtils.trackPageView(path, title)
+    },
+    [analyticsUtils]
+  )
 
-  const trackConversion = useCallback(async (conversionType: string, value: number = 1, metadata: Record<string, any> = {}) => {
-    await analyticsUtils.trackConversion(conversionType, value, metadata)
-  }, [analyticsUtils])
+  const trackConversion = useCallback(
+    async (
+      conversionType: string,
+      value: number = 1,
+      metadata: Record<string, any> = {}
+    ) => {
+      await analyticsUtils.trackConversion(conversionType, value, metadata)
+    },
+    [analyticsUtils]
+  )
 
-  const trackEngagement = useCallback(async (eventType: string, data: Record<string, any> = {}) => {
-    await analyticsUtils.trackEngagement(eventType, data)
-  }, [analyticsUtils])
+  const trackEngagement = useCallback(
+    async (eventType: string, data: Record<string, any> = {}) => {
+      await analyticsUtils.trackEngagement(eventType, data)
+    },
+    [analyticsUtils]
+  )
 
-  const trackCTAClick = useCallback(async (ctaText: string, position: string, destination?: string) => {
-    await analyticsUtils.trackCTAClick(ctaText, position, destination)
-  }, [analyticsUtils])
+  const trackCTAClick = useCallback(
+    async (ctaText: string, position: string, destination?: string) => {
+      await analyticsUtils.trackCTAClick(ctaText, position, destination)
+    },
+    [analyticsUtils]
+  )
 
-  const trackFormInteraction = useCallback(async (formId: string, field: string, action: string) => {
-    await analyticsUtils.trackFormInteraction(formId, field, action)
-  }, [analyticsUtils])
+  const trackFormInteraction = useCallback(
+    async (formId: string, field: string, action: string) => {
+      await analyticsUtils.trackFormInteraction(formId, field, action)
+    },
+    [analyticsUtils]
+  )
 
   return {
     track: trackEvent,
@@ -189,7 +229,7 @@ export function useAnalytics() {
     trackEngagement,
     trackCTAClick,
     trackFormInteraction,
-    getIds: analyticsUtils.getIds
+    getIds: analyticsUtils.getIds,
   }
 }
 
@@ -213,7 +253,7 @@ export function useConversionTracking() {
   return {
     trackBetaSignup: conversionUtils.trackBetaSignup,
     trackNewsletterSignup: conversionUtils.trackNewsletterSignup,
-    trackDownload: conversionUtils.trackDownload
+    trackDownload: conversionUtils.trackDownload,
   }
 }
 
@@ -227,22 +267,30 @@ interface CTATrackerProps {
   destination?: string
 }
 
-export function CTATracker({ children, ctaText, position, destination }: CTATrackerProps) {
+export function CTATracker({
+  children,
+  ctaText,
+  position,
+  destination,
+}: CTATrackerProps) {
   const { trackCTAClick } = useAnalytics()
 
-  const handleClick = useCallback(async (event: React.MouseEvent) => {
-    await trackCTAClick(ctaText, position, destination)
-    
-    // Call original onClick if it exists
-    const originalOnClick = (children.props as any)?.onClick
-    if (originalOnClick) {
-      originalOnClick(event)
-    }
-  }, [trackCTAClick, ctaText, position, destination, children])
+  const handleClick = useCallback(
+    async (event: React.MouseEvent) => {
+      await trackCTAClick(ctaText, position, destination)
+
+      // Call original onClick if it exists
+      const originalOnClick = (children.props as any)?.onClick
+      if (originalOnClick) {
+        originalOnClick(event)
+      }
+    },
+    [trackCTAClick, ctaText, position, destination, children]
+  )
 
   return React.cloneElement(children, {
     ...children.props,
-    onClick: handleClick
+    onClick: handleClick,
   } as any)
 }
 
@@ -256,25 +304,33 @@ interface FormTrackerProps {
   className?: string
 }
 
-export function FormTracker({ children, formId, onSubmit, className }: FormTrackerProps) {
+export function FormTracker({
+  children,
+  formId,
+  onSubmit,
+  className,
+}: FormTrackerProps) {
   const { trackFormInteraction, trackConversion } = useAnalytics()
 
-  const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    
-    await trackFormInteraction(formId, 'form', 'submit')
-    
-    // Check if this is a signup form for conversion tracking
-    if (formId.includes('signup') || formId.includes('beta')) {
-      await trackConversion('form_submission', 1, { formId })
-    }
-    
-    if (onSubmit) {
-      const formData = new FormData(event.currentTarget)
-      const data = Object.fromEntries(formData.entries())
-      onSubmit(data)
-    }
-  }, [trackFormInteraction, trackConversion, formId, onSubmit])
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+
+      await trackFormInteraction(formId, 'form', 'submit')
+
+      // Check if this is a signup form for conversion tracking
+      if (formId.includes('signup') || formId.includes('beta')) {
+        await trackConversion('form_submission', 1, { formId })
+      }
+
+      if (onSubmit) {
+        const formData = new FormData(event.currentTarget)
+        const data = Object.fromEntries(formData.entries())
+        onSubmit(data)
+      }
+    },
+    [trackFormInteraction, trackConversion, formId, onSubmit]
+  )
 
   return (
     <form onSubmit={handleSubmit} className={className} data-form-id={formId}>
@@ -292,7 +348,11 @@ interface FieldTrackerProps {
   formId: string
 }
 
-export function FieldTracker({ children, fieldName, formId }: FieldTrackerProps) {
+export function FieldTracker({
+  children,
+  fieldName,
+  formId,
+}: FieldTrackerProps) {
   const { trackFormInteraction } = useAnalytics()
 
   const handleFocus = useCallback(async () => {
@@ -318,7 +378,7 @@ export function FieldTracker({ children, fieldName, formId }: FieldTrackerProps)
       if (originalOnBlur) {
         originalOnBlur(event)
       }
-    }
+    },
   } as any)
 }
 

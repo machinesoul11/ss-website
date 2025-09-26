@@ -8,7 +8,12 @@ export interface BetaSignup {
   documentation_platform: string[]
   pain_points: string
   use_case_description: string
-  team_size?: 'individual' | 'small_team' | 'medium_team' | 'large_team' | 'enterprise'
+  team_size?:
+    | 'individual'
+    | 'small_team'
+    | 'medium_team'
+    | 'large_team'
+    | 'enterprise'
   signup_source?: string
   referrer_code?: string
   created_at: string
@@ -23,8 +28,22 @@ export interface BetaSignup {
 export interface EmailEvent {
   id: string
   user_id: string
-  email_type: 'welcome' | 'update' | 'early_access' | 'feedback_request' | 're_engagement' | 'monthly_newsletter'
-  event_type: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'spam_report' | 'unsubscribe' | 'group_unsubscribe'
+  email_type:
+    | 'welcome'
+    | 'update'
+    | 'early_access'
+    | 'feedback_request'
+    | 're_engagement'
+    | 'monthly_newsletter'
+  event_type:
+    | 'sent'
+    | 'delivered'
+    | 'opened'
+    | 'clicked'
+    | 'bounced'
+    | 'spam_report'
+    | 'unsubscribe'
+    | 'group_unsubscribe'
   timestamp: string
   email_subject?: string
   campaign_id?: string
@@ -128,7 +147,12 @@ export interface BetaSignupFormData {
   currentTools: string[]
   documentationPlatforms: string[]
   painPoints: string
-  teamSize?: 'individual' | 'small_team' | 'medium_team' | 'large_team' | 'enterprise'
+  teamSize?:
+    | 'individual'
+    | 'small_team'
+    | 'medium_team'
+    | 'large_team'
+    | 'enterprise'
   useCaseDescription: string
   signupSource?: string
   referrerCode?: string

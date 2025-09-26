@@ -1,7 +1,7 @@
 /**
  * Error Boundary Component
  * Phase 6: Performance Monitoring - Error Handling System
- * 
+ *
  * Catches React component errors and reports them to error tracking
  */
 
@@ -22,27 +22,30 @@ interface ErrorBoundaryState {
   errorInfo: React.ErrorInfo | null
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     }
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
-      error
+      error,
     }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Report error to tracking service
     errorTracker.captureComponentError(error, {
-      componentStack: errorInfo.componentStack || ''
+      componentStack: errorInfo.componentStack || '',
     })
 
     // Call custom error handler if provided
@@ -51,7 +54,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // Update state with error info
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     })
 
     // Log to console in development
@@ -98,25 +101,28 @@ function DefaultErrorFallback({ error }: { error: Error | null }) {
             />
           </svg>
         </div>
-        
+
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           Something went wrong
         </h3>
-        
+
         <p className="text-gray-600 mb-4">
-          We're sorry, but something unexpected happened. The error has been reported and we'll look into it.
+          We're sorry, but something unexpected happened. The error has been
+          reported and we'll look into it.
         </p>
 
         {process.env.NODE_ENV === 'development' && error && (
           <details className="text-left bg-gray-100 p-3 rounded text-sm text-gray-700 mb-4">
-            <summary className="cursor-pointer font-medium">Error Details (Dev Mode)</summary>
+            <summary className="cursor-pointer font-medium">
+              Error Details (Dev Mode)
+            </summary>
             <pre className="mt-2 whitespace-pre-wrap break-all">
               {error.name}: {error.message}
               {error.stack && '\n\nStack trace:\n' + error.stack}
             </pre>
           </details>
         )}
-        
+
         <button
           onClick={() => window.location.reload()}
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
@@ -157,7 +163,7 @@ export function withErrorBoundary<P extends object>(
   )
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
-  
+
   return WrappedComponent
 }
 
@@ -165,15 +171,18 @@ export function withErrorBoundary<P extends object>(
  * Hook for manual error reporting within components
  */
 export function useErrorHandler() {
-  const handleError = React.useCallback((error: Error, errorInfo?: { [key: string]: any }) => {
-    errorTracker.captureError({
-      message: error.message,
-      stack: error.stack,
-      severity: 'high',
-      category: 'user',
-      metadata: errorInfo
-    })
-  }, [])
+  const handleError = React.useCallback(
+    (error: Error, errorInfo?: { [key: string]: any }) => {
+      errorTracker.captureError({
+        message: error.message,
+        stack: error.stack,
+        severity: 'high',
+        category: 'user',
+        metadata: errorInfo,
+      })
+    },
+    []
+  )
 
   return handleError
 }
@@ -181,10 +190,10 @@ export function useErrorHandler() {
 /**
  * Async Error Boundary for handling promise rejections in components
  */
-export function AsyncErrorBoundary({ 
-  children, 
+export function AsyncErrorBoundary({
+  children,
   fallback,
-  onError 
+  onError,
 }: {
   children: ReactNode
   fallback?: (error: Error) => ReactNode
@@ -198,23 +207,29 @@ export function AsyncErrorBoundary({
   }, [children])
 
   // Handle async errors
-  const handleAsyncError = React.useCallback((error: Error) => {
-    errorTracker.captureError({
-      message: error.message,
-      stack: error.stack,
-      severity: 'high',
-      category: 'javascript',
-      metadata: { async: true }
-    })
+  const handleAsyncError = React.useCallback(
+    (error: Error) => {
+      errorTracker.captureError({
+        message: error.message,
+        stack: error.stack,
+        severity: 'high',
+        category: 'javascript',
+        metadata: { async: true },
+      })
 
-    onError?.(error)
-    setError(error)
-  }, [onError])
+      onError?.(error)
+      setError(error)
+    },
+    [onError]
+  )
 
   // Provide error handler to children
-  const contextValue = React.useMemo(() => ({
-    handleAsyncError
-  }), [handleAsyncError])
+  const contextValue = React.useMemo(
+    () => ({
+      handleAsyncError,
+    }),
+    [handleAsyncError]
+  )
 
   if (error) {
     if (fallback) {
@@ -225,9 +240,7 @@ export function AsyncErrorBoundary({
 
   return (
     <AsyncErrorContext.Provider value={contextValue}>
-      <ErrorBoundary onError={onError}>
-        {children}
-      </ErrorBoundary>
+      <ErrorBoundary onError={onError}>{children}</ErrorBoundary>
     </AsyncErrorContext.Provider>
   )
 }
@@ -238,7 +251,7 @@ export function AsyncErrorBoundary({
 const AsyncErrorContext = React.createContext<{
   handleAsyncError: (error: Error) => void
 }>({
-  handleAsyncError: () => {}
+  handleAsyncError: () => {},
 })
 
 /**
@@ -246,9 +259,9 @@ const AsyncErrorContext = React.createContext<{
  */
 export function useAsyncErrorHandler() {
   const context = React.useContext(AsyncErrorContext)
-  
+
   const handleAsyncError = React.useCallback(
-    async function<T>(asyncFn: () => Promise<T>): Promise<T | null> {
+    async function <T>(asyncFn: () => Promise<T>): Promise<T | null> {
       try {
         return await asyncFn()
       } catch (error) {
@@ -261,6 +274,6 @@ export function useAsyncErrorHandler() {
 
   return {
     handleAsyncError,
-    reportError: context.handleAsyncError
+    reportError: context.handleAsyncError,
   }
 }
