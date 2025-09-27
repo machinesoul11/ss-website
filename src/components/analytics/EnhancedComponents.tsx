@@ -205,7 +205,7 @@ export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
         `form[data-form-name="${formName}"]`
       ) as HTMLFormElement
       if (form) {
-        ; (form as any).stepControls = stepControls
+        ;(form as any).stepControls = stepControls
       }
       return form
     })

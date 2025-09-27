@@ -12,7 +12,7 @@ import {
   createThrottledPlausibleTracker,
   createFormInteractionThrottler,
   createScrollTrackingThrottler,
-  safeAnalyticsCall
+  safeAnalyticsCall,
 } from '@/lib/analytics-throttle'
 
 export interface FormInteractionData {
@@ -118,7 +118,10 @@ export function useEnhancedTracking() {
                       : 0,
                   has_errors: (data.errors?.length || 0) > 0,
                   error_count: data.errors?.length || 0,
-                  page: typeof window !== 'undefined' ? window.location.pathname : '',
+                  page:
+                    typeof window !== 'undefined'
+                      ? window.location.pathname
+                      : '',
                   timestamp: Date.now(),
                 },
               })
@@ -249,36 +252,32 @@ export function useEnhancedTracking() {
    */
   const trackScrollDepth = async (data: ScrollDepthData) => {
     // Use scroll throttling to prevent excessive calls
-    scrollThrottler.trackScrollMilestone(
-      data.page,
-      data.percentage,
-      () => {
-        safeAnalyticsCall(async () => {
-          await analytics.trackEvent({
-            name: 'scroll_depth_detailed',
-            properties: {
-              depth_percentage: data.percentage,
-              page: data.page,
-              time_to_reach: data.timeToReach,
-              max_depth_reached: data.maxDepthReached,
-              bounced: data.bounced,
-              engagement_score: calculateEngagementScore(data),
+    scrollThrottler.trackScrollMilestone(data.page, data.percentage, () => {
+      safeAnalyticsCall(async () => {
+        await analytics.trackEvent({
+          name: 'scroll_depth_detailed',
+          properties: {
+            depth_percentage: data.percentage,
+            page: data.page,
+            time_to_reach: data.timeToReach,
+            max_depth_reached: data.maxDepthReached,
+            bounced: data.bounced,
+            engagement_score: calculateEngagementScore(data),
+          },
+        })
+
+        // Only track major milestones to Plausible to avoid spam
+        if ([25, 50, 75, 100].includes(data.percentage)) {
+          throttledPlausible.trackEvent('Scroll Engagement', {
+            props: {
+              depth: data.percentage,
+              time_to_reach: Math.round(data.timeToReach / 1000), // Convert to seconds
+              page_section: getPageSection(data.percentage),
             },
           })
-
-          // Only track major milestones to Plausible to avoid spam
-          if ([25, 50, 75, 100].includes(data.percentage)) {
-            throttledPlausible.trackEvent('Scroll Engagement', {
-              props: {
-                depth: data.percentage,
-                time_to_reach: Math.round(data.timeToReach / 1000), // Convert to seconds
-                page_section: getPageSection(data.percentage),
-              },
-            })
-          }
-        })
-      }
-    )
+        }
+      })
+    })
   }
 
   /**

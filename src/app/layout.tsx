@@ -118,7 +118,9 @@ export default function RootLayout({
                     trackClicks: true,
                   }}
                 >
-                  <EnhancedAnalyticsProvider enableAutoTracking={process.env.NODE_ENV === 'production'}>
+                  <EnhancedAnalyticsProvider
+                    enableAutoTracking={process.env.NODE_ENV === 'production'}
+                  >
                     <ToastProvider>
                       <div className="min-h-screen flex flex-col">
                         <ErrorBoundary fallback={<HeaderErrorFallback />}>
