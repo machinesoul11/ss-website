@@ -49,9 +49,19 @@ export function trackPlausibleEvent(
   }
 
   try {
-    window.plausible!(eventName, data)
+    // Check if we're in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Plausible event (dev mode):', eventName, data)
+      return
+    }
+
+    // Only track if plausible function exists and we're not being rate limited
+    if (window.plausible && typeof window.plausible === 'function') {
+      window.plausible(eventName, data)
+    }
   } catch (error) {
-    console.error('Error tracking Plausible event:', error)
+    console.debug('Plausible event tracking failed:', error)
+    // Don't throw errors for analytics failures
   }
 }
 

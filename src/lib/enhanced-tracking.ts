@@ -8,6 +8,12 @@
 import { useCombinedAnalytics } from '@/lib/combined-analytics'
 // import { useAnalyticsUtils } from '@/lib/analytics'
 import { trackPlausibleEvent, trackPlausibleGoal } from '@/lib/plausible'
+import {
+  createThrottledPlausibleTracker,
+  createFormInteractionThrottler,
+  createScrollTrackingThrottler,
+  safeAnalyticsCall
+} from '@/lib/analytics-throttle'
 
 export interface FormInteractionData {
   formId: string
@@ -79,13 +85,61 @@ export interface ConversionFunnelData {
  */
 export function useEnhancedTracking() {
   const analytics = useCombinedAnalytics()
+  const throttledPlausible = createThrottledPlausibleTracker()
+  const formThrottler = createFormInteractionThrottler()
+  const scrollThrottler = createScrollTrackingThrottler()
 
   /**
    * Track detailed form interactions and completion rates
    */
   const trackFormInteraction = async (data: FormInteractionData) => {
     try {
-      // Track to custom analytics with detailed data
+      // Use throttling for non-critical actions
+      if (['focus', 'blur', 'change'].includes(data.action)) {
+        formThrottler.throttleFormEvent(
+          data.formId,
+          data.fieldName,
+          data.action,
+          async () => {
+            safeAnalyticsCall(async () => {
+              await analytics.trackEvent({
+                name: 'form_interaction_detailed',
+                properties: {
+                  form_id: data.formId,
+                  field_name: data.fieldName,
+                  action: data.action,
+                  value_length: data.value?.length || 0,
+                  time_spent: data.timeSpent || 0,
+                  step_number: data.stepNumber || 1,
+                  total_steps: data.totalSteps || 1,
+                  completion_rate:
+                    data.stepNumber && data.totalSteps
+                      ? (data.stepNumber / data.totalSteps) * 100
+                      : 0,
+                  has_errors: (data.errors?.length || 0) > 0,
+                  error_count: data.errors?.length || 0,
+                  page: typeof window !== 'undefined' ? window.location.pathname : '',
+                  timestamp: Date.now(),
+                },
+              })
+
+              // Only track important form events to Plausible
+              if (data.action === 'focus' || data.action === 'blur') {
+                throttledPlausible.trackEvent('Form Interaction', {
+                  props: {
+                    form_id: data.formId,
+                    action: data.action,
+                    step: data.stepNumber || 1,
+                  },
+                })
+              }
+            })
+          }
+        )
+        return
+      }
+
+      // Track critical events immediately (submit, abandon, error)
       await analytics.trackEvent({
         name: 'form_interaction_detailed',
         properties: {
@@ -107,26 +161,6 @@ export function useEnhancedTracking() {
         },
       })
 
-      // Track to Plausible with key metrics (with error handling)
-      try {
-        trackPlausibleEvent('Form Interaction', {
-          props: {
-            form_id: data.formId,
-            action: data.action,
-            step: data.stepNumber || 1,
-            completion_rate:
-              data.stepNumber && data.totalSteps
-                ? Math.round((data.stepNumber / data.totalSteps) * 100)
-                : 0,
-          },
-        })
-      } catch (plausibleError) {
-        console.debug(
-          'Plausible tracking failed for form interaction:',
-          plausibleError
-        )
-      }
-
       // Track abandonment specifically
       if (data.action === 'abandon') {
         await analytics.trackEvent({
@@ -141,19 +175,12 @@ export function useEnhancedTracking() {
           },
         })
 
-        try {
-          trackPlausibleGoal('Form Abandonment', {
-            props: {
-              form_id: data.formId,
-              step: data.stepNumber || 1,
-            },
-          })
-        } catch (plausibleError) {
-          console.debug(
-            'Plausible tracking failed for form abandonment:',
-            plausibleError
-          )
-        }
+        throttledPlausible.trackEvent('Form Abandonment', {
+          props: {
+            form_id: data.formId,
+            step: data.stepNumber || 1,
+          },
+        })
       }
 
       // Track completion
@@ -221,32 +248,37 @@ export function useEnhancedTracking() {
    * Track detailed scroll depth and engagement
    */
   const trackScrollDepth = async (data: ScrollDepthData) => {
-    try {
-      await analytics.trackEvent({
-        name: 'scroll_depth_detailed',
-        properties: {
-          depth_percentage: data.percentage,
-          page: data.page,
-          time_to_reach: data.timeToReach,
-          max_depth_reached: data.maxDepthReached,
-          bounced: data.bounced,
-          engagement_score: calculateEngagementScore(data),
-        },
-      })
+    // Use scroll throttling to prevent excessive calls
+    scrollThrottler.trackScrollMilestone(
+      data.page,
+      data.percentage,
+      () => {
+        safeAnalyticsCall(async () => {
+          await analytics.trackEvent({
+            name: 'scroll_depth_detailed',
+            properties: {
+              depth_percentage: data.percentage,
+              page: data.page,
+              time_to_reach: data.timeToReach,
+              max_depth_reached: data.maxDepthReached,
+              bounced: data.bounced,
+              engagement_score: calculateEngagementScore(data),
+            },
+          })
 
-      // Only track milestones to Plausible to avoid spam
-      if ([25, 50, 75, 90, 100].includes(data.percentage)) {
-        trackPlausibleEvent('Scroll Engagement', {
-          props: {
-            depth: data.percentage,
-            time_to_reach: Math.round(data.timeToReach / 1000), // Convert to seconds
-            page_section: getPageSection(data.percentage),
-          },
+          // Only track major milestones to Plausible to avoid spam
+          if ([25, 50, 75, 100].includes(data.percentage)) {
+            throttledPlausible.trackEvent('Scroll Engagement', {
+              props: {
+                depth: data.percentage,
+                time_to_reach: Math.round(data.timeToReach / 1000), // Convert to seconds
+                page_section: getPageSection(data.percentage),
+              },
+            })
+          }
         })
       }
-    } catch (error) {
-      console.error('Error tracking scroll depth:', error)
-    }
+    )
   }
 
   /**

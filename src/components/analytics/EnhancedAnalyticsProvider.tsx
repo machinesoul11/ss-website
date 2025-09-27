@@ -56,6 +56,11 @@ export function EnhancedAnalyticsProvider({
   children,
   enableAutoTracking = true,
 }: EnhancedAnalyticsProviderProps) {
+  // Production-ready analytics control with proper feature flags
+  const shouldTrack = enableAutoTracking && (
+    process.env.NODE_ENV === 'production' ||
+    process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === 'true'
+  )
   const tracking = useEnhancedTracking()
   const sessionDataRef = useRef({
     sessionStart: Date.now(),
@@ -73,7 +78,7 @@ export function EnhancedAnalyticsProvider({
 
   // Initialize session tracking
   useEffect(() => {
-    if (!enableAutoTracking) return
+    if (!shouldTrack) return
 
     // Track initial attribution
     const initializeAttribution = () => {
@@ -97,7 +102,7 @@ export function EnhancedAnalyticsProvider({
           const scrollPercentage = Math.round(
             (window.scrollY /
               (document.documentElement.scrollHeight - window.innerHeight)) *
-              100
+            100
           )
 
           sessionDataRef.current.scrollDepth = scrollPercentage
@@ -372,12 +377,23 @@ export function EnhancedAnalyticsProvider({
   }
 
   const contextValue: EnhancedAnalyticsContextType = {
-    trackFormInteraction: tracking.trackFormInteraction,
-    trackCTAClick: tracking.trackCTAClick,
-    trackScrollDepth: tracking.trackScrollDepth,
-    trackEngagementTime: tracking.trackEngagementTime,
-    startFormTracking,
-    startFunnelTracking,
+    trackFormInteraction: shouldTrack ? tracking.trackFormInteraction : async () => { },
+    trackCTAClick: shouldTrack ? tracking.trackCTAClick : async () => { },
+    trackScrollDepth: shouldTrack ? tracking.trackScrollDepth : async () => { },
+    trackEngagementTime: shouldTrack ? tracking.trackEngagementTime : async () => { },
+    startFormTracking: shouldTrack ? startFormTracking : () => ({
+      trackFieldInteraction: () => { },
+      trackStepCompletion: () => { },
+      trackAbandonment: () => { },
+      trackCompletion: () => { },
+      cleanup: () => { },
+    }),
+    startFunnelTracking: shouldTrack ? startFunnelTracking : () => ({
+      trackStep: () => { },
+      trackCompletion: () => { },
+      trackAbandonment: () => { },
+      cleanup: () => { },
+    }),
   }
 
   return (

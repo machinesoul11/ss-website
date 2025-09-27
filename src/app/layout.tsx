@@ -68,20 +68,30 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
-        {/* Plausible Analytics Script */}
-        {plausibleDomain && (
-          <>
-            <Script
-              defer
-              data-domain={plausibleDomain}
-              src="https://plausible.io/js/script.js"
-              strategy="afterInteractive"
-            />
-            <Script id="plausible-init" strategy="afterInteractive">
-              {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
-            </Script>
-          </>
-        )}
+        {/* Plausible Analytics Script - Production Only with Kill Switch */}
+        {plausibleDomain &&
+          process.env.NODE_ENV === 'production' &&
+          process.env.NEXT_PUBLIC_DISABLE_ALL_ANALYTICS !== 'true' && (
+            <>
+              <Script
+                defer
+                data-domain={plausibleDomain}
+                src="https://plausible.io/js/script.js"
+                strategy="afterInteractive"
+              />
+              <Script id="plausible-init" strategy="afterInteractive">
+                {`
+                window.plausible = window.plausible || function() {
+                  try {
+                    (window.plausible.q = window.plausible.q || []).push(arguments);
+                  } catch (e) {
+                    console.debug('Plausible tracking error:', e);
+                  }
+                };
+              `}
+              </Script>
+            </>
+          )}
       </head>
       <body className="antialiased">
         <ErrorMonitoringProvider
@@ -108,7 +118,7 @@ export default function RootLayout({
                     trackClicks: true,
                   }}
                 >
-                  <EnhancedAnalyticsProvider enableAutoTracking={true}>
+                  <EnhancedAnalyticsProvider enableAutoTracking={process.env.NODE_ENV === 'production'}>
                     <ToastProvider>
                       <div className="min-h-screen flex flex-col">
                         <ErrorBoundary fallback={<HeaderErrorFallback />}>

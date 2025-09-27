@@ -9,6 +9,7 @@ import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { useEnhancedAnalyticsContext } from './EnhancedAnalyticsProvider'
 import { Button } from '@/components/ui/button'
 import type { CTAClickData, FormInteractionData } from '@/lib/enhanced-tracking'
+import { safeAnalyticsCall } from '@/lib/analytics-throttle'
 
 interface EnhancedButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -204,7 +205,7 @@ export const EnhancedForm = forwardRef<HTMLFormElement, EnhancedFormProps>(
         `form[data-form-name="${formName}"]`
       ) as HTMLFormElement
       if (form) {
-        ;(form as any).stepControls = stepControls
+        ; (form as any).stepControls = stepControls
       }
       return form
     })
@@ -252,14 +253,16 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
     const { trackFormInteraction } = useEnhancedAnalyticsContext()
     const focusTimeRef = useRef<number>(0)
 
-    const handleFocus = async (event: React.FocusEvent<HTMLInputElement>) => {
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
       focusTimeRef.current = Date.now()
 
       if (trackInteractions && fieldName && formName) {
-        await trackFormInteraction({
-          formId: formName,
-          fieldName,
-          action: 'focus',
+        safeAnalyticsCall(() => {
+          trackFormInteraction({
+            formId: formName,
+            fieldName,
+            action: 'focus',
+          })
         })
       }
 
@@ -268,16 +271,18 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
       }
     }
 
-    const handleBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
+    const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
       const timeSpent = Date.now() - focusTimeRef.current
 
       if (trackInteractions && fieldName && formName) {
-        await trackFormInteraction({
-          formId: formName,
-          fieldName,
-          action: 'blur',
-          value: event.target.value,
-          timeSpent,
+        safeAnalyticsCall(() => {
+          trackFormInteraction({
+            formId: formName,
+            fieldName,
+            action: 'blur',
+            value: event.target.value,
+            timeSpent,
+          })
         })
       }
 
@@ -286,13 +291,15 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
       }
     }
 
-    const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       if (trackInteractions && fieldName && formName) {
-        await trackFormInteraction({
-          formId: formName,
-          fieldName,
-          action: 'change',
-          value: event.target.value,
+        safeAnalyticsCall(() => {
+          trackFormInteraction({
+            formId: formName,
+            fieldName,
+            action: 'change',
+            value: event.target.value,
+          })
         })
       }
 
