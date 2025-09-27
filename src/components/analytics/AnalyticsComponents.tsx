@@ -32,7 +32,7 @@ export const AnalyticsButton = forwardRef<
       goalName,
       onClick,
       children,
-      ...props
+      ...domProps
     },
     ref
   ) => {
@@ -66,7 +66,7 @@ export const AnalyticsButton = forwardRef<
         onClick={handleClick}
         data-cta={ctaText || true}
         data-cta-position={ctaPosition}
-        {...props}
+        {...domProps}
       >
         {children}
       </button>

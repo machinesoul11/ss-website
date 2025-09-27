@@ -44,15 +44,21 @@ export async function POST(request: NextRequest) {
     )
 
     // Track the visitor identification event
-    await trackVisitorEvent(visitor.id, sessionId, eventType, pagePath, {
-      isNewVisitor,
-      fingerprint: visitorFingerprint,
-      timezone: visitorData.timezone,
-      screenResolution: visitorData.screenResolution,
-      language: visitorData.language,
-      referrer: visitorData.referrer,
-      utmParams: visitorData.utmParams,
-    })
+    await trackVisitorEvent(
+      visitor.id,
+      sessionId || undefined,
+      eventType,
+      pagePath,
+      {
+        isNewVisitor,
+        fingerprint: visitorFingerprint,
+        timezone: visitorData.timezone,
+        screenResolution: visitorData.screenResolution,
+        language: visitorData.language,
+        referrer: visitorData.referrer,
+        utmParams: visitorData.utmParams,
+      }
+    )
 
     return NextResponse.json({
       success: true,
@@ -93,7 +99,7 @@ export async function GET(request: NextRequest) {
     // Get visitor session history
     const sessionHistory = await getVisitorSessionHistory(
       visitorId,
-      sessionId,
+      sessionId || undefined,
       days
     )
 
@@ -262,7 +268,7 @@ async function getVisitorSessionHistory(
     // Group by session_id to create session summaries
     const sessionMap = new Map()
 
-    sessions?.forEach((record) => {
+    sessions?.forEach((record: any) => {
       const sessionId = record.session_id || 'unknown'
 
       if (!sessionMap.has(sessionId)) {
@@ -346,11 +352,11 @@ async function getVisitorAnalyticsSummary(visitorId: string, days: number = 7) {
     }
 
     // Calculate metrics
-    const sessions = new Set(records.map((r) => r.session_id))
+    const sessions = new Set(records.map((r: any) => r.session_id))
     const pages = new Map<string, number>()
     const eventTypes = new Map<string, number>()
 
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       // Count pages
       const pageCount = pages.get(record.page_path) || 0
       pages.set(record.page_path, pageCount + 1)

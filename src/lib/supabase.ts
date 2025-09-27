@@ -10,9 +10,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Client for browser-side operations
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient<Database>(supabaseUrl, supabaseAnonKey)
-  : ({} as any) // Mock client for build-time
+export const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey)
+    : ({} as any) // Mock client for build-time
 
 // Create a properly typed admin client
 let _supabaseAdmin: SupabaseClient<Database> | null = null
@@ -22,7 +23,9 @@ if (typeof window === 'undefined' && supabaseUrl) {
   if (supabaseServiceKey) {
     _supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey)
   } else {
-    console.warn('SUPABASE_SERVICE_ROLE_KEY not configured - admin operations may fail')
+    console.warn(
+      'SUPABASE_SERVICE_ROLE_KEY not configured - admin operations may fail'
+    )
   }
 }
 

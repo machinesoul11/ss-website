@@ -203,7 +203,7 @@ async function generateAggregatedMetrics(
 
     // Calculate top pages
     const pageMap = new Map<string, number>()
-    pageViews.forEach((record) => {
+    pageViews.forEach((record: any) => {
       const count = pageMap.get(record.page_path) || 0
       pageMap.set(record.page_path, count + 1)
     })
@@ -215,7 +215,7 @@ async function generateAggregatedMetrics(
 
     // Calculate referrer breakdown
     const referrerMap = new Map<string, number>()
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       if (record.referrer) {
         try {
           const domain = new URL(record.referrer).hostname || 'direct'
@@ -240,7 +240,7 @@ async function generateAggregatedMetrics(
       string,
       { visitors: Set<string>; conversions: number }
     >()
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       const metadata = record.metadata as any
       if (metadata?.utmParams?.utm_campaign) {
         const campaign = metadata.utmParams.utm_campaign
@@ -270,7 +270,7 @@ async function generateAggregatedMetrics(
 
     // Calculate device breakdown (screen resolution)
     const deviceMap = new Map<string, number>()
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       const metadata = record.metadata as any
       const resolution = metadata?.screenResolution || 'unknown'
       const count = deviceMap.get(resolution) || 0
@@ -284,7 +284,7 @@ async function generateAggregatedMetrics(
 
     // Calculate timezone distribution
     const timezoneMap = new Map<string, number>()
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       const metadata = record.metadata as any
       const timezone = metadata?.timezone
         ? `GMT${metadata.timezone > 0 ? '+' : ''}${metadata.timezone}`
@@ -302,7 +302,7 @@ async function generateAggregatedMetrics(
       string,
       { start: Date; end: Date; pageViews: number }
     >()
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       if (record.session_id) {
         const timestamp = new Date(record.timestamp)
         if (!sessionMap.has(record.session_id)) {
@@ -338,7 +338,7 @@ async function generateAggregatedMetrics(
     return {
       date: new Date().toISOString().split('T')[0],
       unique_visitors: uniqueVisitors.size,
-      total_sessions: uniqueSessions.size,
+      total_sessions: uniqueSessions,
       total_page_views: pageViews.length,
       bounce_rate: Math.round(bounceRate * 100) / 100,
       avg_session_duration: Math.round(avgSessionDuration),

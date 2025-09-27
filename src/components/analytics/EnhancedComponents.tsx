@@ -38,11 +38,11 @@ export const EnhancedButton = forwardRef<
       section,
       destination,
       userFlow,
-      // trackAsGoal,
-      // goalName,
+      trackAsGoal,
+      goalName,
       onClick,
       children,
-      ...props
+      ...domProps
     },
     ref
   ) => {
@@ -74,7 +74,7 @@ export const EnhancedButton = forwardRef<
         data-cta={ctaText || true}
         data-cta-position={ctaPosition}
         data-cta-type={ctaType}
-        {...props}
+        {...domProps}
       >
         {children}
       </Button>
