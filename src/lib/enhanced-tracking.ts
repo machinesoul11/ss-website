@@ -107,18 +107,25 @@ export function useEnhancedTracking() {
         },
       })
 
-      // Track to Plausible with key metrics
-      trackPlausibleEvent('Form Interaction', {
-        props: {
-          form_id: data.formId,
-          action: data.action,
-          step: data.stepNumber || 1,
-          completion_rate:
-            data.stepNumber && data.totalSteps
-              ? Math.round((data.stepNumber / data.totalSteps) * 100)
-              : 0,
-        },
-      })
+      // Track to Plausible with key metrics (with error handling)
+      try {
+        trackPlausibleEvent('Form Interaction', {
+          props: {
+            form_id: data.formId,
+            action: data.action,
+            step: data.stepNumber || 1,
+            completion_rate:
+              data.stepNumber && data.totalSteps
+                ? Math.round((data.stepNumber / data.totalSteps) * 100)
+                : 0,
+          },
+        })
+      } catch (plausibleError) {
+        console.debug(
+          'Plausible tracking failed for form interaction:',
+          plausibleError
+        )
+      }
 
       // Track abandonment specifically
       if (data.action === 'abandon') {
@@ -134,12 +141,19 @@ export function useEnhancedTracking() {
           },
         })
 
-        trackPlausibleGoal('Form Abandonment', {
-          props: {
-            form_id: data.formId,
-            step: data.stepNumber || 1,
-          },
-        })
+        try {
+          trackPlausibleGoal('Form Abandonment', {
+            props: {
+              form_id: data.formId,
+              step: data.stepNumber || 1,
+            },
+          })
+        } catch (plausibleError) {
+          console.debug(
+            'Plausible tracking failed for form abandonment:',
+            plausibleError
+          )
+        }
       }
 
       // Track completion

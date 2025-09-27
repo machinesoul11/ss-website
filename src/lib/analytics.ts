@@ -354,16 +354,23 @@ class AnalyticsTracker {
       return
     }
 
+    // Safely handle className - it might be a string or DOMTokenList
+    const classNameStr =
+      typeof className === 'string'
+        ? className
+        : (className as any)?.toString() || ''
+    const clickTarget = `${tagName}${id ? '#' + id : ''}${classNameStr ? '.' + classNameStr.split(' ').join('.') : ''}`
+
     // Track general clicks
     await this.track('click', {
       element_type: tagName,
       element_text: text.substring(0, 100), // Limit text length
       element_id: id,
-      element_class: className,
+      element_class: classNameStr,
       href,
       x: event.clientX,
       y: event.clientY,
-      click_target: `${tagName}${id ? '#' + id : ''}${className ? '.' + className.split(' ').join('.') : ''}`,
+      click_target: clickTarget,
     })
   }
 

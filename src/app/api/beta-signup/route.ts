@@ -45,9 +45,11 @@ const betaSignupSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('Received body:', JSON.stringify(body, null, 2))
 
     // Validate the request data
     const validatedData = betaSignupSchema.parse(body)
+    console.log('Validated data:', JSON.stringify(validatedData, null, 2))
 
     // Check if user already exists
     const { data: existingUser } = await supabaseAdmin

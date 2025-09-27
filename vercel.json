@@ -13,7 +13,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://silentscribe.dev"
+          "value": "https://www.silentscribe.dev"
         },
         {
           "key": "Access-Control-Allow-Methods",

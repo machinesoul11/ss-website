@@ -29,7 +29,11 @@ export interface PlausibleEventData {
  * Check if Plausible is available
  */
 export function isPlausibleAvailable(): boolean {
-  return typeof window !== 'undefined' && typeof window.plausible === 'function'
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.plausible === 'function' &&
+    process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN !== undefined
+  )
 }
 
 /**

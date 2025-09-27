@@ -18,28 +18,38 @@ import { Select } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 
-// Form validation schema
+// Form validation schema - matching API expectations
 const betaSignupSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   githubUsername: z.string().optional(),
+  gitlabUsername: z.string().optional(),
   currentTools: z.array(z.string()).min(1, 'Please select at least one tool'),
   documentationPlatforms: z
     .array(z.string())
     .min(1, 'Please select at least one platform'),
   painPoints: z
-    .array(z.string())
-    .min(1, 'Please select at least one pain point'),
-  teamSize: z.string().optional(),
-  useCase: z
+    .string()
+    .min(10, 'Please describe your main pain points (at least 10 characters)'),
+  teamSize: z
+    .enum([
+      'individual',
+      'small_team',
+      'medium_team',
+      'large_team',
+      'enterprise',
+    ])
+    .optional(),
+  useCaseDescription: z
     .string()
     .min(10, 'Please provide at least 10 characters describing your use case'),
   privacyConsent: z
     .boolean()
     .refine((val) => val === true, 'Privacy consent is required'),
-  marketingOptIn: z.boolean(),
+  marketingOptIn: z.boolean().default(true),
+  researchOptIn: z.boolean().default(true),
 })
 
-type FormData = z.infer<typeof betaSignupSchema>
+type BetaSignupFormData = z.infer<typeof betaSignupSchema>
 
 const steps = [
   {
@@ -208,19 +218,21 @@ export default function BetaSignupPage() {
     setValue,
     formState: { errors },
     trigger,
-  } = useForm<FormData>({
+  } = useForm<BetaSignupFormData>({
     resolver: zodResolver(betaSignupSchema),
     mode: 'onChange',
     defaultValues: {
       email: '',
       githubUsername: '',
+      gitlabUsername: '',
       currentTools: [],
       documentationPlatforms: [],
-      painPoints: [],
-      teamSize: '',
-      useCase: '',
+      painPoints: '',
+      teamSize: undefined,
+      useCaseDescription: '',
       privacyConsent: false,
-      marketingOptIn: false,
+      marketingOptIn: true,
+      researchOptIn: true,
     },
   })
 
@@ -239,7 +251,7 @@ export default function BetaSignupPage() {
     setCurrentStep((prev) => prev - 1)
   }
 
-  const handleFormSubmit = async (data: FormData) => {
+  const handleFormSubmit = async (data: BetaSignupFormData) => {
     setIsSubmitting(true)
 
     try {
@@ -264,14 +276,14 @@ export default function BetaSignupPage() {
     }
   }
 
-  const getFieldsForStep = (step: number): (keyof FormData)[] => {
+  const getFieldsForStep = (step: number): (keyof BetaSignupFormData)[] => {
     switch (step) {
       case 0:
-        return ['email', 'githubUsername']
+        return ['email', 'githubUsername', 'gitlabUsername']
       case 1:
         return ['currentTools', 'documentationPlatforms', 'painPoints']
       case 2:
-        return ['useCase', 'privacyConsent']
+        return ['useCaseDescription', 'privacyConsent']
       default:
         return []
     }
@@ -301,7 +313,7 @@ export default function BetaSignupPage() {
         case 'painPoints':
           return Array.isArray(value) && value.length > 0
 
-        case 'useCase':
+        case 'useCaseDescription':
           return typeof value === 'string' && value.length >= 10
 
         case 'privacyConsent':
@@ -403,16 +415,21 @@ export default function BetaSignupPage() {
                       maxSelections={5}
                     />
 
-                    <CheckboxGroup
-                      name="painPoints"
-                      label="What are your biggest pain points with current tools?"
-                      options={painPointOptions}
-                      value={watchedValues.painPoints}
-                      onChange={(value) => setValue('painPoints', value)}
-                      error={errors.painPoints?.message}
-                      required
-                      maxSelections={5}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        What are your biggest pain points with current tools? *
+                      </label>
+                      <Textarea
+                        {...register('painPoints')}
+                        placeholder="Please describe your main challenges with current documentation tools..."
+                        rows={4}
+                      />
+                      {errors.painPoints && (
+                        <p className="text-sm text-red-600">
+                          {errors.painPoints.message}
+                        </p>
+                      )}
+                    </div>
                   </FormStep>
                 )}
 
@@ -435,11 +452,11 @@ export default function BetaSignupPage() {
                     </Select>
 
                     <Textarea
-                      {...register('useCase')}
+                      {...register('useCaseDescription')}
                       label="Describe your documentation workflow and use case"
                       placeholder="Tell us about your current documentation process, the types of content you create, and how you envision Silent Scribe fitting into your workflow..."
                       rows={4}
-                      error={errors.useCase?.message}
+                      error={errors.useCaseDescription?.message}
                       required
                       maxLength={1000}
                       showCount
