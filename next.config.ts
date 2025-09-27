@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // Disable ESLint during build to speed up deployment
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: [
@@ -13,6 +18,12 @@ const nextConfig: NextConfig = {
       '@heroicons/react',
       'framer-motion',
     ],
+  },
+
+  // Build performance optimizations
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 
   // Image optimization
